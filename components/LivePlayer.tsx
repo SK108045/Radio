@@ -25,6 +25,29 @@ export default function LivePlayer() {
     }
   }, [])
 
+  // Handle audio errors and setup listeners
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const handleError = () => {
+      console.error("[v0] Audio element error:", audio.error?.message)
+      setIsPlaying(false)
+    }
+
+    const handleEnded = () => {
+      setIsPlaying(false)
+    }
+
+    audio.addEventListener('error', handleError)
+    audio.addEventListener('ended', handleEnded)
+
+    return () => {
+      audio.removeEventListener('error', handleError)
+      audio.removeEventListener('ended', handleEnded)
+    }
+  }, [])
+
   // Creates the animated wave effect for the visualizer
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -42,11 +65,23 @@ export default function LivePlayer() {
         audioRef.current.pause()
         setIsPlaying(false)
       } else {
-        audioRef.current.play().then(() => {
-          setIsPlaying(true)
-        }).catch(err => {
-          console.error("Audio playback failed:", err)
-        })
+        // Reset the audio to the beginning and play
+        audioRef.current.currentTime = 0
+        const playPromise = audioRef.current.play()
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log("[v0] Audio playback started")
+              setIsPlaying(true)
+            })
+            .catch(err => {
+              console.error("[v0] Audio playback failed:", err)
+              console.error("[v0] Error type:", err.name)
+              console.error("[v0] Error message:", err.message)
+              alert("Audio playback failed. The stream may be unavailable.")
+            })
+        }
       }
     }
   }
@@ -54,7 +89,7 @@ export default function LivePlayer() {
   return (
     <section id="live-player" className="bg-background py-8 md:py-12 border-b border-border shadow-2xl relative z-20 scroll-mt-24">
       {/* Hidden Audio Element */}
-      <audio ref={audioRef} src="http://47.237.15.69/audio.mp3" preload="none" />
+      <audio ref={audioRef} src="http://47.237.15.69/audio.mp3" preload="none" crossOrigin="anonymous" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative bg-[#0a0a0a] overflow-hidden rounded-[2rem] border border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
