@@ -44,10 +44,10 @@ const dailyShows = [
   },
   {
     title: 'Kenyan RnB',
-    host: 'RIENG Radio',
+    host: 'Modesto',
     schedule: 'Weekdays | 11:00 PM - 3:00 AM',
     description: 'Smooth Kenyan RnB featuring Bensoul, Nviiri, Otile Brown, Kodong Clan, Sauti Sol, and more.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/shows/KenyanRnB.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvc2hvd3MvS2VueWFuUm5CLmpwZyIsImlhdCI6MTc3ODUxMzMxMywiZXhwIjoxODEwMDQ5MzEzfQ.DEbuexELYYSxv2iP7N5oRvsYjHIebYmuEK5hTn5h4Ls',
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/RnB2.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1JuQjIuanBnIiwiaWF0IjoxNzc5MjI2OTkwLCJleHAiOjE4MTA3NjI5OTB9.9ivEn4-TuqAMLuzxpjRPlCkCcSaavS_ey9ZWeCBk_i0',
     color: 'from-blue-500/20 to-transparent',
     features: ['Bensoul', 'Nviiri', 'Otile Brown', 'Sauti Sol']
   },
