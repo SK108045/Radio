@@ -223,8 +223,7 @@ export default function VideosPage() {
   const [activeVideo, setActiveVideo] = useState<string | null>(null)
   const [animateIn, setAnimateIn] = useState(false)
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
-  const [panelAnimateIn, setPanelAnimateIn] = useState(false)
-  const panelRef = useRef<HTMLDivElement>(null)
+  const [displayedCategory, setDisplayedCategory] = useState<string | null>(null)
 
   useEffect(() => {
     if (activeVideo) {
@@ -242,23 +241,198 @@ export default function VideosPage() {
     setTimeout(() => setActiveVideo(null), 400)
   }
 
-  const handleCategoryClick = (name: string) => {
-    if (activeCategory === name) {
-      setPanelAnimateIn(false)
-      setTimeout(() => setActiveCategory(null), 350)
-      return
+  const handleCategoryClick = (name: string | null) => {
+    if (name === activeCategory) return
+    if (name === null) {
+      setActiveCategory(null)
+      setTimeout(() => setDisplayedCategory(null), 700)
+    } else {
+      setDisplayedCategory(name)
+      setTimeout(() => setActiveCategory(name), 10)
     }
-    setPanelAnimateIn(false)
-    setActiveCategory(name)
-    setTimeout(() => {
-      setPanelAnimateIn(true)
-      panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }, 50)
   }
 
   return (
     <main className="min-h-screen bg-[#050505] selection:bg-red-500 selection:text-white">
       <Navbar />
+
+      {/* Category Pills Bar */}
+      <div className="w-full bg-[#050505]/95 backdrop-blur-md border-b border-white/5 sticky top-[65px] z-40 py-3">
+         <div className="max-w-[1400px] mx-auto px-4 md:px-12 flex justify-center">
+            <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar max-w-full">
+              <button 
+                onClick={() => handleCategoryClick(null)}
+                className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${
+                  activeCategory === null 
+                    ? 'bg-white text-black' 
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                All
+              </button>
+              {categoryData.map(cat => (
+                 <button
+                    key={cat.name}
+                    onClick={() => handleCategoryClick(cat.name)}
+                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${
+                      activeCategory === cat.name
+                        ? 'bg-white text-black'
+                        : 'bg-white/10 text-white hover:bg-white/20'
+                    }`}
+                 >
+                    {cat.name}
+                 </button>
+              ))}
+            </div>
+         </div>
+      </div>
+
+      {/* Expanded Video Panel - Pushes content down smoothly */}
+      <div 
+        className={`w-full bg-[#050505] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden ${
+          activeCategory ? 'max-h-[800px] border-b border-white/5 opacity-100' : 'max-h-0 border-transparent opacity-0'
+        }`}
+      >
+        <div className={`max-w-[1400px] mx-auto px-4 md:px-12 transition-all duration-700 transform ${
+          activeCategory ? 'translate-y-0 pb-8 pt-6 scale-100' : '-translate-y-10 pb-0 pt-0 scale-95'
+        }`}>
+          {displayedCategory && (() => {
+            const cat = categoryData.find(c => c.name === displayedCategory) || categoryData[0]
+            return (
+                <div className="relative p-[1px] rounded-[2rem] overflow-hidden group/panel shadow-2xl">
+                  {/* Animated border gradient */}
+                  <div className="absolute inset-0 transition-opacity duration-700 opacity-30" style={{ background: `linear-gradient(135deg, ${cat.glow || '#ef4444'} 0%, transparent 50%, ${cat.glow || '#ef4444'} 100%)` }} />
+                  
+                  {/* Glowing blobs */}
+                  <div className="absolute top-0 right-0 w-[500px] h-[500px] blur-[120px] rounded-full pointer-events-none transition-all duration-1000 -translate-y-1/2 translate-x-1/4 opacity-15" style={{ background: cat.glow || '#ef4444' }} />
+                  <div className="absolute bottom-0 left-0 w-[400px] h-[400px] blur-[100px] rounded-full pointer-events-none transition-all duration-1000 translate-y-1/4 -translate-x-1/4 opacity-10" style={{ background: cat.glow || '#ef4444' }} />
+
+                  <div className="relative rounded-[2rem] bg-[#050505]/90 backdrop-blur-2xl overflow-hidden flex flex-col h-[400px] md:h-[480px] w-full z-10"
+                    style={{ boxShadow: `inset 0 0 80px ${cat.glow || 'rgba(255,255,255,0.1)'}10` }}>
+
+                    {/* Premium Panel header */}
+                    <div className="relative flex items-center justify-between px-6 md:px-10 py-6 border-b border-white/[0.04] flex-shrink-0 bg-white/[0.01]">
+                      <div className="absolute left-0 top-0 w-1.5 h-full rounded-r-full" style={{ background: cat.accentColor || '#ef4444' }} />
+                      
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center border border-white/10 bg-black shadow-inner" style={{ boxShadow: `inset 0 0 20px ${cat.glow || 'rgba(255,255,255,0.1)'}30` }}>
+                           <span className="text-2xl opacity-80">{cat.name === 'Music' ? '🎵' : cat.name === 'Comedy' ? '😂' : cat.name === 'Sports' ? '⚽' : cat.name === 'Movies' ? '🍿' : cat.name === 'Reality' ? '🎬' : cat.name === 'News' ? '📰' : cat.name === 'Audio / Video Books' ? '📚' : '🎙️'}</span>
+                        </div>
+                        <div>
+                          <p className="font-black uppercase tracking-[0.2em] text-lg md:text-xl drop-shadow-lg" style={{ color: cat.accentColor || '#ef4444' }}>{cat.name}</p>
+                          <p className="text-white/40 text-xs font-bold tracking-wider mt-0.5 uppercase">
+                            {cat.name === 'Music'
+                              ? `${songsForSale.length} Premium Tracks`
+                              : cat.videos.length > 0 ? `${cat.videos.length} Exclusive Releases` : 'Coming Soon'}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={() => handleCategoryClick(null)}
+                        className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 hover:border-white/20 hover:rotate-90 transition-all duration-300"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    </div>
+
+                    <div className="flex-1 flex flex-col justify-center overflow-hidden w-full relative z-10">
+                    {/* Music category */}
+                    {cat.name === 'Music' ? (
+                      songsForSale.length > 0 ? (
+                        <div className="overflow-x-auto hide-scrollbar w-full">
+                          <div className="flex gap-5 p-6 md:p-10 min-w-max">
+                            {songsForSale.map((song) => (
+                              <a
+                                key={song.id}
+                                href={`/albums`}
+                                className="group relative w-[180px] md:w-[220px] flex-shrink-0 rounded-2xl overflow-hidden border border-white/5 hover:border-orange-500/40 transition-all duration-300 bg-[#0a0a0a] flex flex-col"
+                              >
+                                <div className="relative aspect-square w-full overflow-hidden">
+                                  <Image
+                                    src={song.image}
+                                    alt={song.title}
+                                    fill
+                                    className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105 transition-transform"
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    <div className="w-14 h-14 rounded-full flex items-center justify-center text-white border border-white/20 backdrop-blur-sm bg-orange-600/80 shadow-[0_0_30px_rgba(234,88,12,0.6)]">
+                                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
+                                    </div>
+                                  </div>
+                                  <div className="absolute top-3 left-3">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-orange-400 bg-black/60 backdrop-blur-sm px-2 py-1 rounded">{song.genre}</span>
+                                  </div>
+                                  <div className="absolute bottom-3 right-3">
+                                    <span className="text-[10px] font-black text-white/60">{song.duration}</span>
+                                  </div>
+                                </div>
+                                <div className="p-4 flex flex-col gap-1">
+                                  <h4 className="text-sm font-black text-white/90 group-hover:text-orange-400 transition-colors leading-snug">{song.title}</h4>
+                                  <p className="text-[11px] text-white/40 font-medium truncate">{song.feat}</p>
+                                  <p className="text-orange-400 font-black text-sm mt-1">{song.price}</p>
+                                </div>
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center px-6 text-center">
+                          <div className="text-6xl mb-6 opacity-30">🎵</div>
+                          <p className="text-white/20 font-black uppercase tracking-widest text-sm mb-2">Coming Soon</p>
+                          <p className="text-white/10 text-xs max-w-xs">Music tracks are being curated. Check back soon.</p>
+                        </div>
+                      )
+                    ) : cat.videos.length > 0 ? (
+                      <div className="overflow-x-auto hide-scrollbar w-full">
+                        <div className="flex gap-5 p-6 md:p-10 min-w-max">
+                          {cat.videos.map((vid, i) => (
+                            <div
+                              key={i}
+                              onClick={() => setActiveVideo(vid.id)}
+                              className="group relative w-[260px] md:w-[320px] flex-shrink-0 rounded-2xl overflow-hidden cursor-pointer border border-white/5 hover:border-white/20 transition-all duration-300 bg-black"
+                            >
+                              <div className="relative aspect-video">
+                                <Image
+                                  src={`https://img.youtube.com/vi/${vid.id}/hqdefault.jpg`}
+                                  alt={vid.title}
+                                  fill
+                                  unoptimized
+                                  className="object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105 transition-transform"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                  <div className="w-14 h-14 rounded-full flex items-center justify-center text-white border border-white/20 backdrop-blur-sm"
+                                    style={{ background: `${cat.glow || 'rgba(255,255,255,0.1)'}`, boxShadow: `0 0 30px ${cat.glow || 'rgba(255,255,255,0.1)'}` }}>
+                                    <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                  </div>
+                                </div>
+                                <div className="absolute bottom-3 left-3">
+                                  <span className={`text-[10px] font-black uppercase tracking-widest ${cat.textActive || 'text-white'}`}>{vid.views}</span>
+                                </div>
+                              </div>
+                              <div className="p-4">
+                                <h4 className="text-sm font-bold text-white/80 group-hover:text-white transition-colors leading-snug line-clamp-2">{vid.title}</h4>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center px-6 text-center">
+                        <div className="text-6xl mb-6 opacity-30">📺</div>
+                        <p className="text-white/20 font-black uppercase tracking-widest text-sm mb-2">Coming Soon</p>
+                        <p className="text-white/10 text-xs max-w-xs">{cat.name} content is being curated. Check back soon.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div> // <-- MISSING TAG ADDED HERE 
+            )
+          })()}
+        </div>
+      </div>
 
       {/* 1. Massive Blockbuster Hero Section */}
       <section className="relative w-full min-h-[85vh] flex flex-col justify-end overflow-hidden group cursor-pointer" onClick={() => setActiveVideo(mainHeroVideo.id)}>
@@ -286,7 +460,7 @@ export default function VideosPage() {
                 {mainHeroVideo.desc}
               </p>
               <button className="flex items-center gap-3 bg-white text-black hover:bg-red-600 hover:text-white transition-colors duration-300 px-6 py-3 md:px-8 md:py-4 rounded-full font-black uppercase tracking-widest pointer-events-auto text-xs md:text-sm group/btn">
-                 <div className="w-8 h-8 md:w-10 md:h-10 bg-black text-white group-hover/btn:bg-white group-hover/btn:text-red-500 rounded-full flex items-center justify-center transition-colors">
+                 <div className="w-8 h-8 md:w-10 h-10 bg-black text-white group-hover/btn:bg-white group-hover/btn:text-red-500 rounded-full flex items-center justify-center transition-colors">
                     <svg className="w-4 h-4 md:w-5 md:h-5 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                  </div>
                  Play Episode
@@ -456,230 +630,7 @@ export default function VideosPage() {
         </div>
       )}
 
-      {/* ── Pick Your Channel ── */}
-      <section className="py-28 relative overflow-hidden bg-[#020202] border-t border-white/5">
-        <div className="absolute inset-0 opacity-[0.025] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-red-500/10 blur-[120px] rounded-full pointer-events-none" />
 
-        <div className="max-w-[1400px] mx-auto px-4 md:px-12 relative z-10">
-
-          {/* Header */}
-          <div className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-10">
-            <div>
-              <p className="text-xs font-black tracking-[0.4em] text-red-500 uppercase mb-3">Browse Content</p>
-              <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Pick Your <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400 pr-2">Category</span></h2>
-            </div>
-            <p className="text-gray-500 font-medium max-w-sm text-right hidden md:block">
-              {activeCategory ? `Showing: ${activeCategory}` : 'Tap a category to explore its content'}
-            </p>
-          </div>
-
-          {/* Category Grid — editorial tile design */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-white/[0.04] border border-white/[0.06] rounded-2xl overflow-hidden">
-            {categoryData.map((cat, idx) => {
-              const isActive = activeCategory === cat.name
-              const count = cat.name === 'Music' ? songsForSale.length : cat.videos.length
-              return (
-                <button
-                  key={cat.name}
-                  onClick={() => handleCategoryClick(cat.name)}
-                  className={`group relative bg-[#0a0a0a] text-left p-6 md:p-8 flex flex-col justify-between min-h-[140px] md:min-h-[170px] cursor-pointer transition-all duration-400 overflow-hidden
-                    ${isActive ? 'bg-[#111111]' : 'hover:bg-[#0f0f0f]'}`}
-                  style={isActive ? { boxShadow: `inset 0 0 40px ${cat.glow}` } : {}}
-                >
-                  {/* Coloured top accent bar */}
-                  <div
-                    className={`absolute top-0 left-0 right-0 h-[3px] transition-all duration-500 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'}`}
-                    style={{ background: cat.accentColor }}
-                  />
-
-                  {/* Faded index number in background */}
-                  <div
-                    className="absolute -bottom-3 -right-2 text-[80px] md:text-[100px] font-black leading-none select-none pointer-events-none transition-opacity duration-500"
-                    style={{ color: isActive ? cat.accentColor : 'white', opacity: isActive ? 0.06 : 0.03 }}
-                  >
-                    {cat.num}
-                  </div>
-
-                  {/* Top row */}
-                  <div className="flex items-start justify-between relative z-10">
-                    <span
-                      className="text-[10px] font-black uppercase tracking-[0.25em] transition-colors duration-300"
-                      style={{ color: isActive ? cat.accentColor : 'rgba(255,255,255,0.25)' }}
-                    >
-                      {cat.num}
-                    </span>
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 ${
-                        count > 0
-                          ? isActive ? 'text-white/60' : 'text-white/20 group-hover:text-white/40'
-                          : 'text-white/10'
-                      }`}
-                    >
-                      {count > 0 ? `${count} ${cat.name === 'Music' ? 'tracks' : 'clips'}` : 'Soon'}
-                    </span>
-                  </div>
-
-                  {/* Category name */}
-                  <div className="relative z-10">
-                    <p
-                      className={`font-black uppercase tracking-tight text-lg md:text-2xl leading-tight transition-colors duration-300 ${
-                        isActive ? 'text-white' : 'text-white/50 group-hover:text-white/80'
-                      }`}
-                    >
-                      {cat.name}
-                    </p>
-                    {/* Animated underline when active */}
-                    <div
-                      className="mt-3 h-[2px] rounded-full transition-all duration-500 origin-left"
-                      style={{
-                        background: cat.accentColor,
-                        transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
-                        width: '40px',
-                        opacity: isActive ? 1 : 0,
-                      }}
-                    />
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Expanded Video Panel */}
-          {activeCategory && (
-            <div
-              ref={panelRef}
-              className={`mt-8 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
-                panelAnimateIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}
-            >
-              {(() => {
-                const cat = categoryData.find(c => c.name === activeCategory)!
-                return (
-                  <div className={`relative rounded-3xl border ${cat.border} bg-[#080808] overflow-hidden`}
-                    style={{ boxShadow: `inset 0 0 60px ${cat.glow}20` }}>
-
-                    {/* Panel header */}
-                    <div className="flex items-center justify-between px-6 md:px-10 py-5 border-b border-white/5">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{cat.icon}</span>
-                        <div>
-                          <p className={`font-black uppercase tracking-widest text-sm ${cat.accent}`}>{cat.name}</p>
-                          <p className="text-white/30 text-xs font-medium">
-                            {cat.name === 'Music'
-                              ? `${songsForSale.length} ${songsForSale.length === 1 ? 'track' : 'tracks'} available`
-                              : cat.videos.length > 0 ? `${cat.videos.length} videos available` : 'Content coming soon'}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleCategoryClick(activeCategory)}
-                        className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-all"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                      </button>
-                    </div>
-
-                    {/* Music category — dynamic audio cards from lib/musicData.ts */}
-                    {cat.name === 'Music' ? (
-                      songsForSale.length > 0 ? (
-                        <div className="overflow-x-auto hide-scrollbar">
-                          <div className="flex gap-5 p-6 md:p-10 min-w-max">
-                            {songsForSale.map((song) => (
-                              <a
-                                key={song.id}
-                                href={`/albums`}
-                                className="group relative w-[220px] md:w-[260px] flex-shrink-0 rounded-2xl overflow-hidden border border-white/5 hover:border-orange-500/40 transition-all duration-300 bg-[#0a0a0a] flex flex-col"
-                                style={{ boxShadow: 'none' }}
-                              >
-                                <div className="relative aspect-square w-full overflow-hidden">
-                                  <Image
-                                    src={song.image}
-                                    alt={song.title}
-                                    fill
-                                    className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105 transition-transform"
-                                  />
-                                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                                  {/* Waveform icon overlay */}
-                                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                    <div className="w-14 h-14 rounded-full flex items-center justify-center text-white border border-white/20 backdrop-blur-sm bg-orange-600/80 shadow-[0_0_30px_rgba(234,88,12,0.6)]">
-                                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
-                                    </div>
-                                  </div>
-                                  <div className="absolute top-3 left-3">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-orange-400 bg-black/60 backdrop-blur-sm px-2 py-1 rounded">{song.genre}</span>
-                                  </div>
-                                  <div className="absolute bottom-3 right-3">
-                                    <span className="text-[10px] font-black text-white/60">{song.duration}</span>
-                                  </div>
-                                </div>
-                                <div className="p-4 flex flex-col gap-1">
-                                  <h4 className="text-sm font-black text-white/90 group-hover:text-orange-400 transition-colors leading-snug">{song.title}</h4>
-                                  <p className="text-[11px] text-white/40 font-medium truncate">{song.feat}</p>
-                                  <p className="text-orange-400 font-black text-sm mt-1">{song.price}</p>
-                                </div>
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
-                          <div className="text-6xl mb-6 opacity-30">🎵</div>
-                          <p className="text-white/20 font-black uppercase tracking-widest text-sm mb-2">Coming Soon</p>
-                          <p className="text-white/10 text-xs max-w-xs">Music tracks are being curated. Check back soon.</p>
-                        </div>
-                      )
-                    ) : cat.videos.length > 0 ? (
-                      <div className="overflow-x-auto hide-scrollbar">
-                        <div className="flex gap-5 p-6 md:p-10 min-w-max">
-                          {cat.videos.map((vid, i) => (
-                            <div
-                              key={i}
-                              onClick={() => setActiveVideo(vid.id)}
-                              className="group relative w-[280px] md:w-[360px] flex-shrink-0 rounded-2xl overflow-hidden cursor-pointer border border-white/5 hover:border-white/20 transition-all duration-300 bg-black"
-                            >
-                              <div className="relative aspect-video">
-                                <Image
-                                  src={`https://img.youtube.com/vi/${vid.id}/hqdefault.jpg`}
-                                  alt={vid.title}
-                                  fill
-                                  unoptimized
-                                  className="object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105 transition-transform"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                                {/* Play button */}
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                  <div className="w-14 h-14 rounded-full flex items-center justify-center text-white border border-white/20 backdrop-blur-sm"
-                                    style={{ background: `${cat.glow}`, boxShadow: `0 0 30px ${cat.glow}` }}>
-                                    <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                                  </div>
-                                </div>
-                                <div className="absolute bottom-3 left-3">
-                                  <span className={`text-[10px] font-black uppercase tracking-widest ${cat.accent}`}>{vid.views}</span>
-                                </div>
-                              </div>
-                              <div className="p-4">
-                                <h4 className="text-sm font-bold text-white/80 group-hover:text-white transition-colors leading-snug line-clamp-2">{vid.title}</h4>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
-                        <div className={`text-6xl mb-6 opacity-30`}>{cat.icon}</div>
-                        <p className="text-white/20 font-black uppercase tracking-widest text-sm mb-2">Coming Soon</p>
-                        <p className="text-white/10 text-xs max-w-xs">{cat.name} content is being curated. Check back soon.</p>
-                      </div>
-                    )}
-                  </div>
-                )
-              })()}
-            </div>
-          )}
-
-        </div>
-      </section>
 
       {/* Global override so horizontal scrollbar disappears strictly for the slider but mouse can still target it easily */}
       <style dangerouslySetInnerHTML={{__html: `
