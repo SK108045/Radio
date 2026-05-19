@@ -225,6 +225,8 @@ export default function VideosPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [displayedCategory, setDisplayedCategory] = useState<string | null>(null)
 
+  const currentActiveCat = categoryData.find(c => c.name === activeCategory) || null
+
   useEffect(() => {
     if (activeVideo) {
       document.body.style.overflow = 'hidden'
@@ -257,32 +259,85 @@ export default function VideosPage() {
       <Navbar />
 
       {/* Category Pills Bar */}
-      <div className="w-full bg-[#050505]/95 backdrop-blur-md border-b border-white/5 sticky top-[65px] z-40 py-3">
+      <div className="w-full bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 sticky top-[65px] z-40 py-5 transition-all duration-500">
+         {/* Dynamic Neon LED flow strip at the bottom of the bar */}
+         <div 
+           className="absolute bottom-0 left-0 right-0 h-[2px] led-flow-strip transition-all duration-750 ease-in-out"
+           style={{
+             background: activeCategory 
+               ? `linear-gradient(90deg, transparent 0%, ${currentActiveCat?.accentColor || '#ef4444'}33 25%, ${currentActiveCat?.accentColor || '#ef4444'} 50%, ${currentActiveCat?.accentColor || '#ef4444'}33 75%, transparent 100%)` 
+               : 'linear-gradient(90deg, transparent 0%, rgba(239, 68, 68, 0.1) 25%, rgba(239, 68, 68, 0.6) 50%, rgba(239, 68, 68, 0.1) 75%, transparent 100%)',
+             boxShadow: activeCategory 
+               ? `0 0 25px 4px ${currentActiveCat?.accentColor || '#ef4444'}` 
+               : '0 0 12px 2px rgba(239, 68, 68, 0.25)',
+             opacity: activeCategory ? 1 : 0.6
+           }}
+         />
+         
          <div className="max-w-[1400px] mx-auto px-4 md:px-12 flex justify-center">
-            <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar max-w-full">
-              <button 
-                onClick={() => handleCategoryClick(null)}
-                className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${
-                  activeCategory === null 
-                    ? 'bg-white text-black' 
-                    : 'bg-white/10 text-white hover:bg-white/20'
-                }`}
-              >
-                All
-              </button>
-              {categoryData.map(cat => (
-                 <button
-                    key={cat.name}
-                    onClick={() => handleCategoryClick(cat.name)}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${
-                      activeCategory === cat.name
-                        ? 'bg-white text-black'
-                        : 'bg-white/10 text-white hover:bg-white/20'
-                    }`}
-                 >
-                    {cat.name}
-                 </button>
-              ))}
+            {/* LED Snake Chase Wrapper */}
+            <div 
+              className="led-snake-border shadow-[0_0_30px_rgba(0,0,0,0.8)]"
+              style={{
+                '--led-color-1': currentActiveCat ? currentActiveCat.accentColor : '#ef4444',
+                '--led-color-2': currentActiveCat ? '#ffffff' : '#f97316',
+                boxShadow: activeCategory 
+                  ? `0 0 30px ${currentActiveCat?.accentColor}30, inset 0 0 15px ${currentActiveCat?.accentColor}10`
+                  : '0 0 20px rgba(239,68,68,0.1)',
+              } as React.CSSProperties}
+            >
+              <div className="led-snake-content flex items-center gap-3 overflow-x-auto hide-scrollbar max-w-full px-5 py-2.5 bg-[#050505]/95 backdrop-blur-2xl">
+                <button 
+                  onClick={() => handleCategoryClick(null)}
+                  className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-all duration-300 border ${
+                    activeCategory === null 
+                      ? 'border-red-500 text-white bg-red-500/10' 
+                      : 'border-white/5 bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.08] hover:border-white/20'
+                  }`}
+                  style={activeCategory === null ? {
+                    boxShadow: '0 0 15px rgba(239,68,68,0.4), inset 0 0 8px rgba(239,68,68,0.2)',
+                    textShadow: '0 0 8px rgba(239,68,68,0.5)'
+                  } : {}}
+                >
+                  All
+                </button>
+                {categoryData.map(cat => {
+                  const isActive = activeCategory === cat.name;
+                  return (
+                    <button
+                      key={cat.name}
+                      onClick={() => handleCategoryClick(cat.name)}
+                      className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-all duration-300 border ${
+                        isActive
+                          ? 'text-white'
+                          : 'border-white/5 bg-white/[0.03] text-white/60 hover:bg-white/[0.08]'
+                      }`}
+                      style={isActive ? {
+                        borderColor: cat.accentColor,
+                        backgroundColor: `${cat.accentColor}15`,
+                        boxShadow: `0 0 15px ${cat.accentColor}40, inset 0 0 8px ${cat.accentColor}20`,
+                        textShadow: `0 0 8px ${cat.accentColor}50`
+                      } : {}}
+                      onMouseEnter={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.borderColor = cat.accentColor;
+                          e.currentTarget.style.boxShadow = `0 0 10px ${cat.accentColor}25, inset 0 0 5px ${cat.accentColor}10`;
+                          e.currentTarget.style.color = '#ffffff';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.borderColor = '';
+                          e.currentTarget.style.boxShadow = '';
+                          e.currentTarget.style.color = '';
+                        }
+                      }}
+                    >
+                      {cat.name}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
          </div>
       </div>
@@ -428,7 +483,7 @@ export default function VideosPage() {
                     )}
                   </div>
                 </div>
-              </div> // <-- MISSING TAG ADDED HERE 
+              </div>
             )
           })()}
         </div>
@@ -636,6 +691,67 @@ export default function VideosPage() {
       <style dangerouslySetInnerHTML={{__html: `
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes rotate-led {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes led-flow {
+          0% { background-position: 200% 0%; }
+          100% { background-position: -200% 0%; }
+        }
+        
+        .led-snake-border {
+          position: relative;
+          border-radius: 9999px;
+          padding: 2px;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.5s ease;
+        }
+        
+        .led-snake-border::before {
+          content: '';
+          position: absolute;
+          top: -150%;
+          left: -150%;
+          width: 400%;
+          height: 400%;
+          background: conic-gradient(
+            from 0deg,
+            transparent 0%,
+            transparent 20%,
+            var(--led-color-1, #ef4444) 23%,
+            var(--led-color-2, #ffffff) 25%,
+            var(--led-color-1, #ef4444) 27%,
+            transparent 30%,
+            transparent 70%,
+            var(--led-color-1, #ef4444) 73%,
+            var(--led-color-2, #ffffff) 75%,
+            var(--led-color-1, #ef4444) 77%,
+            transparent 80%,
+            transparent 100%
+          );
+          animation: rotate-led 6s linear infinite;
+          border-radius: 50%;
+        }
+        
+        .led-snake-content {
+          position: relative;
+          background: #050505;
+          border-radius: 9999px;
+          z-index: 1;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .led-flow-strip {
+          background-size: 200% 100%;
+          animation: led-flow 6s linear infinite;
+        }
       `}} />
 
       <Footer />
