@@ -210,14 +210,17 @@ const categoryData = [
     videos: [] as { id: string; title: string; views: string }[],
   },
   {
-    name: 'Audio / Video Books',
+    name: 'Books',
     num: '07',
     accentColor: '#2dd4bf',
     accentClass: 'bg-teal-400',
     glow: 'rgba(45,212,191,0.15)',
     borderActive: 'border-teal-400/50',
     textActive: 'text-teal-400',
-    videos: [] as { id: string; title: string; views: string }[],
+    videos: [
+      { id: 'f_Jb27a3VfM', title: 'Kidagaa Kimemwozea Audiobook Summary & Analysis', views: '12K Views' },
+      { id: 'ayi8P9Pfufo', title: 'The River Between Complete Book Discussion', views: '8.5K Views' }
+    ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
   },
   {
     name: 'Entertainment Podcasts',
@@ -235,7 +238,46 @@ const categoryData = [
       { id: 'M9tIVvCgowg', title: '"Kuimpress Madame Ni Ngumu" | Heartbreaks', views: '65K Views' },
       { id: 'DrdbQ1I-aIA', title: 'Rieng Radio Reunion | How Big Dreams Die', views: '107K Views' },
       { id: '5iJXQA0JP28', title: 'JUA SHENG Episode 2', views: '42K Views' },
-    ] as { id: string; title: string; views: string }[],
+    ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
+  },
+  {
+    name: 'Politics',
+    num: '09',
+    accentColor: '#e11d48',
+    accentClass: 'bg-rose-500',
+    glow: 'rgba(225,29,72,0.15)',
+    borderActive: 'border-rose-500/50',
+    textActive: 'text-rose-400',
+    videos: [
+      { id: 'aH837tU7eDk', title: 'Inside the Senate: Live Debates & Policy Decisions', views: '100K Views' },
+      { id: 'vJ_l94v0r1k', title: 'Analysis of the New Economic Policies and Trade Agreements', views: '65K Views' }
+    ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
+  },
+  {
+    name: 'Vines',
+    num: '10',
+    accentColor: '#84cc16',
+    accentClass: 'bg-lime-500',
+    glow: 'rgba(132,204,22,0.15)',
+    borderActive: 'border-lime-500/50',
+    textActive: 'text-lime-400',
+    videos: [
+      { id: 'SlagKsO_xAU', title: 'The Funniest Vines and Street Comedy of the Week', views: '120K Views' },
+      { id: 'OUFm3s1wn48', title: 'Best Funny Moments Compilation', views: '85K Views' }
+    ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
+  },
+  {
+    name: 'Business',
+    num: '11',
+    accentColor: '#10b981',
+    accentClass: 'bg-emerald-500',
+    glow: 'rgba(16,185,129,0.15)',
+    borderActive: 'border-emerald-500/50',
+    textActive: 'text-emerald-400',
+    videos: [
+      { id: 'M9tIVvCgowg', title: 'Starting a Small Business in Nairobi: Key Tips & Pitfalls', views: '45K Views' },
+      { id: 'DrdbQ1I-aIA', title: 'Tech Startups Showcase: Funding & Innovation in East Africa', views: '32K Views' }
+    ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
   },
 ]
 
