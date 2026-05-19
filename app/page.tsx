@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
@@ -76,6 +77,12 @@ const dailyShows = [
 ]
 
 const trendingContent = [
+  {
+    category: 'Breaking News',
+    title: '🚨 ARSENAL ARE THE NEW PREMIER LEAGUE CHAMPIONS OF ENGLAND! 🏆🔴',
+    videoId: 'f_Jb27a3VfM',
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Arsenal.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvQXJzZW5hbC5qcGciLCJpYXQiOjE3NzkyMjQwNTcsImV4cCI6MTgxMDc2MDA1N30.NIT9WSkM2QVSTt1WWHeuGvHK5KamJZDLqNXzyHChSN0',
+  },
   {
     category: 'Music',
     title: 'Sean MMG ft. Khaligraph - Personality',
@@ -346,13 +353,29 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <iframe
-              src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1&rel=0&modestbranding=1`}
-              title={activeVideoTitle}
-              className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            {activeVideoId === 'f_Jb27a3VfM' ? (
+              <div className="relative w-full h-full">
+                <Image 
+                  src="https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Arsenal.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvQXJzZW5hbC5qcGciLCJpYXQiOjE3NzkyMjQwNTcsImV4cCI6MTgxMDc2MDA1N30.NIT9WSkM2QVSTt1WWHeuGvHK5KamJZDLqNXzyHChSN0" 
+                  alt={activeVideoTitle}
+                  fill 
+                  className="object-contain"
+                  unoptimized
+                />
+                <div className="absolute bottom-6 left-6 right-6 bg-black/70 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+                  <h3 className="text-xl md:text-2xl font-black text-white mb-2">{activeVideoTitle}</h3>
+                  <p className="text-gray-400 text-xs md:text-sm font-bold uppercase tracking-wider text-red-500">🏆 CHAMPIONS OF ENGLAND 🔴</p>
+                </div>
+              </div>
+            ) : (
+              <iframe
+                src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1&rel=0&modestbranding=1`}
+                title={activeVideoTitle}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            )}
           </div>
         </div>
       )}

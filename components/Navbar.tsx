@@ -11,6 +11,8 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
+  const [showBreaking, setShowBreaking] = useState(true)
+
   // Handle scroll effect for dynamic blur/background
   useEffect(() => {
     const handleScroll = () => {
@@ -34,11 +36,31 @@ export default function Navbar() {
   }
 
   return (
-    <nav className={`sticky top-0 z-50 transition-all duration-500 ${
-      scrolled 
-        ? 'bg-[#050505]/80 backdrop-blur-xl border-b border-white/[0.05] shadow-[0_4px_30px_rgba(0,0,0,0.6)]' 
-        : 'bg-[#050505]/40 backdrop-blur-md border-b border-white/[0.02]'
-    }`}>
+    <>
+      {showBreaking && (
+        <div className="w-full bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white py-2.5 px-6 text-center text-xs font-black uppercase tracking-wider relative z-[60] flex items-center justify-center gap-3 overflow-hidden shadow-[0_4px_20px_rgba(239,68,68,0.4)] border-b border-red-500/30">
+          {/* Glowing animated background lines */}
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.08)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.08)_75%,transparent_75%,transparent)] bg-[length:30px_30px] animate-[pulse_2s_infinite] opacity-40" />
+          
+          <div className="relative z-10 flex items-center justify-center gap-2 flex-wrap pr-6">
+            <span className="bg-white text-red-700 px-2 py-0.5 rounded font-black text-[9px] tracking-widest animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]">BREAKING NEWS</span>
+            <span className="font-bold normal-case sm:uppercase">🚨 Arsenal are Premier League champions after Manchester City drew 1-1 with Bournemouth, and they still have a game in hand! 🏆🔴. City Bottle It 🍼</span>
+          </div>
+          
+          <button 
+            onClick={() => setShowBreaking(false)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
+            aria-label="Dismiss news"
+          >
+            <X size={14} strokeWidth={3} />
+          </button>
+        </div>
+      )}
+      <nav className={`sticky top-0 z-50 transition-all duration-500 ${
+        scrolled 
+          ? 'bg-[#050505]/80 backdrop-blur-xl border-b border-white/[0.05] shadow-[0_4px_30px_rgba(0,0,0,0.6)]' 
+          : 'bg-[#050505]/40 backdrop-blur-md border-b border-white/[0.02]'
+      }`}>
       <div className="max-w-[1400px] mx-auto px-4 md:px-12">
         <div className="flex items-center justify-between h-16">
           
@@ -165,5 +187,6 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
+    </>
   )
 }

@@ -153,7 +153,27 @@ const categoryData = [
     glow: 'rgba(34,197,94,0.15)',
     borderActive: 'border-green-500/50',
     textActive: 'text-green-400',
-    videos: [] as { id: string; title: string; views: string }[],
+    videos: [
+      { 
+        id: 'f_Jb27a3VfM', 
+        title: 'ARSENAL ARE PREMIER LEAGUE CHAMPIONS! 🏆🔴 Gunners celebrate as Man City draw 1-1', 
+        views: 'BREAKING',
+        image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Arsenal.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvQXJzZW5hbC5qcGciLCJpYXQiOjE3NzkyMjQwNTcsImV4cCI6MTgxMDc2MDA1N30.NIT9WSkM2QVSTt1WWHeuGvHK5KamJZDLqNXzyHChSN0',
+        isImageOnly: true
+      },
+      { 
+        id: 'sky-sports-mancity-bournemouth', 
+        title: 'Manchester City 1-1 Bournemouth | Match Highlights & Title Handed to Arsenal', 
+        views: '1.2M Views',
+        image: 'https://img.youtube.com/vi/vJ_l94v0r1k/hqdefault.jpg',
+        link: 'https://www.skysports.com/football/video/12606/13546065/bournemouth-1-1-manchester-city-premier-league-highlights'
+      },
+      { 
+        id: 'ayi8P9Pfufo', 
+        title: 'The Long Wait is Over: Arsenal Fans Celebrate Historic Title Win!', 
+        views: '450K Views' 
+      }
+    ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
   },
   {
     name: 'Movies',
@@ -450,7 +470,7 @@ export default function VideosPage() {
                             >
                               <div className="relative aspect-video">
                                 <Image
-                                  src={`https://img.youtube.com/vi/${vid.id}/hqdefault.jpg`}
+                                  src={vid.image || `https://img.youtube.com/vi/${vid.id}/hqdefault.jpg`}
                                   alt={vid.title}
                                   fill
                                   unoptimized
@@ -675,12 +695,55 @@ export default function VideosPage() {
              >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
              </button>
-             <iframe 
-               src={`https://www.youtube.com/embed/${activeVideo}?autoplay=1&rel=0&modestbranding=1`} 
-               className="w-full h-full"
-               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-               allowFullScreen
-             ></iframe>
+             {(() => {
+               const allVideos = categoryData.flatMap(c => c.videos || [])
+               const selectedVideo = allVideos.find(v => v.id === activeVideo)
+               
+               if (selectedVideo?.isImageOnly && selectedVideo?.image) {
+                 return (
+                   <div className="relative w-full h-full">
+                     <Image 
+                       src={selectedVideo.image} 
+                       alt={selectedVideo.title}
+                       fill 
+                       className="object-contain"
+                       unoptimized
+                     />
+                     <div className="absolute bottom-6 left-6 right-6 bg-black/70 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+                       <h3 className="text-xl md:text-2xl font-black text-white mb-2">{selectedVideo.title}</h3>
+                       <p className="text-gray-400 text-xs md:text-sm font-bold uppercase tracking-wider text-red-500">🏆 CHAMPIONS OF ENGLAND 🔴</p>
+                     </div>
+                   </div>
+                 )
+               }
+               
+               if (selectedVideo?.link) {
+                 return (
+                   <div className="relative w-full h-full flex flex-col items-center justify-center bg-black/60 p-8 text-center">
+                     <div className="text-6xl mb-4">⚽</div>
+                     <h3 className="text-2xl md:text-3xl font-black text-white mb-4 max-w-2xl">{selectedVideo.title}</h3>
+                     <p className="text-gray-400 mb-8 max-w-md">This video is hosted on Sky Sports. Click the button below to watch the official Premier League highlights directly on their platform.</p>
+                     <a 
+                       href={selectedVideo.link}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-sm rounded-full transition-all shadow-[0_0_30px_rgba(220,38,38,0.5)] hover:scale-105"
+                     >
+                       Watch on Sky Sports
+                     </a>
+                   </div>
+                 )
+               }
+               
+               return (
+                 <iframe 
+                   src={`https://www.youtube.com/embed/${activeVideo}?autoplay=1&rel=0&modestbranding=1`} 
+                   className="w-full h-full"
+                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                   allowFullScreen
+                 ></iframe>
+               )
+             })()}
           </div>
         </div>
       )}
