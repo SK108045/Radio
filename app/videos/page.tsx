@@ -165,7 +165,7 @@ const categoryData = [
         id: 'sky-sports-mancity-bournemouth', 
         title: 'Manchester City 1-1 Bournemouth | Match Highlights & Title Handed to Arsenal', 
         views: '1.2M Views',
-        image: 'https://youtu.be/zcKqgfJYsz0?si=5O5V_Dy1T7QXBGL6',
+        image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/maxresdefault.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvbWF4cmVzZGVmYXVsdC5qcGciLCJpYXQiOjE3NzkyODU0NzUsImV4cCI6MTgxMDgyMTQ3NX0.iKRLOfGYqwUZQPj7u0JwGHw1P35RtCewDDQQ_DOkE_Y',
         link: 'https://youtu.be/zcKqgfJYsz0?si=5O5V_Dy1T7QXBGL6'
       },
       { 
