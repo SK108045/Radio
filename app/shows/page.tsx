@@ -70,7 +70,7 @@ const dailyShows = [
     features: ['Live Sports Analysis', 'Athlete Interviews', 'Fantasy Football Talk']
   },
   {
-    title: 'POLITICS SHOW',
+    title: 'POLITICS SHOW - STARING SOON',
     host: 'HON MICHAEL THIONGO KAZIDUU',
     schedule: 'Saturday | 9:00 AM - 1:00 PM',
     description: 'In-depth political interviews with leading politicians and presidential aspirants. No questions off-limits.',
