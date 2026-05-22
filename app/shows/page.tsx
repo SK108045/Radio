@@ -71,10 +71,10 @@ const dailyShows = [
   },
   {
     title: 'POLITICS SHOW',
-    host: 'Boneye',
-    schedule: 'Saturday | 3:00 PM - 7:00 PM',
+    host: 'HON MICHAEL THIONGO KAZIDUU',
+    schedule: 'Saturday | 9:00 AM - 1:00 PM',
     description: 'In-depth political interviews with leading politicians and presidential aspirants. No questions off-limits.',
-    image: '/TeloandBura.jpg',
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Politics.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1BvbGl0aWNzLmpwZyIsImlhdCI6MTc3OTQ1NjgwOSwiZXhwIjoxODEwOTkyODA5fQ.cL7be6KjlWm1cMDWqElTql568ju6o8GznaYZvAAim8o',
     color: 'from-blue-500/20 to-transparent',
     features: ['Political Interviews', 'Policy Discussions', 'Election Coverage']
   },
