@@ -49,87 +49,102 @@ export async function logoutAction() {
 }
 
 export async function updateEmailAction(prevState: any, formData: FormData) {
-  const session = await getSession()
-  if (!session) return { error: 'Not authenticated' }
+  try {
+    const session = await getSession()
+    if (!session) return { error: 'Not authenticated' }
 
-  const email = formData.get('email') as string
-  if (!email) return { error: 'Email is required' }
+    const email = formData.get('email') as string
+    if (!email) return { error: 'Email is required' }
 
-  const { error } = await supabase
-    .from('artist_accounts')
-    .update({ email })
-    .eq('artist_id', session.artistId)
+    const { error } = await supabase
+      .from('artist_accounts')
+      .update({ email })
+      .eq('artist_id', session.artistId)
 
-  if (error) {
-    if (error.code === '23505') return { error: 'Email is already in use' }
-    return { error: 'Failed to update email' }
+    if (error) {
+      if (error.code === '23505') return { error: 'Email is already in use' }
+      return { error: 'Failed to update email' }
+    }
+
+    // Update session with new email
+    await setSession({ ...session, email })
+    
+    return { success: 'Email updated successfully!' }
+  } catch (err) {
+    console.error('Update email error:', err)
+    return { error: 'An unexpected error occurred' }
   }
-
-  // Update session with new email
-  await setSession({ ...session, email })
-  
-  return { success: 'Email updated successfully!' }
 }
 
 export async function updatePasswordAction(prevState: any, formData: FormData) {
-  const session = await getSession()
-  if (!session) return { error: 'Not authenticated' }
+  try {
+    const session = await getSession()
+    if (!session) return { error: 'Not authenticated' }
 
-  const currentPassword = formData.get('currentPassword') as string
-  const newPassword = formData.get('newPassword') as string
-  const confirmPassword = formData.get('confirmPassword') as string
+    const currentPassword = formData.get('currentPassword') as string
+    const newPassword = formData.get('newPassword') as string
+    const confirmPassword = formData.get('confirmPassword') as string
 
-  if (!currentPassword || !newPassword || !confirmPassword) {
-    return { error: 'All fields are required' }
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return { error: 'All fields are required' }
+    }
+
+    if (newPassword !== confirmPassword) {
+      return { error: 'New passwords do not match' }
+    }
+
+    // Verify current password
+    const { data: account } = await supabase
+      .from('artist_accounts')
+      .select('password')
+      .eq('artist_id', session.artistId)
+      .single()
+
+    if (!account || account.password !== currentPassword) {
+      return { error: 'Incorrect current password' }
+    }
+
+    // Update password
+    const { error } = await supabase
+      .from('artist_accounts')
+      .update({ password: newPassword })
+      .eq('artist_id', session.artistId)
+
+    if (error) {
+      return { error: 'Failed to update password' }
+    }
+
+    return { success: 'Password updated successfully!' }
+  } catch (err) {
+    console.error('Update password error:', err)
+    return { error: 'An unexpected error occurred' }
   }
-
-  if (newPassword !== confirmPassword) {
-    return { error: 'New passwords do not match' }
-  }
-
-  // Verify current password
-  const { data: account } = await supabase
-    .from('artist_accounts')
-    .select('password')
-    .eq('artist_id', session.artistId)
-    .single()
-
-  if (!account || account.password !== currentPassword) {
-    return { error: 'Incorrect current password' }
-  }
-
-  // Update password
-  const { error } = await supabase
-    .from('artist_accounts')
-    .update({ password: newPassword })
-    .eq('artist_id', session.artistId)
-
-  if (error) {
-    return { error: 'Failed to update password' }
-  }
-
-  return { success: 'Password updated successfully!' }
 }
 
 export async function updateUsernameAction(prevState: any, formData: FormData) {
-  const session = await getSession()
-  if (!session) return { error: 'Not authenticated' }
+  try {
+    const session = await getSession()
+    if (!session) return { error: 'Not authenticated' }
 
-  const username = formData.get('username') as string
-  if (!username) return { error: 'Username is required' }
+    const username = formData.get('username') as string
+    if (!username) return { error: 'Username is required' }
 
-  const { error } = await supabase
-    .from('artist_accounts')
-    .update({ username })
-    .eq('artist_id', session.artistId)
+    const { error } = await supabase
+      .from('artist_accounts')
+      .update({ username })
+      .eq('artist_id', session.artistId)
 
-  if (error) {
-    if (error.code === '23505') return { error: 'Username is already in use' }
-    return { error: 'Failed to update username' }
+    if (error) {
+      if (error.code === '23505') return { error: 'Username is already in use' }
+      return { error: 'Failed to update username' }
+    }
+
+    // Update session with new username
+    await setSession({ ...session, username })
+    
+    return { success: 'Username updated successfully!' }
+  } catch (err) {
+    console.error('Update username error:', err)
+    return { error: 'An unexpected error occurred' }
   }
-
-  // Update session with new username
-  await setSession({ ...session, username })
-  
-  return { success: 'Username updated successfully!' }
 }
