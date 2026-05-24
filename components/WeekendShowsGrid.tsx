@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const weekendShows = [
   {
@@ -10,7 +11,7 @@ const weekendShows = [
     schedule: '1:00 PM - 3:00 PM',
     description: 'A Swahili-heavy East African heat check: catchy hooks, street poetry, and that Tanzanian pop/hip-hop bounce that makes Bongo Flava so sticky. Featuring Diamond Platnumz, Nandy, Harmonize, Alikiba, and Rayvanny.',
     image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    gradient: 'from-orange-500 via-orange-600 to-red-700'
+    accentColor: '#ff8c00'
   },
   {
     title: 'Naija',
@@ -18,15 +19,15 @@ const weekendShows = [
     schedule: '3:00 PM - 5:00 PM',
     description: 'Pure Afrobeats energy for the weekend takeover: danceable drums, sing-along choruses, and glossy crossover records. Burna Boy, Wizkid, Davido, and Fireboy DML are all solid anchors here.',
     image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    gradient: 'from-green-500 via-emerald-600 to-teal-700'
+    accentColor: '#22c55e'
   },
   {
     title: 'Piano/Amapiano',
     day: 'Saturday',
     schedule: '5:00 PM - 7:00 PM',
-    description: 'Deep groove piano keys meet hypnotic basslines: Amapiano is the South African sound that&apos;s taking over. Piano-driven production with Kabza De Small, Focalistic, and Lady Du vibes.',
+    description: 'Deep groove piano keys meet hypnotic basslines: Amapiano is the South African sound that\'s taking over. Piano-driven production with Kabza De Small, Focalistic, and Lady Du vibes.',
     image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    gradient: 'from-purple-500 via-pink-600 to-rose-700'
+    accentColor: '#a855f7'
   },
   {
     title: 'Lingala',
@@ -34,15 +35,15 @@ const weekendShows = [
     schedule: '7:00 PM - 9:00 PM',
     description: 'The hypnotic polyrhythmic grooves of Congo and Central Africa. Soukous guitars, infectious percussion, and the unmistakable bounce that gets everyone dancing.',
     image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    gradient: 'from-blue-500 via-cyan-600 to-sky-700'
+    accentColor: '#3b82f6'
   },
   {
     title: 'Gospel / Worship',
     day: 'Sunday',
     schedule: '5:00 AM - 7:00 AM',
-    description: 'Start your Sunday with spiritual awakening and uplifting melodies. Kenya&apos;s finest gospel artists bringing messages of hope and healing.',
+    description: 'Start your Sunday with spiritual awakening and uplifting melodies. Kenya\'s finest gospel artists bringing messages of hope and healing.',
     image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Gospel.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0dvc3BlbC5qcGciLCJpYXQiOjE3Nzc2MTg2OTAsImV4cCI6MTgwOTE1NDY5MH0.FiCgYciSVoTbmjsZ039KJG8_hlbPa18hY7rl10hUzrw',
-    gradient: 'from-yellow-500 via-amber-600 to-orange-700'
+    accentColor: '#eab308'
   },
   {
     title: 'US R&B',
@@ -50,7 +51,7 @@ const weekendShows = [
     schedule: '1:00 PM - 3:00 PM',
     description: 'Smooth, soulful American RnB vibes. From Frank Ocean to The Weeknd, dive deep into the sound that soothes the soul.',
     image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/RnB.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1JuQi5qcGciLCJpYXQiOjE3NzkyNjcwMzYsImV4cCI6MTgxMDgwMzAzNn0.1n19oWoG6A-EDrXaILLNof75PFG_mg7iLSLI7_aAl9I',
-    gradient: 'from-indigo-500 via-purple-600 to-pink-700'
+    accentColor: '#6366f1'
   },
   {
     title: 'US Hip-Hop',
@@ -58,64 +59,65 @@ const weekendShows = [
     schedule: '3:00 PM - 5:00 PM',
     description: 'Hard-hitting beats and lyrical wizardry from the States. Kendrick, Drake, J. Cole, and the latest heat dominate the airwaves.',
     image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    gradient: 'from-red-500 via-orange-600 to-yellow-700'
+    accentColor: '#ef4444'
   },
   {
     title: 'New Kenyan Music',
     day: 'Sunday',
     schedule: '7:00 PM - 9:00 PM',
-    description: 'Fresh sounds from Kenya&apos;s rising stars. New drops, underground bangers, and the next generation of talent pushing the culture forward.',
+    description: 'Fresh sounds from Kenya\'s rising stars. New drops, underground bangers, and the next generation of talent pushing the culture forward.',
     image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/KenyanOldSchool.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0tlbnlhbk9sZFNjaG9vbC5qcGciLCJpYXQiOjE3Nzg5MjkyNzksImV4cCI6MTgxMDQ2NTI3OX0.v6fsoH7FpaX9-sDUtk1Kwk_5hiRTzvK_c9HIBHHU-LI',
-    gradient: 'from-lime-500 via-green-600 to-emerald-700'
+    accentColor: '#84cc16'
   },
 ]
 
-interface CardState {
-  [key: number]: { x: number; y: number }
-}
-
 export default function WeekendShowsGrid() {
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-  const [cardRotation, setCardRotation] = useState<CardState>({})
+  const [activeIdx, setActiveIdx] = useState(0)
+  const [direction, setDirection] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, idx: number) => {
-    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
-    const x = (e.clientX - rect.left) / rect.width
-    const y = (e.clientY - rect.top) / rect.height
-
-    setMousePos({ x, y })
-    setCardRotation((prev) => ({
-      ...prev,
-      [idx]: {
-        x: (y - 0.5) * 8,
-        y: (x - 0.5) * -8,
-      },
-    }))
+  const handleNext = () => {
+    setDirection(1)
+    setActiveIdx((prev) => (prev + 1) % weekendShows.length)
   }
 
-  const handleMouseLeave = (idx: number) => {
-    setHoveredIdx(null)
-    setCardRotation((prev) => ({
-      ...prev,
-      [idx]: { x: 0, y: 0 },
-    }))
+  const handlePrev = () => {
+    setDirection(-1)
+    setActiveIdx((prev) => (prev - 1 + weekendShows.length) % weekendShows.length)
+  }
+
+  const handleDotClick = (idx: number) => {
+    setDirection(idx > activeIdx ? 1 : -1)
+    setActiveIdx(idx)
+  }
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') handleNext()
+      if (e.key === 'ArrowLeft') handlePrev()
+    }
+    window.addEventListener('keydown', handleKeydown)
+    return () => window.removeEventListener('keydown', handleKeydown)
+  }, [])
+
+  const getShowOrder = (idx: number) => {
+    const relative = (idx - activeIdx + weekendShows.length) % weekendShows.length
+    return relative
   }
 
   return (
-    <section className="relative z-20 bg-background overflow-hidden py-24">
-      {/* Animated background gradient */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+    <section className="relative z-20 bg-background overflow-hidden py-32">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-20 left-1/4 w-80 h-80 bg-primary/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-20">
-          <div className="inline-block mb-6">
-            <span className="text-primary font-black uppercase tracking-[0.3em] text-sm block">Weekend Vibes</span>
-          </div>
+        <div className="text-center mb-24">
+          <span className="text-primary font-black uppercase tracking-[0.3em] text-sm block mb-4">Weekend Vibes</span>
           <h2 className="text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight">
             <span className="bg-gradient-to-r from-primary via-purple-500 to-blue-500 bg-clip-text text-transparent">
               Weekend
@@ -124,117 +126,221 @@ export default function WeekendShowsGrid() {
             <span className="text-white">Sound Spectrum</span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
-            Eight curated shows across Saturday and Sunday. From gospel sunrise to late-night Kenyan heat — find your perfect weekend soundtrack.
+            Immerse yourself in our curated weekend shows. Navigate through eight distinct sounds, from spiritual gospel mornings to electrifying late-night beats.
           </p>
         </div>
 
-        {/* Grid of Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {weekendShows.map((show, idx) => {
-            const rotation = cardRotation[idx] || { x: 0, y: 0 }
-            const isHovered = hoveredIdx === idx
+        {/* Carousel Container */}
+        <div className="relative h-[500px] md:h-[600px] perspective" ref={containerRef}>
+          {/* Background blur slides */}
+          <AnimatePresence mode="sync">
+            {weekendShows.map((show, idx) => {
+              const order = getShowOrder(idx)
+              const isCenter = order === 0
+              const isLeft = order === weekendShows.length - 1
+              const isRight = order === 1
+              const isFarLeft = order > 1 && order <= weekendShows.length / 2
+              const isFarRight = order > weekendShows.length / 2
 
-            return (
-              <div
-                key={idx}
-                onMouseEnter={() => setHoveredIdx(idx)}
-                onMouseMove={(e) => handleMouseMove(e, idx)}
-                onMouseLeave={() => handleMouseLeave(idx)}
-                className="group perspective h-full cursor-pointer"
-              >
-                <div
-                  className="relative h-96 rounded-2xl overflow-hidden transition-transform duration-300"
-                  style={{
-                    transformStyle: 'preserve-3d',
-                    transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(${isHovered ? 1.05 : 1})`,
+              // Position logic
+              let xPos = 0
+              let yPos = 0
+              let scale = 0.65
+              let opacity = 0.4
+              let blur = 'blur(12px)'
+              let zIndex = 10
+
+              if (isCenter) {
+                scale = 1
+                opacity = 1
+                blur = 'blur(0px)'
+                zIndex = 50
+              } else if (isRight) {
+                xPos = 280
+                scale = 0.75
+                opacity = 0.5
+                blur = 'blur(8px)'
+                zIndex = 40
+              } else if (isLeft) {
+                xPos = -280
+                scale = 0.75
+                opacity = 0.5
+                blur = 'blur(8px)'
+                zIndex = 40
+              } else if (isFarRight) {
+                xPos = 500
+                scale = 0.6
+                opacity = 0.3
+                blur = 'blur(15px)'
+                zIndex = 20
+              } else if (isFarLeft) {
+                xPos = -500
+                scale = 0.6
+                opacity = 0.3
+                blur = 'blur(15px)'
+                zIndex = 20
+              }
+
+              return (
+                <motion.div
+                  key={`show-${idx}-${direction}`}
+                  initial={{ opacity: 0, x: direction > 0 ? 300 : -300 }}
+                  animate={{
+                    opacity,
+                    x: xPos,
+                    scale,
+                    filter: blur,
+                    zIndex,
+                  }}
+                  exit={{ opacity: 0, x: direction > 0 ? -300 : 300 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 md:w-80 h-96 md:h-[480px] rounded-3xl overflow-hidden cursor-pointer group"
+                  onClick={() => {
+                    if (isRight) handleNext()
+                    else if (isLeft) handlePrev()
                   }}
                 >
-                  {/* Background Image */}
+                  {/* Image */}
                   <Image
                     src={show.image}
                     alt={show.title}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    quality={85}
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    quality={80}
                   />
 
-                  {/* Gradient Overlay */}
+                  {/* Gradient overlay */}
                   <div
-                    className={`absolute inset-0 bg-gradient-to-b ${show.gradient} opacity-0 group-hover:opacity-60 transition-opacity duration-500 mix-blend-multiply`}
+                    className="absolute inset-0 opacity-60"
+                    style={{
+                      background: `linear-gradient(135deg, ${show.accentColor}40 0%, ${show.accentColor}20 50%, transparent 100%)`,
+                    }}
                   ></div>
 
-                  {/* Dark Base Overlay */}
-                  <div className={`absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/40 transition-opacity duration-500 ${isHovered ? 'opacity-40' : 'opacity-70'}`}></div>
+                  {/* Dark base overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/80"></div>
 
-                  {/* Glass Morphism Card */}
-                  <div
-                    className={`absolute inset-0 backdrop-blur-sm transition-all duration-500 ${
-                      isHovered ? 'bg-white/10 border border-white/30' : 'bg-white/5 border border-white/10'
-                    }`}
-                  ></div>
-
-                  {/* Content */}
-                  <div className="absolute inset-0 flex flex-col justify-between p-6 z-10">
-                    {/* Top */}
-                    <div className="flex items-start justify-between">
+                  {/* Content — only show for center */}
+                  {isCenter && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ delay: 0.1 }}
+                      className="absolute inset-0 flex flex-col justify-between p-6 md:p-8 z-20"
+                    >
                       <div>
-                        <p className="text-white/70 text-xs font-bold uppercase tracking-[0.15em] mb-2">
+                        <motion.span
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="inline-block text-xs md:text-sm font-black uppercase tracking-[0.2em] text-white/70 mb-3"
+                        >
                           {show.day}
-                        </p>
-                        <h3
-                          className={`font-black uppercase tracking-tighter transition-all duration-500 ${
-                            isHovered ? 'text-4xl text-white' : 'text-2xl text-white/90'
-                          }`}
+                        </motion.span>
+                        <motion.h3
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.05 }}
+                          className="text-4xl md:text-5xl font-black text-white leading-tight mb-4"
                         >
                           {show.title}
-                        </h3>
+                        </motion.h3>
                       </div>
-                      <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
-                          isHovered
-                            ? 'bg-primary border border-primary shadow-lg shadow-primary/50'
-                            : 'bg-white/10 border border-white/20'
-                        }`}
-                      >
-                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </div>
 
-                    {/* Bottom */}
-                    <div className={`transition-all duration-500 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                      <p className="text-white/80 text-sm mb-4 leading-relaxed line-clamp-3">
-                        {show.description}
-                      </p>
-                      <div className="flex items-center justify-between pt-4 border-t border-white/20">
-                        <span className="text-primary font-bold text-sm uppercase tracking-[0.1em]">
-                          {show.schedule}
-                        </span>
-                        <span className="text-white/60 text-xs">Tap to explore</span>
-                      </div>
-                    </div>
-                  </div>
+                      <div>
+                        <motion.p
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                          className="text-white/80 text-sm md:text-base leading-relaxed mb-6"
+                        >
+                          {show.description}
+                        </motion.p>
 
-                  {/* Glow Effect on Hover */}
-                  {isHovered && (
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/20 via-transparent to-blue-500/20 opacity-50 blur-xl pointer-events-none"></div>
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.15 }}
+                          className="flex items-center justify-between pt-4 border-t border-white/30"
+                        >
+                          <span className="text-primary font-black text-xs md:text-sm uppercase tracking-[0.15em]">
+                            {show.schedule}
+                          </span>
+                          <span
+                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold text-white/90 border border-white/30 transition-all hover:bg-white/10"
+                            style={{ borderColor: `${show.accentColor}80` }}
+                          >
+                            Play
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M8 5v14l11-7z" />
+                            </svg>
+                          </span>
+                        </motion.div>
+                      </div>
+                    </motion.div>
                   )}
-                </div>
-              </div>
-            )
-          })}
+
+                  {/* Glow effect for center */}
+                  {isCenter && (
+                    <div
+                      className="absolute inset-0 rounded-3xl shadow-2xl pointer-events-none"
+                      style={{
+                        boxShadow: `0 0 60px ${show.accentColor}40, inset 0 0 60px ${show.accentColor}20`,
+                      }}
+                    ></div>
+                  )}
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
         </div>
 
-        {/* Bottom CTA */}
-        <div className="mt-20 text-center">
-          <p className="text-gray-400 mb-6">Ready to discover your weekend groove?</p>
-          <button className="group relative inline-flex items-center gap-3 px-8 py-4 bg-primary rounded-full font-black uppercase tracking-widest text-background transition-all duration-300 hover:shadow-xl hover:shadow-primary/50 hover:scale-105">
-            Start Listening
-            <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        {/* Navigation Buttons */}
+        <div className="flex items-center justify-center gap-6 mt-16 md:mt-20">
+          <button
+            onClick={handlePrev}
+            className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/30 hover:border-primary transition-all duration-300 flex items-center justify-center hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/30"
+            aria-label="Previous show"
+          >
+            <svg className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
+
+          {/* Dot Indicators */}
+          <div className="flex items-center gap-2 md:gap-3">
+            {weekendShows.map((show, idx) => (
+              <motion.button
+                key={idx}
+                onClick={() => handleDotClick(idx)}
+                className="transition-all duration-300 rounded-full"
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  width: activeIdx === idx ? 32 : 10,
+                  height: 10,
+                  backgroundColor: activeIdx === idx ? show.accentColor : 'rgba(255,255,255,0.2)',
+                  border: activeIdx === idx ? `2px solid ${show.accentColor}` : '2px solid rgba(255,255,255,0.1)',
+                }}
+                aria-label={`Go to ${show.title}`}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={handleNext}
+            className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/30 hover:border-primary transition-all duration-300 flex items-center justify-center hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/30"
+            aria-label="Next show"
+          >
+            <svg className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Keyboard hint */}
+        <div className="text-center mt-12 text-white/40 text-xs md:text-sm">
+          <p>Use arrow keys or buttons to navigate • Click side shows to jump</p>
         </div>
       </div>
     </section>
