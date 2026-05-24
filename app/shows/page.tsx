@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
+import WeekendShowsGrid from '@/components/WeekendShowsGrid'
 
 const dailyShows = [
   {
@@ -79,6 +80,8 @@ const dailyShows = [
     features: ['Political Interviews', 'Policy Discussions', 'Election Coverage']
   },
 ]
+
+
 
 export default function ShowsPage() {
   const [currentHour, setCurrentHour] = useState(12)
@@ -195,6 +198,9 @@ export default function ShowsPage() {
           )
         })}
       </section>
+
+      {/* Weekend Shows Grid */}
+      <WeekendShowsGrid />
 
       {/* Guest Mixes Banner Section */}
       <section className="bg-primary relative overflow-hidden py-24 md:py-32">
