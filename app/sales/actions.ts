@@ -110,3 +110,26 @@ export async function updatePasswordAction(prevState: any, formData: FormData) {
 
   return { success: 'Password updated successfully!' }
 }
+
+export async function updateUsernameAction(prevState: any, formData: FormData) {
+  const session = await getSession()
+  if (!session) return { error: 'Not authenticated' }
+
+  const username = formData.get('username') as string
+  if (!username) return { error: 'Username is required' }
+
+  const { error } = await supabase
+    .from('artist_accounts')
+    .update({ username })
+    .eq('artist_id', session.artistId)
+
+  if (error) {
+    if (error.code === '23505') return { error: 'Username is already in use' }
+    return { error: 'Failed to update username' }
+  }
+
+  // Update session with new username
+  await setSession({ ...session, username })
+  
+  return { success: 'Username updated successfully!' }
+}

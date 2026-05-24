@@ -5,15 +5,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Mail, Lock, User as UserIcon, Bell, Check, AlertCircle, Loader2 } from 'lucide-react'
-import { updateEmailAction, updatePasswordAction } from '../actions'
+import { updateEmailAction, updatePasswordAction, updateUsernameAction } from '../actions'
 import type { SessionPayload } from '@/lib/auth'
 
 export function SettingsClient({ session }: { session: SessionPayload }) {
+  const [usernameState, usernameAction, isUsernamePending] = useActionState(updateUsernameAction, null)
   const [emailState, emailAction, isEmailPending] = useActionState(updateEmailAction, null)
   const [passwordState, passwordAction, isPasswordPending] = useActionState(updatePasswordAction, null)
 
+  const [usernameSuccess, setUsernameSuccess] = useState(false)
   const [emailSuccess, setEmailSuccess] = useState(false)
   const [passwordSuccess, setPasswordSuccess] = useState(false)
+
+  useEffect(() => {
+    if (usernameState?.success) {
+      setUsernameSuccess(true)
+      const t = setTimeout(() => setUsernameSuccess(false), 3000)
+      return () => clearTimeout(t)
+    }
+  }, [usernameState])
 
   useEffect(() => {
     if (emailState?.success) {
@@ -38,7 +48,7 @@ export function SettingsClient({ session }: { session: SessionPayload }) {
         <p className="text-muted-foreground">Manage your account and preferences</p>
       </div>
 
-      {/* Account Information (Read Only for now) */}
+      {/* Account Information */}
       <Card className="bg-card border-border mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -47,16 +57,40 @@ export function SettingsClient({ session }: { session: SessionPayload }) {
           </CardTitle>
           <CardDescription>Your public profile details</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Username</label>
-            <Input
-              readOnly
-              value={session.username}
-              className="bg-input border-border text-foreground opacity-70"
-            />
-          </div>
-
+        <CardContent>
+          <form action={usernameAction} className="space-y-4">
+            {usernameState?.error && (
+              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+                <span className="text-sm text-destructive">{usernameState.error}</span>
+              </div>
+            )}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Username</label>
+              <Input
+                name="username"
+                defaultValue={session.username}
+                required
+                className="bg-input border-border text-foreground"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                type="submit"
+                disabled={isUsernamePending}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                {isUsernamePending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                Update Username
+              </Button>
+              {usernameSuccess && (
+                <div className="flex items-center gap-1 text-primary text-sm">
+                  <Check className="w-4 h-4" />
+                  Saved
+                </div>
+              )}
+            </div>
+          </form>
         </CardContent>
       </Card>
 
