@@ -159,7 +159,6 @@ const categoryData = [
         title: 'ARSENAL ARE PREMIER LEAGUE CHAMPIONS! 🏆🔴 Gunners celebrate as Man City draw 1-1', 
         views: 'BREAKING',
         image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Arsenal.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvQXJzZW5hbC5qcGciLCJpYXQiOjE3NzkyMjQwNTcsImV4cCI6MTgxMDc2MDA1N30.NIT9WSkM2QVSTt1WWHeuGvHK5KamJZDLqNXzyHChSN0',
-        isImageOnly: true, 
         link: 'https://youtu.be/fLRFOxgJp7M?si=CsQBokf-47h9W6to'
       },
       { 
