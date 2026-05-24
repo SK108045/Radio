@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { motion, AnimatePresence } from 'framer-motion'
 
 const weekendShows = [
   {
@@ -72,277 +71,217 @@ const weekendShows = [
 ]
 
 export default function WeekendShowsGrid() {
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [activeIdx, setActiveIdx] = useState(0)
-  const [direction, setDirection] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
 
-  const handleNext = () => {
-    setDirection(1)
-    setActiveIdx((prev) => (prev + 1) % weekendShows.length)
-  }
-
-  const handlePrev = () => {
-    setDirection(-1)
-    setActiveIdx((prev) => (prev - 1 + weekendShows.length) % weekendShows.length)
-  }
-
-  const handleDotClick = (idx: number) => {
-    setDirection(idx > activeIdx ? 1 : -1)
-    setActiveIdx(idx)
-  }
-
-  // Keyboard navigation
   useEffect(() => {
-    const handleKeydown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') handleNext()
-      if (e.key === 'ArrowLeft') handlePrev()
-    }
-    window.addEventListener('keydown', handleKeydown)
-    return () => window.removeEventListener('keydown', handleKeydown)
+    setMounted(true)
   }, [])
 
-  const getShowOrder = (idx: number) => {
-    const relative = (idx - activeIdx + weekendShows.length) % weekendShows.length
-    return relative
+  // Handle scroll to update active index
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return
+
+    const container = scrollContainerRef.current
+    const scrollLeft = container.scrollLeft
+    const cardWidth = 400 // approximate card width
+    const newIdx = Math.round(scrollLeft / cardWidth)
+    
+    setActiveIdx(Math.max(0, Math.min(newIdx, weekendShows.length - 1)))
+  }
+
+  // Calculate card transform based on position
+  const getCardTransform = (idx: number) => {
+    const distance = Math.abs(idx - activeIdx)
+    
+    if (idx === activeIdx) {
+      return {
+        scale: 1,
+        opacity: 1,
+        zIndex: 50,
+        rotateY: 0,
+      }
+    } else if (idx === activeIdx - 1) {
+      return {
+        scale: 0.85,
+        opacity: 0.7,
+        zIndex: 30,
+        rotateY: 25,
+      }
+    } else if (idx === activeIdx + 1) {
+      return {
+        scale: 0.85,
+        opacity: 0.7,
+        zIndex: 30,
+        rotateY: -25,
+      }
+    } else {
+      return {
+        scale: 0.7,
+        opacity: 0.4,
+        zIndex: 10,
+        rotateY: idx < activeIdx ? 45 : -45,
+      }
+    }
   }
 
   return (
-    <section className="relative z-20 bg-background overflow-hidden py-32">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-20 left-1/4 w-80 h-80 bg-primary/30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+    <section className="relative min-h-screen bg-gradient-to-b from-[#050505] via-[#0a0a0a] to-[#000000] flex flex-col items-center justify-center overflow-hidden py-20">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-radial from-orange-500/20 via-transparent to-transparent rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-gradient-radial from-blue-500/15 via-transparent to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-24">
-          <span className="text-primary font-black uppercase tracking-[0.3em] text-sm block mb-4">Weekend Vibes</span>
-          <h2 className="text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight">
-            <span className="bg-gradient-to-r from-primary via-purple-500 to-blue-500 bg-clip-text text-transparent">
-              Weekend
-            </span>
-            <br />
-            <span className="text-white">Sound Spectrum</span>
-          </h2>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
-            Immerse yourself in our curated weekend shows. Navigate through eight distinct sounds, from spiritual gospel mornings to electrifying late-night beats.
-          </p>
-        </div>
+      {/* Header */}
+      <div className="relative z-10 text-center mb-20 px-6">
+        <span className="inline-block text-primary font-black uppercase tracking-[0.3em] text-xs mb-4">Weekend Vibes</span>
+        <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tight mb-6">
+          Weekend Sound <span className="bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent">Spectrum</span>
+        </h2>
+        <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">Scroll through the weekend soundtrack. From sunrise worship to late-night Kenyan heat — Saturday and Sunday get their own sonic identity.</p>
+      </div>
 
-        {/* Carousel Container */}
-        <div className="relative h-[500px] md:h-[600px] perspective" ref={containerRef}>
-          {/* Background blur slides */}
-          <AnimatePresence mode="sync">
+      {/* Carousel Container */}
+      <div className="relative z-20 w-full flex items-center justify-center px-4 md:px-8">
+        {/* Left gradient fade */}
+        <div className="hidden md:block absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#050505] to-transparent z-30 pointer-events-none"></div>
+        
+        {/* Scroll Container */}
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="w-full max-w-7xl overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth"
+          style={{
+            perspective: '1200px',
+            scrollBehavior: 'smooth',
+          }}
+        >
+          <div className="flex gap-12 px-12 md:px-20 py-12">
             {weekendShows.map((show, idx) => {
-              const order = getShowOrder(idx)
-              const isCenter = order === 0
-              const isLeft = order === weekendShows.length - 1
-              const isRight = order === 1
-              const isFarLeft = order > 1 && order <= weekendShows.length / 2
-              const isFarRight = order > weekendShows.length / 2
-
-              // Position logic
-              let xPos = 0
-              let yPos = 0
-              let scale = 0.65
-              let opacity = 0.4
-              let blur = 'blur(12px)'
-              let zIndex = 10
-
-              if (isCenter) {
-                scale = 1
-                opacity = 1
-                blur = 'blur(0px)'
-                zIndex = 50
-              } else if (isRight) {
-                xPos = 280
-                scale = 0.75
-                opacity = 0.5
-                blur = 'blur(8px)'
-                zIndex = 40
-              } else if (isLeft) {
-                xPos = -280
-                scale = 0.75
-                opacity = 0.5
-                blur = 'blur(8px)'
-                zIndex = 40
-              } else if (isFarRight) {
-                xPos = 500
-                scale = 0.6
-                opacity = 0.3
-                blur = 'blur(15px)'
-                zIndex = 20
-              } else if (isFarLeft) {
-                xPos = -500
-                scale = 0.6
-                opacity = 0.3
-                blur = 'blur(15px)'
-                zIndex = 20
-              }
-
+              const transform = getCardTransform(idx)
+              
               return (
-                <motion.div
-                  key={`show-${idx}-${direction}`}
-                  initial={{ opacity: 0, x: direction > 0 ? 300 : -300 }}
-                  animate={{
-                    opacity,
-                    x: xPos,
-                    scale,
-                    filter: blur,
-                    zIndex,
-                  }}
-                  exit={{ opacity: 0, x: direction > 0 ? -300 : 300 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 md:w-80 h-96 md:h-[480px] rounded-3xl overflow-hidden cursor-pointer group"
-                  onClick={() => {
-                    if (isRight) handleNext()
-                    else if (isLeft) handlePrev()
+                <div
+                  key={idx}
+                  className="flex-shrink-0 group snap-center"
+                  style={{
+                    width: '380px',
+                    perspective: '1200px',
                   }}
                 >
-                  {/* Image */}
-                  <Image
-                    src={show.image}
-                    alt={show.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    quality={80}
-                  />
-
-                  {/* Gradient overlay */}
                   <div
-                    className="absolute inset-0 opacity-60"
+                    className="relative h-96 rounded-3xl overflow-hidden transition-all duration-500 ease-out cursor-grab active:cursor-grabbing"
                     style={{
-                      background: `linear-gradient(135deg, ${show.accentColor}40 0%, ${show.accentColor}20 50%, transparent 100%)`,
+                      transform: `scaleX(${transform.scale}) scaleY(${transform.scale}) rotateY(${transform.rotateY}deg)`,
+                      opacity: transform.opacity,
+                      zIndex: transform.zIndex,
+                      transformStyle: 'preserve-3d',
+                      transformOrigin: 'center',
                     }}
-                  ></div>
+                  >
+                    {/* Image */}
+                    <Image
+                      src={show.image}
+                      alt={show.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      priority={idx === 0}
+                    />
 
-                  {/* Dark base overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/80"></div>
-
-                  {/* Content — only show for center */}
-                  {isCenter && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      transition={{ delay: 0.1 }}
-                      className="absolute inset-0 flex flex-col justify-between p-6 md:p-8 z-20"
-                    >
-                      <div>
-                        <motion.span
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="inline-block text-xs md:text-sm font-black uppercase tracking-[0.2em] text-white/70 mb-3"
-                        >
-                          {show.day}
-                        </motion.span>
-                        <motion.h3
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.05 }}
-                          className="text-4xl md:text-5xl font-black text-white leading-tight mb-4"
-                        >
-                          {show.title}
-                        </motion.h3>
-                      </div>
-
-                      <div>
-                        <motion.p
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.1 }}
-                          className="text-white/80 text-sm md:text-base leading-relaxed mb-6"
-                        >
-                          {show.description}
-                        </motion.p>
-
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.15 }}
-                          className="flex items-center justify-between pt-4 border-t border-white/30"
-                        >
-                          <span className="text-primary font-black text-xs md:text-sm uppercase tracking-[0.15em]">
-                            {show.schedule}
-                          </span>
-                          <span
-                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold text-white/90 border border-white/30 transition-all hover:bg-white/10"
-                            style={{ borderColor: `${show.accentColor}80` }}
-                          >
-                            Play
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M8 5v14l11-7z" />
-                            </svg>
-                          </span>
-                        </motion.div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Glow effect for center */}
-                  {isCenter && (
+                    {/* Gradient overlays */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80"></div>
                     <div
-                      className="absolute inset-0 rounded-3xl shadow-2xl pointer-events-none"
+                      className="absolute inset-0 opacity-40 mix-blend-multiply"
                       style={{
-                        boxShadow: `0 0 60px ${show.accentColor}40, inset 0 0 60px ${show.accentColor}20`,
+                        background: `linear-gradient(135deg, ${show.accentColor}30, ${show.accentColor}10)`,
                       }}
                     ></div>
-                  )}
-                </motion.div>
+
+                    {/* Content */}
+                    <div className="absolute inset-0 flex flex-col justify-between p-6">
+                      {/* Day badge */}
+                      <div className="flex items-center justify-between">
+                        <span className="inline-block px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-bold text-white uppercase tracking-widest">
+                          {show.day}
+                        </span>
+                      </div>
+
+                      {/* Bottom content */}
+                      <div>
+                        <h3 className="text-4xl md:text-5xl font-black text-white uppercase mb-3 leading-tight">
+                          {show.title}
+                        </h3>
+                        <p className="text-sm md:text-base text-gray-300 leading-relaxed mb-4 line-clamp-3">
+                          {show.description}
+                        </p>
+                        <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                          {show.schedule}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Accent line */}
+                    <div
+                      className="absolute top-0 left-0 h-1 w-full"
+                      style={{
+                        background: `linear-gradient(90deg, ${show.accentColor}, ${show.accentColor}00)`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
               )
             })}
-          </AnimatePresence>
-        </div>
-
-        {/* Navigation Buttons */}
-        <div className="flex items-center justify-center gap-6 mt-16 md:mt-20">
-          <button
-            onClick={handlePrev}
-            className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/30 hover:border-primary transition-all duration-300 flex items-center justify-center hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/30"
-            aria-label="Previous show"
-          >
-            <svg className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          {/* Dot Indicators */}
-          <div className="flex items-center gap-2 md:gap-3">
-            {weekendShows.map((show, idx) => (
-              <motion.button
-                key={idx}
-                onClick={() => handleDotClick(idx)}
-                className="transition-all duration-300 rounded-full"
-                whileHover={{ scale: 1.2 }}
-                whileTap={{ scale: 0.95 }}
-                style={{
-                  width: activeIdx === idx ? 32 : 10,
-                  height: 10,
-                  backgroundColor: activeIdx === idx ? show.accentColor : 'rgba(255,255,255,0.2)',
-                  border: activeIdx === idx ? `2px solid ${show.accentColor}` : '2px solid rgba(255,255,255,0.1)',
-                }}
-                aria-label={`Go to ${show.title}`}
-              />
-            ))}
           </div>
-
-          <button
-            onClick={handleNext}
-            className="group relative w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/30 hover:border-primary transition-all duration-300 flex items-center justify-center hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/30"
-            aria-label="Next show"
-          >
-            <svg className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
         </div>
 
-        {/* Keyboard hint */}
-        <div className="text-center mt-12 text-white/40 text-xs md:text-sm">
-          <p>Use arrow keys or buttons to navigate • Click side shows to jump</p>
-        </div>
+        {/* Right gradient fade */}
+        <div className="hidden md:block absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#050505] to-transparent z-30 pointer-events-none"></div>
       </div>
+
+      {/* Indicator Dots */}
+      <div className="relative z-20 flex items-center justify-center gap-3 mt-12">
+        {weekendShows.map((show, idx) => (
+          <button
+            key={idx}
+            onClick={() => {
+              if (scrollContainerRef.current) {
+                const scrollLeft = idx * 400 + idx * 48 // card width + gap
+                scrollContainerRef.current.scrollTo({
+                  left: scrollLeft,
+                  behavior: 'smooth',
+                })
+              }
+            }}
+            className="group relative h-3 transition-all duration-300"
+            style={{
+              width: activeIdx === idx ? 32 : 12,
+            }}
+          >
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{
+                backgroundColor: activeIdx === idx ? show.accentColor : 'rgba(255, 255, 255, 0.2)',
+              }}
+            ></div>
+          </button>
+        ))}
+      </div>
+
+      {/* Hint text */}
+      <p className="relative z-20 text-gray-500 text-sm mt-8 text-center">Scroll horizontally to explore the weekend lineup</p>
+
+      {/* Custom scrollbar styles */}
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </section>
   )
 }
