@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
-import WeekendShowsGrid from '@/components/WeekendShowsGrid'
 
 const dailyShows = [
   {
@@ -87,8 +86,9 @@ const weekendShows = [
     day: 'Saturday',
     schedule: '1:00 PM - 3:00 PM',
     description: 'A Swahili-heavy East African heat check: catchy hooks, street poetry, and that Tanzanian pop/hip-hop bounce that makes Bongo Flava so sticky. Featuring Diamond Platnumz, Nandy, Harmonize, Alikiba, and Rayvanny.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    color: 'from-orange-500 to-orange-900'
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/KenyanOldSchool.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0tlbnlhbk9sZFNjaG9vbC5qcGciLCJpYXQiOjE3Nzg5MjkyNzksImV4cCI6MTgxMDQ2NTI3OX0.v6fsoH7FpaX9-sDUtk1Kwk_5hiRTzvK_c9HIBHHU-LI',
+    color: 'from-orange-500 to-orange-900',
+    features: ['Diamond Platnumz', 'Nandy', 'Harmonize']
   },
   {
     title: 'Naija',
@@ -96,202 +96,272 @@ const weekendShows = [
     schedule: '3:00 PM - 5:00 PM',
     description: 'Pure Afrobeats energy for the weekend takeover: danceable drums, sing-along choruses, and glossy crossover records. Burna Boy, Wizkid, Davido, and Fireboy DML are all solid anchors here.',
     image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    color: 'from-green-500 to-green-900'
+    color: 'from-green-500 to-green-900',
+    features: ['Afrobeats', 'Burna Boy', 'Wizkid', 'Davido']
   },
   {
     title: 'Piano',
     day: 'Saturday',
     schedule: '5:00 PM - 7:00 PM',
     description: 'Amapiano is the South African township sound built on jazz/house roots, warm keys, and deep log-drum grooves. Kabza De Small, DJ Maphorisa, Kamo Mphela, Tyla, and Boohle fit this lane nicely.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    color: 'from-yellow-500 to-yellow-900'
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Gospel.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0dvc3BlbC5qcGciLCJpYXQiOjE3Nzc2MTg2OTAsImV4cCI6MTgwOTE1NDY5MH0.FiCgYciSVoTbmjsZ039KJG8_hlbPa18hY7rl10hUzrw',
+    color: 'from-yellow-500 to-yellow-900',
+    features: ['Amapiano', 'Kabza De Small', 'DJ Maphorisa']
   },
   {
     title: 'Lingala',
     day: 'Saturday',
     schedule: '7:00 PM - 9:00 PM',
     description: 'The Congolese rumba/soukous power slot: bright guitars, big dance energy, and that rich Lingala feel that always sounds like a celebration. Fally Ipupa, Koffi Olomidé, Werrason, and Awilo Longomba.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    color: 'from-red-500 to-red-900'
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Gengetone2.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0dlbmdldG9uZTIuanBnIiwiaWF0IjoxNzc5MjcxMjcxLCJleHAiOjE4MTA4MDcyNzF9.8g2lcsHxZHP3zTn1nnGaS7WDdO51ILslPaQA_t8O5IM',
+    color: 'from-red-500 to-red-900',
+    features: ['Rumba', 'Fally Ipupa', 'Koffi Olomidé']
   },
   {
     title: 'Gospel / Worship',
     day: 'Sunday',
     schedule: '5:00 AM - 7:00 AM',
     description: 'A proper sunrise worship block, separate from the weekday run. Think big-voice praise, choir moments, and testimony-driven worship with Kirk Franklin, CeCe Winans, Mercy Chinwo, and Benjamin Dube.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    color: 'from-purple-500 to-purple-900'
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/InkMatik.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvSW5rTWF0aWsuanBnIiwiaWF0IjoxNzc4ODYyNTY3LCJleHAiOjE4MTAzOTg1Njd9.PGiJ15a-fGAhA8e0v2HZwnkVIP2jBx4KSrWiPuwX-fA',
+    color: 'from-purple-500 to-purple-900',
+    features: ['Sunrise Worship', 'Kirk Franklin', 'CeCe Winans']
   },
   {
     title: 'US R&B',
     day: 'Sunday',
     schedule: '1:00 PM - 3:00 PM',
     description: 'Smooth, emotional, glossy R&B with a little soul and hip-hop drizzle on top. SZA, H.E.R., Chris Brown, and The Weeknd are strong names for this block.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    color: 'from-blue-500 to-blue-900'
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/RnB.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1JuQi5qcGciLCJpYXQiOjE3NzkyNjcwMzYsImV4cCI6MTgxMDgwMzAzNn0.1n19oWoG6A-EDrXaILLNof75PFG_mg7iLSLI7_aAl9I',
+    color: 'from-blue-500 to-blue-900',
+    features: ['SZA', 'H.E.R.', 'Chris Brown']
   },
   {
     title: 'US Hip-Hop',
     day: 'Sunday',
     schedule: '3:00 PM - 5:00 PM',
     description: 'The bars-and-attitude slot: lyric-heavy, culture-heavy, and built for replay value. Kendrick Lamar and Drake are the cleanest headliners here.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    color: 'from-gray-500 to-gray-900'
+    image: '/Bura.jpg',
+    color: 'from-gray-500 to-gray-900',
+    features: ['Kendrick Lamar', 'Drake', 'J. Cole']
   },
   {
     title: 'New Kenyan Music',
     day: 'Sunday',
     schedule: '7:00 PM - 9:00 PM',
     description: 'The fresh-evening lane for the current wave: Kenya’s most-streamed space is now heavily rap, hip-hop, Afropop, and Afrobeats-driven. Featuring Bien, Sauti Sol, Wakadinali, Nyashinski, Lil Maina, and Okello Max.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    color: 'from-primary to-orange-900'
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Politics.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1BvbGl0aWNzLmpwZyIsImlhdCI6MTc3OTQ1NjgwOSwiZXhwIjoxODEwOTkyODA5fQ.cL7be6KjlWm1cMDWqElTql568ju6o8GznaYZvAAim8o',
+    color: 'from-primary to-orange-900',
+    features: ['Bien', 'Wakadinali', 'Nyashinski']
   }
 ]
 
-/* ─── Scramble Text ───────────────────────────────────────────── */
-function ScrambleText({ text, active }: { text: string; active: boolean }) {
-  const [out, setOut] = useState(text)
-  useEffect(() => {
-    if (!active) { setOut(text); return }
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-    let iter = 0
-    const id = setInterval(() => {
-      setOut(text.split('').map((c, i) => {
-        if (c === ' ') return ' '
-        if (i < iter) return text[i]
-        return chars[Math.floor(Math.random() * chars.length)]
-      }).join(''))
-      iter += 0.9
-      if (iter > text.length) { clearInterval(id); setOut(text) }
-    }, 32)
-    return () => clearInterval(id)
-  }, [active, text])
-  return <>{out}</>
-}
-
-/* ─── Weekend Card (3-D tilt + spotlight + scramble) ───────────── */
-type WKShow = typeof weekendShows[0]
-function WeekendCard({ show, delay }: { show: WKShow; delay: number }) {
-  const cardRef   = useRef<HTMLDivElement>(null)
-  const imgRef    = useRef<HTMLDivElement>(null)
-  const spotRef   = useRef<HTMLDivElement>(null)
-  const overlayRef = useRef<HTMLDivElement>(null)
-  const rafRef    = useRef<number>()
-  const [hovered, setHovered] = useState(false)
-
-  const onMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    rafRef.current = requestAnimationFrame(() => {
-      const el = cardRef.current; if (!el) return
-      const r = el.getBoundingClientRect()
-      const x = (e.clientX - r.left) / r.width
-      const y = (e.clientY - r.top)  / r.height
-      const rx = (y - 0.5) * -22
-      const ry = (x - 0.5) *  26
-      el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.06)`
-      const img = imgRef.current
-      if (img) img.style.transform = `scale(1.14) translate(${ry * -0.55}px, ${rx * 0.45}px)`
-      const spot = spotRef.current
-      if (spot) spot.style.background =
-        `radial-gradient(circle at ${x*100}% ${y*100}%, rgba(255,140,0,0.5) 0%, rgba(255,140,0,0.15) 38%, transparent 62%)`
-    })
-  }, [])
-
-  const onEnter = useCallback(() => {
-    const el = cardRef.current
-    if (el) {
-      el.style.transition = 'transform 0.07s linear, box-shadow 0.3s ease'
-      el.style.boxShadow  = '0 32px 80px rgba(0,0,0,0.95), 0 0 0 1.5px rgba(255,140,0,0.65), 0 0 50px rgba(255,140,0,0.22)'
-    }
-    const img = imgRef.current
-    if (img) img.style.transition = 'transform 0.07s linear'
-    const spot = spotRef.current
-    if (spot) { spot.style.opacity = '1' }
-    const ov = overlayRef.current
-    if (ov) ov.style.clipPath = 'inset(0% 0 0 0)'
-    setHovered(true)
-  }, [])
-
-  const onLeave = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    const el = cardRef.current
-    if (el) {
-      el.style.transition = 'transform 0.7s cubic-bezier(0.23,1,0.32,1), box-shadow 0.5s ease'
-      el.style.transform  = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)'
-      el.style.boxShadow  = 'none'
-    }
-    const img = imgRef.current
-    if (img) {
-      img.style.transition = 'transform 0.7s cubic-bezier(0.23,1,0.32,1)'
-      img.style.transform  = 'scale(1.08)'
-    }
-    const spot = spotRef.current
-    if (spot) spot.style.opacity = '0'
-    const ov = overlayRef.current
-    if (ov) ov.style.clipPath = 'inset(100% 0 0 0)'
-    setHovered(false)
-  }, [])
+function PremiumWeekendAccordion() {
+  const satShows = weekendShows.filter(s => s.day === 'Saturday')
+  const sunShows = weekendShows.filter(s => s.day === 'Sunday')
+  
+  const [activeSat, setActiveSat] = useState<number | null>(0)
+  const [activeSun, setActiveSun] = useState<number | null>(0)
 
   return (
-    <div
-      ref={cardRef}
-      className="wk-card relative aspect-square overflow-hidden cursor-none select-none"
-      style={{
-        animationDelay: `${delay}s`,
-        transform: 'perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)',
-        transition: 'transform 0.7s cubic-bezier(0.23,1,0.32,1)',
-        willChange: 'transform',
-      }}
-      onMouseEnter={onEnter}
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
-    >
-      {/* Poster with parallax headroom */}
-      <div ref={imgRef} className="absolute inset-0" style={{ transform: 'scale(1.08)', willChange: 'transform' }}>
-        <Image src={show.image} alt={show.title} fill className="object-cover" />
+    <section className="relative z-20 bg-[#020202] py-24 md:py-32 overflow-hidden border-t border-white/5">
+      {/* Decorative Blur Background */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
+          <div>
+            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-white px-4 py-1.5 rounded-full mb-6 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+              <span className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]"></span>
+              <span className="text-xs font-bold uppercase tracking-[0.2em]">Curated Selection</span>
+            </div>
+            <h2 className="text-5xl md:text-8xl lg:text-[9rem] font-black uppercase tracking-tighter leading-none text-white">
+              Weekend
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-orange-400 to-yellow-500 italic pr-4 drop-shadow-[0_0_30px_rgba(239,68,68,0.3)]">Anthems</span>
+            </h2>
+          </div>
+          <p className="max-w-md text-gray-400 font-medium text-lg leading-relaxed border-l-[3px] border-primary/50 pl-6 lg:mb-8">
+            Step into the sonic underground. Carefully curated, deeply rooted, and broadcasted live. Explore our premium weekend roster.
+          </p>
+        </div>
+
+        {/* Saturday Container */}
+        <div className="mb-32">
+          <div className="flex items-center gap-4 mb-10">
+            <h3 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">
+              Saturday
+            </h3>
+            <span className="text-4xl md:text-5xl font-black text-primary/40">/01</span>
+            <div className="h-[2px] bg-white/10 flex-1 ml-4 rounded-full"></div>
+          </div>
+          
+          <div className="flex flex-col lg:flex-row gap-3 h-[800px] lg:h-[650px]">
+            {satShows.map((show, i) => (
+              <div 
+                key={i}
+                onMouseEnter={() => setActiveSat(i)}
+                onMouseLeave={() => setActiveSat(null)}
+                className={`relative rounded-[2rem] overflow-hidden cursor-crosshair transition-all duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)] flex-shrink-0 group
+                  ${activeSat === i ? 'lg:flex-[3.5] flex-[4]' : activeSat === null ? 'lg:flex-1 flex-1' : 'lg:flex-[0.5] flex-[0.5]'}`}
+              >
+                <div className="absolute inset-0 bg-[#050505]">
+                  <Image src={show.image} alt={show.title} fill className={`object-cover transition-all duration-[1500ms] ease-out ${activeSat === i ? 'scale-105 opacity-80' : 'scale-100 opacity-40 grayscale group-hover:grayscale-0'}`} />
+                  <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-[#020202]/50 to-[#020202] transition-opacity duration-700 ${activeSat === i ? 'opacity-100' : 'opacity-90'}`} />
+                </div>
+                
+                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end pointer-events-none">
+                   
+                   {/* Inactive Title (Always bottom left, fade out when active) */}
+                   <div className={`absolute bottom-6 md:bottom-10 left-6 md:left-10 transition-all duration-500 flex flex-col items-start
+                     ${activeSat === i ? 'opacity-0 translate-y-4 pointer-events-none' : 'opacity-100 translate-y-0 delay-200'}`}>
+                      <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mb-4 lg:hidden border border-white/20">
+                        <span className="text-white text-xs font-black">{i + 1}</span>
+                      </div>
+                      <h4 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter [writing-mode:vertical-rl] lg:rotate-180 lg:text-3xl whitespace-nowrap hidden lg:block">
+                        {show.title}
+                      </h4>
+                      <h4 className="text-2xl font-black text-white uppercase tracking-tighter lg:hidden drop-shadow-xl">
+                        {show.title}
+                      </h4>
+                   </div>
+
+                   {/* Active Content */}
+                   <div className={`relative z-10 transition-all duration-[800ms] ease-out w-full ${activeSat === i ? 'opacity-100 translate-y-0 delay-100 pointer-events-auto' : 'opacity-0 translate-y-8 absolute pointer-events-none'}`}>
+                     <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-6 lg:gap-8 w-full">
+                       
+                       {/* Text Side */}
+                       <div className="flex-1 w-full max-w-3xl">
+                          <div className="inline-flex items-center gap-3 bg-black/40 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10 mb-6">
+                            <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                            <span className="text-white text-xs font-bold uppercase tracking-widest">{show.schedule}</span>
+                          </div>
+                          <h4 className="text-5xl md:text-7xl lg:text-8xl font-black text-white uppercase tracking-tighter mb-4 lg:mb-6 leading-[0.9] drop-shadow-2xl">
+                            {show.title}
+                          </h4>
+                          <p className="text-gray-200 font-medium text-base md:text-lg lg:text-xl max-w-2xl leading-relaxed drop-shadow-lg">
+                            {show.description}
+                          </p>
+                          
+                          {/* Features/Tags if any */}
+                          {show.features && (
+                            <div className="flex flex-wrap gap-2 mt-6 lg:mt-8">
+                               {show.features.map((feature, fIdx) => (
+                                 <span key={fIdx} className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-bold text-white uppercase tracking-widest border border-white/20 shadow-xl hover:bg-white hover:text-black transition-colors cursor-default">
+                                   {feature}
+                                 </span>
+                               ))}
+                            </div>
+                          )}
+                       </div>
+
+                       {/* Poster Side */}
+                       <div className={`hidden md:block w-48 lg:w-72 xl:w-[320px] aspect-[4/5] relative rounded-2xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/10 shrink-0 transform transition-all duration-[1200ms] ease-[cubic-bezier(0.25,1,0.5,1)] origin-bottom ${activeSat === i ? 'translate-y-0 opacity-100 scale-100 lg:rotate-[-4deg] lg:hover:rotate-0 lg:hover:scale-105' : 'translate-y-32 opacity-0 scale-75 rotate-12'}`}>
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                          <Image src={(show as any).poster || show.image} alt={`${show.title} Poster`} fill className="object-cover" />
+                          <div className="absolute inset-0 bg-gradient-to-tr from-black/40 via-transparent to-white/10 pointer-events-none mix-blend-overlay"></div>
+                       </div>
+
+                     </div>
+                   </div>
+
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Sunday Container */}
+        <div>
+          <div className="flex items-center gap-4 mb-10">
+            <h3 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">
+              Sunday
+            </h3>
+            <span className="text-4xl md:text-5xl font-black text-primary/40">/02</span>
+            <div className="h-[2px] bg-white/10 flex-1 ml-4 rounded-full"></div>
+          </div>
+          
+          <div className="flex flex-col lg:flex-row gap-3 h-[800px] lg:h-[650px]">
+            {sunShows.map((show, i) => (
+              <div 
+                key={i}
+                onMouseEnter={() => setActiveSun(i)}
+                onMouseLeave={() => setActiveSun(null)}
+                className={`relative rounded-[2rem] overflow-hidden cursor-crosshair transition-all duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)] flex-shrink-0 group
+                  ${activeSun === i ? 'lg:flex-[3.5] flex-[4]' : activeSun === null ? 'lg:flex-1 flex-1' : 'lg:flex-[0.5] flex-[0.5]'}`}
+              >
+                <div className="absolute inset-0 bg-[#050505]">
+                  <Image src={show.image} alt={show.title} fill className={`object-cover transition-all duration-[1500ms] ease-out ${activeSun === i ? 'scale-105 opacity-80' : 'scale-100 opacity-40 grayscale group-hover:grayscale-0'}`} />
+                  <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-[#020202]/50 to-[#020202] transition-opacity duration-700 ${activeSun === i ? 'opacity-100' : 'opacity-90'}`} />
+                </div>
+                
+                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end pointer-events-none">
+                   
+                   {/* Inactive Title */}
+                   <div className={`absolute bottom-6 md:bottom-10 left-6 md:left-10 transition-all duration-500 flex flex-col items-start
+                     ${activeSun === i ? 'opacity-0 translate-y-4 pointer-events-none' : 'opacity-100 translate-y-0 delay-200'}`}>
+                      <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mb-4 lg:hidden border border-white/20">
+                        <span className="text-white text-xs font-black">{i + 1}</span>
+                      </div>
+                      <h4 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter [writing-mode:vertical-rl] lg:rotate-180 lg:text-3xl whitespace-nowrap hidden lg:block">
+                        {show.title}
+                      </h4>
+                      <h4 className="text-2xl font-black text-white uppercase tracking-tighter lg:hidden drop-shadow-xl">
+                        {show.title}
+                      </h4>
+                   </div>
+
+                   {/* Active Content */}
+                   <div className={`relative z-10 transition-all duration-[800ms] ease-out w-full ${activeSun === i ? 'opacity-100 translate-y-0 delay-100 pointer-events-auto' : 'opacity-0 translate-y-8 absolute pointer-events-none'}`}>
+                     <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-6 lg:gap-8 w-full">
+                       
+                       {/* Text Side */}
+                       <div className="flex-1 w-full max-w-3xl">
+                          <div className="inline-flex items-center gap-3 bg-black/40 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10 mb-6">
+                            <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                            <span className="text-white text-xs font-bold uppercase tracking-widest">{show.schedule}</span>
+                          </div>
+                          <h4 className="text-5xl md:text-7xl lg:text-8xl font-black text-white uppercase tracking-tighter mb-4 lg:mb-6 leading-[0.9] drop-shadow-2xl">
+                            {show.title}
+                          </h4>
+                          <p className="text-gray-200 font-medium text-base md:text-lg lg:text-xl max-w-2xl leading-relaxed drop-shadow-lg">
+                            {show.description}
+                          </p>
+                          
+                          {/* Features/Tags if any */}
+                          {show.features && (
+                            <div className="flex flex-wrap gap-2 mt-6 lg:mt-8">
+                               {show.features.map((feature, fIdx) => (
+                                 <span key={fIdx} className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-bold text-white uppercase tracking-widest border border-white/20 shadow-xl hover:bg-white hover:text-black transition-colors cursor-default">
+                                   {feature}
+                                 </span>
+                               ))}
+                            </div>
+                          )}
+                       </div>
+
+                       {/* Poster Side */}
+                       <div className={`hidden md:block w-48 lg:w-72 xl:w-[320px] aspect-[4/5] relative rounded-2xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/10 shrink-0 transform transition-all duration-[1200ms] ease-[cubic-bezier(0.25,1,0.5,1)] origin-bottom ${activeSun === i ? 'translate-y-0 opacity-100 scale-100 lg:rotate-[-4deg] lg:hover:rotate-0 lg:hover:scale-105' : 'translate-y-32 opacity-0 scale-75 rotate-12'}`}>
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                          <Image src={(show as any).poster || show.image} alt={`${show.title} Poster`} fill className="object-cover" />
+                          <div className="absolute inset-0 bg-gradient-to-tr from-black/40 via-transparent to-white/10 pointer-events-none mix-blend-overlay"></div>
+                       </div>
+
+                     </div>
+                   </div>
+
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
-
-      {/* Vignette */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent pointer-events-none" />
-
-      {/* Cursor spotlight */}
-      <div
-        ref={spotRef}
-        className="absolute inset-0 pointer-events-none"
-        style={{ opacity: 0, transition: 'opacity 0.35s ease', mixBlendMode: 'screen', willChange: 'background, opacity' }}
-      />
-
-      {/* Resting label */}
-      <div
-        className="absolute bottom-0 left-0 right-0 p-4 md:p-6 pointer-events-none"
-        style={{ opacity: hovered ? 0 : 1, transform: hovered ? 'translateY(6px)' : 'translateY(0)', transition: 'opacity 0.35s, transform 0.35s' }}
-      >
-        <span className="text-primary font-bold uppercase tracking-[0.2em] text-[10px] block mb-1">{show.schedule}</span>
-        <h3 className="text-white font-black uppercase tracking-tight text-lg md:text-xl leading-tight">{show.title}</h3>
-      </div>
-
-      {/* Clip-path wipe overlay */}
-      <div
-        ref={overlayRef}
-        className="absolute inset-0 bg-black/88 backdrop-blur-md flex flex-col justify-end p-5 md:p-7 pointer-events-none"
-        style={{ clipPath: 'inset(100% 0 0 0)', transition: 'clip-path 0.58s cubic-bezier(0.33,1,0.68,1)' }}
-      >
-        <span
-          className="inline-block bg-primary text-black text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-3 w-max"
-          style={{ opacity: hovered ? 1 : 0, transform: hovered ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.4s 0.1s, transform 0.4s 0.1s' }}
-        >{show.day} · {show.schedule}</span>
-        <h3
-          className="text-white font-black uppercase tracking-tight text-xl md:text-2xl leading-tight mb-3"
-          style={{ opacity: hovered ? 1 : 0, transform: hovered ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.4s 0.16s, transform 0.4s 0.16s' }}
-        ><ScrambleText text={show.title} active={hovered} /></h3>
-        <p
-          className="text-gray-300 text-xs md:text-sm leading-relaxed line-clamp-4"
-          style={{ opacity: hovered ? 1 : 0, transform: hovered ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.4s 0.22s, transform 0.4s 0.22s' }}
-        >{show.description}</p>
-      </div>
-    </div>
+    </section>
   )
 }
+
 
 export default function ShowsPage() {
   const [currentHour, setCurrentHour] = useState(12)
@@ -410,8 +480,8 @@ export default function ShowsPage() {
         })}
       </section>
 
-      {/* Weekend Shows - New Fresh Design */}
-      <WeekendShowsGrid />
+      {/* Weekend Specials — Premium Accordion */}
+      <PremiumWeekendAccordion />
 
       {/* Guest Mixes Banner Section */}
       <section className="bg-primary relative overflow-hidden py-24 md:py-32">

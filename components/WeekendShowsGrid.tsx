@@ -18,7 +18,7 @@ const weekendShows: Show[] = [
     day: 'Saturday',
     schedule: '1:00 PM - 3:00 PM',
     description: 'A Swahili-heavy East African heat check: catchy hooks, street poetry, and that Tanzanian pop/hip-hop bounce.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/Bongo.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL0JvbmdvLmpwZyIsImlhdCI6MTc3OTc4NDg1MSwiZXhwIjoxODExMzIwODUxfQ.hVJe2v5lmbwmb3BwiaCHyD5L0y4eVNlv2YmHEo5to7g',
     accentColor: '#ff8c00'
   },
   {
@@ -26,7 +26,7 @@ const weekendShows: Show[] = [
     day: 'Saturday',
     schedule: '3:00 PM - 5:00 PM',
     description: 'Pure Afrobeats energy: danceable drums, sing-along choruses, and glossy crossover records.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/Ampiano.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL0FtcGlhbm8uanBnIiwiaWF0IjoxNzc5Nzg0ODYzLCJleHAiOjE4MTEzMjA4NjN9.Gv_a67BXe_-vKhi0-Gu1EDhvy7ec2xMb8YbG-KC_eHw',
     accentColor: '#22c55e'
   },
   {
@@ -34,7 +34,7 @@ const weekendShows: Show[] = [
     day: 'Saturday',
     schedule: '5:00 PM - 7:00 PM',
     description: 'Deep groove piano keys meet hypnotic basslines: Amapiano is the South African sound taking over.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/Ampiano.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL0FtcGlhbm8uanBnIiwiaWF0IjoxNzc5Nzg0ODYzLCJleHAiOjE4MTEzMjA4NjN9.Gv_a67BXe_-vKhi0-Gu1EDhvy7ec2xMb8YbG-KC_eHw',
     accentColor: '#a855f7'
   },
   {
@@ -42,7 +42,7 @@ const weekendShows: Show[] = [
     day: 'Saturday',
     schedule: '7:00 PM - 9:00 PM',
     description: 'Hypnotic polyrhythmic grooves of Congo and Central Africa with soukous guitars and infectious percussion.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/Ampiano.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL0FtcGlhbm8uanBnIiwiaWF0IjoxNzc5Nzg0ODYzLCJleHAiOjE4MTEzMjA4NjN9.Gv_a67BXe_-vKhi0-Gu1EDhvy7ec2xMb8YbG-KC_eHw',
     accentColor: '#3b82f6'
   },
   {
@@ -58,7 +58,7 @@ const weekendShows: Show[] = [
     day: 'Sunday',
     schedule: '1:00 PM - 3:00 PM',
     description: 'Smooth, soulful American R&B vibes from Frank Ocean to The Weeknd.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/RnB.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1JuQi5qcGciLCJpYXQiOjE3NzkyNjcwMzYsImV4cCI6MTgxMDgwMzAzNn0.1n19oWoG6A-EDrXaILLNof75PFG_mg7iLSLI7_aAl9I',
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/New_Kenyan_Music.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL05ld19LZW55YW5fTXVzaWMuanBnIiwiaWF0IjoxNzc5Nzg0OTExLCJleHAiOjE4MTEzMjA5MTF9.9GRhk0jBuT8Ybb-hL8uAdZuiC6rLGhj0maEjaHFuLE8',
     accentColor: '#6366f1'
   },
   {
@@ -66,7 +66,7 @@ const weekendShows: Show[] = [
     day: 'Sunday',
     schedule: '3:00 PM - 5:00 PM',
     description: 'Hard-hitting beats and lyrical wizardry. Kendrick, Drake, J. Cole leading the charge.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/New_Kenyan_Music.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL05ld19LZW55YW5fTXVzaWMuanBnIiwiaWF0IjoxNzc5Nzg0OTExLCJleHAiOjE4MTEzMjA5MTF9.9GRhk0jBuT8Ybb-hL8uAdZuiC6rLGhj0maEjaHFuLE8',
     accentColor: '#ef4444'
   },
   {
@@ -74,7 +74,7 @@ const weekendShows: Show[] = [
     day: 'Sunday',
     schedule: '7:00 PM - 9:00 PM',
     description: 'Fresh sounds from Kenya\'s rising stars pushing the culture forward.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/KenyanOldSchool.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0tlbnlhbk9sZFNjaG9vbC5qcGciLCJpYXQiOjE3Nzg5MjkyNzksImV4cCI6MTgxMDQ2NTI3OX0.v6fsoH7FpaX9-sDUtk1Kwk_5hiRTzvK_c9HIBHHU-LI',
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/New_Kenyan_Music.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL05ld19LZW55YW5fTXVzaWMuanBnIiwiaWF0IjoxNzc5Nzg0OTExLCJleHAiOjE4MTEzMjA5MTF9.9GRhk0jBuT8Ybb-hL8uAdZuiC6rLGhj0maEjaHFuLE8',
     accentColor: '#84cc16'
   },
 ]
