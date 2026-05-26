@@ -18,21 +18,10 @@ export default function LivePlayer() {
     const hour = now.getHours() // 0-23
     const day = now.getDay() // 0 = Sunday, 1 = Monday, etc.
     
-    if (hour >= 5 && hour < 10) {
-      setCurrentShow({ title: 'Kenyan Old School', host: 'Muthoni Kenya', image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/KenyanOldSchool.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0tlbnlhbk9sZFNjaG9vbC5qcGciLCJpYXQiOjE3Nzg5Mjk3MzMsImV4cCI6MTgxMDQ2NTczM30.LHFeq8dSzsQ9oRcMlVefuHuW3mQ-YHlrpetQTovXRTY' })
-    } else if (hour >= 10 && hour < 15) {
-      setCurrentShow({ title: 'Gengetone / Arbantone', host: 'Kartelo', image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Gengetone2.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0dlbmdldG9uZTIuanBnIiwiaWF0IjoxNzc5MjcxMjcxLCJleHAiOjE4MTA4MDcyNzF9.8g2lcsHxZHP3zTn1nnGaS7WDdO51ILslPaQA_t8O5IM' })
-    } else if (hour >= 15 && hour < 19) {
-      setCurrentShow({ title: 'Reggae / Dancehall', host: 'inkmatic', image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/InkMatik.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvSW5rTWF0aWsuanBnIiwiaWF0IjoxNzc4ODYyNTY3LCJleHAiOjE4MTAzOTg1Njd9.PGiJ15a-fGAhA8e0v2HZwnkVIP2jBx4KSrWiPuwX-fA' })
-    } else if (hour >= 19 && hour < 23) {
-      setCurrentShow({ title: 'Underground Kenyan HipHop', host: 'Joy Ohon', image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTgyNiwiZXhwIjoxODEwNDY1ODI2fQ.muNTHcXGPd11AeyNwz5C5TszbS1xWJO1Gb9Ib5496ag' })
-    } else if (hour >= 23 || hour < 3) {
-      setCurrentShow({ title: 'Kenyan RnB', host: 'Modesto', image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/RnB.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1JuQi5qcGciLCJpYXQiOjE3NzkyNjcwMzYsImV4cCI6MTgxMDgwMzAzNn0.1n19oWoG6A-EDrXaILLNof75PFG_mg7iLSLI7_aAl9I' })
-    } else if (day === 0 || (hour >= 3 && hour < 5)) {
-      setCurrentShow({ title: 'Gospel Kenya', host: 'RIENG Radio', image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Gospel.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0dvc3BlbC5qcGciLCJpYXQiOjE3Nzc2MTg2OTAsImV4cCI6MTgwOTE1NDY5MH0.FiCgYciSVoTbmjsZ039KJG8_hlbPa18hY7rl10hUzrw' })
-    } else {
-      setCurrentShow({ title: 'Kenyan Old School', host: 'Muthoni Kenya', image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/KenyanOldSchool.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0tlbnlhbk9sZFNjaG9vbC5qcGciLCJpYXQiOjE3Nzg5MzAyNzUsImV4cCI6MTgxMDQ2NjI3NX0.TEdCSlJa-nq45lHd_sk5oE85kEQiyZqEBzi9OVBs-As' })
-    }
+    // Import dynamically or assume it's imported at top
+    import('@/lib/getCurrentShow').then(({ getCurrentShow }) => {
+      setCurrentShow(getCurrentShow(day, hour));
+    });
   }, [])
 
   // Creates the animated wave effect for the visualizer
