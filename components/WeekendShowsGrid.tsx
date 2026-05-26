@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 
 interface Show {
@@ -80,286 +80,179 @@ const weekendShows: Show[] = [
 ]
 
 export default function WeekendShowsGrid() {
-  const [selectedIdx, setSelectedIdx] = useState(0)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [activeIdx, setActiveIdx] = useState(0)
   const [mounted, setMounted] = useState(false)
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-        setSelectedIdx(prev => Math.min(prev + 1, weekendShows.length - 1))
-      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-        setSelectedIdx(prev => Math.max(prev - 1, 0))
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return
+    
+    const container = scrollContainerRef.current
+    const scrollLeft = container.scrollLeft
+    const cardWidth = 400
+    const gap = 48
+    const itemWidth = cardWidth + gap
+    const newIdx = Math.round(scrollLeft / itemWidth)
+    
+    setActiveIdx(Math.max(0, Math.min(newIdx, weekendShows.length - 1)))
+  }
 
-  const selectedShow = weekendShows[selectedIdx]
-  const saturdayShows = weekendShows.filter(s => s.day === 'Saturday')
-  const sundayShows = weekendShows.filter(s => s.day === 'Sunday')
+  const getCardTransform = (idx: number) => {
+    const distance = Math.abs(idx - activeIdx)
+    
+    if (distance === 0) {
+      return { scale: 1, blur: 0, opacity: 1, zIndex: 50 }
+    } else if (distance === 1) {
+      return { scale: 0.85, blur: 8, opacity: 0.7, zIndex: 30 }
+    } else if (distance === 2) {
+      return { scale: 0.7, blur: 15, opacity: 0.5, zIndex: 20 }
+    } else {
+      return { scale: 0.6, blur: 20, opacity: 0.3, zIndex: 10 }
+    }
+  }
+
+  if (!mounted) return null
 
   return (
-    <section className="relative w-full bg-black py-32 overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-1/3 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-32 right-1/4 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl"></div>
-      </div>
-
+    <section className="relative w-full bg-black py-24 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="mb-20">
-          <p className="text-primary font-black uppercase tracking-[0.3em] text-sm mb-3">Weekend Spectrum</p>
-          <h2 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight">
-            Saturday & Sunday<br />Sound Journey
+        <div className="mb-16">
+          <p className="text-primary font-black uppercase tracking-[0.3em] text-sm mb-3">Weekend Vibes</p>
+          <h2 className="text-5xl md:text-7xl font-black text-white mb-4 tracking-tight">
+            Scroll the<br className="hidden md:inline" /> Weekend Sound
           </h2>
-          <p className="text-gray-400 text-lg max-w-2xl">Pick a show below and explore what's playing across your weekend.</p>
         </div>
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        {/* Scroll Carousel */}
+        <div className="relative">
+          {/* Left fade */}
+          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black to-transparent z-40 pointer-events-none"></div>
           
-          {/* Left: Show List */}
-          <div className="lg:col-span-1 space-y-8">
-            
-            {/* Saturday */}
-            <div>
-              <h3 className="text-xs font-black uppercase tracking-widest text-white mb-4 opacity-60">Saturday</h3>
-              <div className="space-y-2">
-                {saturdayShows.map((show, idx) => {
-                  const actualIdx = weekendShows.indexOf(show)
-                  const isSelected = selectedIdx === actualIdx
-                  
-                  return (
-                    <button
-                      key={actualIdx}
-                      onClick={() => setSelectedIdx(actualIdx)}
-                      onMouseEnter={() => setHoveredIdx(actualIdx)}
-                      onMouseLeave={() => setHoveredIdx(null)}
-                      className="w-full text-left group relative overflow-hidden rounded-lg transition-all duration-300"
-                    >
-                      {/* Background */}
+          {/* Carousel container */}
+          <div
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="w-full overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+            style={{ scrollBehavior: 'smooth' }}
+          >
+            <div className="flex gap-12 px-20 py-6">
+              {weekendShows.map((show, idx) => {
+                const transform = getCardTransform(idx)
+                
+                return (
+                  <div
+                    key={idx}
+                    className="flex-shrink-0 transition-all duration-500"
+                    style={{
+                      width: '400px',
+                      transform: `scale(${transform.scale})`,
+                      opacity: transform.opacity,
+                      zIndex: transform.zIndex,
+                      filter: `blur(${transform.blur}px)`,
+                      transformOrigin: 'center',
+                    }}
+                  >
+                    <div className="relative h-96 rounded-2xl overflow-hidden group cursor-grab active:cursor-grabbing shadow-2xl">
+                      {/* Image */}
+                      <Image
+                        src={show.image}
+                        alt={show.title}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                        priority={idx === 0}
+                      />
+
+                      {/* Overlay gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80"></div>
                       <div
-                        className={`absolute inset-0 transition-all duration-300 ${
-                          isSelected
-                            ? 'bg-white/10 backdrop-blur-md'
-                            : hoveredIdx === actualIdx
-                            ? 'bg-white/5'
-                            : 'bg-transparent'
-                        }`}
+                        className="absolute inset-0"
+                        style={{
+                          background: `linear-gradient(135deg, ${show.accentColor}40 0%, transparent 100%)`,
+                        }}
                       ></div>
 
                       {/* Content */}
-                      <div className="relative px-4 py-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3 min-w-0">
-                          {/* Indicator dot */}
-                          <div
-                            className={`flex-shrink-0 w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                              isSelected ? 'w-3 h-3' : ''
-                            }`}
-                            style={{
-                              backgroundColor: show.accentColor,
-                              boxShadow: isSelected ? `0 0 12px ${show.accentColor}` : 'none'
-                            }}
-                          ></div>
-
-                          <div className="min-w-0 flex-1">
-                            <h4 className={`font-black text-sm transition-colors duration-300 ${
-                              isSelected ? 'text-white' : 'text-gray-300 group-hover:text-white'
-                            }`}>
-                              {show.title}
-                            </h4>
-                            <p className="text-xs text-gray-500 truncate">{show.schedule}</p>
-                          </div>
+                      <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                        {/* Day badge */}
+                        <div className="flex justify-end">
+                          <span className="inline-block px-3 py-1 bg-white/15 backdrop-blur-md border border-white/30 rounded-full text-xs font-bold text-white uppercase tracking-widest">
+                            {show.day}
+                          </span>
                         </div>
 
-                        {/* Arrow indicator */}
-                        {isSelected && (
-                          <svg className="w-4 h-4 text-white flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        )}
+                        {/* Title & info */}
+                        <div>
+                          <h3 className="text-4xl font-black text-white mb-3 leading-tight">
+                            {show.title}
+                          </h3>
+                          <p className="text-sm text-gray-200 line-clamp-2 mb-3">
+                            {show.description}
+                          </p>
+                          <div className="text-xs font-bold text-gray-300 uppercase tracking-widest">
+                            {show.schedule}
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Bottom accent line */}
-                      {isSelected && (
-                        <div
-                          className="absolute bottom-0 left-0 h-0.5 w-full"
-                          style={{background: `linear-gradient(90deg, ${show.accentColor}, ${show.accentColor}00)`}}
-                        ></div>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Sunday */}
-            <div>
-              <h3 className="text-xs font-black uppercase tracking-widest text-white mb-4 opacity-60">Sunday</h3>
-              <div className="space-y-2">
-                {sundayShows.map((show, idx) => {
-                  const actualIdx = weekendShows.indexOf(show)
-                  const isSelected = selectedIdx === actualIdx
-                  
-                  return (
-                    <button
-                      key={actualIdx}
-                      onClick={() => setSelectedIdx(actualIdx)}
-                      onMouseEnter={() => setHoveredIdx(actualIdx)}
-                      onMouseLeave={() => setHoveredIdx(null)}
-                      className="w-full text-left group relative overflow-hidden rounded-lg transition-all duration-300"
-                    >
+                      {/* Accent line */}
                       <div
-                        className={`absolute inset-0 transition-all duration-300 ${
-                          isSelected
-                            ? 'bg-white/10 backdrop-blur-md'
-                            : hoveredIdx === actualIdx
-                            ? 'bg-white/5'
-                            : 'bg-transparent'
-                        }`}
+                        className="absolute top-0 left-0 h-1 w-full"
+                        style={{
+                          background: `linear-gradient(90deg, ${show.accentColor}, ${show.accentColor}00)`,
+                        }}
                       ></div>
-
-                      <div className="relative px-4 py-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div
-                            className={`flex-shrink-0 w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                              isSelected ? 'w-3 h-3' : ''
-                            }`}
-                            style={{
-                              backgroundColor: show.accentColor,
-                              boxShadow: isSelected ? `0 0 12px ${show.accentColor}` : 'none'
-                            }}
-                          ></div>
-
-                          <div className="min-w-0 flex-1">
-                            <h4 className={`font-black text-sm transition-colors duration-300 ${
-                              isSelected ? 'text-white' : 'text-gray-300 group-hover:text-white'
-                            }`}>
-                              {show.title}
-                            </h4>
-                            <p className="text-xs text-gray-500 truncate">{show.schedule}</p>
-                          </div>
-                        </div>
-
-                        {isSelected && (
-                          <svg className="w-4 h-4 text-white flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        )}
-                      </div>
-
-                      {isSelected && (
-                        <div
-                          className="absolute bottom-0 left-0 h-0.5 w-full"
-                          style={{background: `linear-gradient(90deg, ${show.accentColor}, ${show.accentColor}00)`}}
-                        ></div>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
 
-          {/* Right: Show Preview */}
-          {mounted && (
-            <div className="lg:col-span-2">
-              <div
-                className="relative group rounded-3xl overflow-hidden backdrop-blur-xl border border-white/10 transition-all duration-500"
-                style={{
-                  backgroundColor: `${selectedShow.accentColor}08`,
-                }}
-              >
-                {/* Background image with blur */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-700">
-                  <Image
-                    src={selectedShow.image}
-                    alt={selectedShow.title}
-                    fill
-                    className="object-cover blur-2xl"
-                    priority
-                  />
-                </div>
-
-                {/* Gradient overlay */}
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-                  style={{
-                    background: `linear-gradient(135deg, ${selectedShow.accentColor}10 0%, transparent 100%)`
-                  }}
-                ></div>
-
-                {/* Content */}
-                <div className="relative z-10 p-8 md:p-12 h-full flex flex-col justify-between min-h-96">
-                  
-                  {/* Top accent */}
-                  <div
-                    className="w-16 h-1.5 rounded-full mb-8 transition-all duration-500"
-                    style={{backgroundColor: selectedShow.accentColor}}
-                  ></div>
-
-                  {/* Main content */}
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-6xl md:text-7xl font-black text-white mb-6 leading-tight tracking-tight">
-                        {selectedShow.title}
-                      </h3>
-
-                      {/* Badges */}
-                      <div className="flex flex-wrap gap-3 mb-10">
-                        <span
-                          className="px-4 py-2 text-sm font-black text-white rounded-lg backdrop-blur-md transition-all duration-300"
-                          style={{
-                            backgroundColor: `${selectedShow.accentColor}30`,
-                            border: `1px solid ${selectedShow.accentColor}60`
-                          }}
-                        >
-                          {selectedShow.day}
-                        </span>
-                        <span className="px-4 py-2 text-sm font-bold text-gray-300 rounded-lg border border-white/20 backdrop-blur-md">
-                          {selectedShow.schedule}
-                        </span>
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-lg text-gray-200 leading-relaxed max-w-xl">
-                        {selectedShow.description}
-                      </p>
-                    </div>
-
-                    {/* Play button */}
-                    <button
-                      className="w-fit px-8 py-3 rounded-lg font-black text-sm text-white uppercase tracking-wider transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-3 mt-10"
-                      style={{backgroundColor: selectedShow.accentColor}}
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path>
-                      </svg>
-                      Play Now
-                    </button>
-                  </div>
-                </div>
-
-                {/* Corner glow */}
-                <div
-                  className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full blur-3xl pointer-events-none opacity-30 group-hover:opacity-50 transition-opacity duration-700"
-                  style={{backgroundColor: selectedShow.accentColor}}
-                ></div>
-              </div>
-
-              {/* Keyboard hint */}
-              <p className="text-gray-500 text-sm mt-8">Use arrow keys to navigate shows</p>
-            </div>
-          )}
+          {/* Right fade */}
+          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black to-transparent z-40 pointer-events-none"></div>
         </div>
+
+        {/* Indicators */}
+        <div className="flex justify-center gap-2 mt-12">
+          {weekendShows.map((show, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                if (scrollContainerRef.current) {
+                  const scrollLeft = idx * (400 + 48)
+                  scrollContainerRef.current.scrollTo({
+                    left: scrollLeft,
+                    behavior: 'smooth',
+                  })
+                }
+              }}
+              className="h-2 rounded-full transition-all duration-300"
+              style={{
+                width: activeIdx === idx ? 32 : 8,
+                backgroundColor: activeIdx === idx ? show.accentColor : 'rgba(255, 255, 255, 0.2)',
+              }}
+            ></button>
+          ))}
+        </div>
+
+        {/* Hint */}
+        <p className="text-center text-gray-500 text-sm mt-8">Scroll horizontally to explore the weekend lineup</p>
       </div>
+
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </section>
   )
 }
