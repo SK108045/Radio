@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
+import WeekendShowsGrid from '@/components/WeekendShowsGrid'
 
 const dailyShows = [
   {
@@ -409,68 +410,8 @@ export default function ShowsPage() {
         })}
       </section>
 
-      {/* Weekend Specials — Full-Bleed Editorial Card Grid */}
-      <section className="relative z-20 bg-[#050505] border-t border-white/5">
-
-        {/* Section Header */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
-          <div className="flex items-end justify-between flex-wrap gap-6">
-            <div>
-              <span className="text-primary font-black uppercase tracking-[0.4em] text-sm block mb-3">Weekend Specials</span>
-              <h2 className="text-6xl md:text-8xl font-black text-white uppercase tracking-tighter leading-none">
-                Sat &amp; <span className="text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.6)] italic">Sun</span>
-              </h2>
-            </div>
-            <p className="text-gray-400 max-w-sm text-lg leading-relaxed border-l-4 border-primary pl-5">
-              From sunrise worship to late-night Kenyan heat — every weekend gets its own sound.
-            </p>
-          </div>
-        </div>
-
-        {/* ── SATURDAY BLOCK ── */}
-        <div className="relative border-t border-white/[0.06]">
-          {/* Giant ghost day label */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <span className="text-white/[0.06] font-black uppercase text-[5rem] md:text-[8rem] leading-none tracking-tighter select-none">SAT</span>
-              <div>
-                <p className="text-primary font-black uppercase tracking-[0.3em] text-xs mb-1">Saturday</p>
-                <p className="text-gray-500 text-sm">{weekendShows.filter(s => s.day === 'Saturday').length} shows</p>
-              </div>
-            </div>
-            <div className="h-px flex-1 mx-8 bg-white/[0.06] hidden md:block"></div>
-          </div>
-
-          {/* 4-col full-bleed grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-[2px]">
-            {weekendShows.filter(s => s.day === 'Saturday').map((show, cardIdx) => (
-              <WeekendCard key={weekendShows.indexOf(show)} show={show} delay={cardIdx * 0.09} />
-            ))}
-          </div>
-        </div>
-
-        {/* ── SUNDAY BLOCK ── */}
-        <div className="relative border-t border-white/[0.06] mt-[2px]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <span className="text-white/[0.06] font-black uppercase text-[5rem] md:text-[8rem] leading-none tracking-tighter select-none">SUN</span>
-              <div>
-                <p className="text-primary font-black uppercase tracking-[0.3em] text-xs mb-1">Sunday</p>
-                <p className="text-gray-500 text-sm">{weekendShows.filter(s => s.day === 'Sunday').length} shows</p>
-              </div>
-            </div>
-            <div className="h-px flex-1 mx-8 bg-white/[0.06] hidden md:block"></div>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-[2px]">
-            {weekendShows.filter(s => s.day === 'Sunday').map((show, cardIdx) => (
-              <WeekendCard key={weekendShows.indexOf(show)} show={show} delay={cardIdx * 0.09} />
-            ))}
-          </div>
-        </div>
-
-        <div className="pb-24"></div>
-      </section>
+      {/* Weekend Shows - New Fresh Design */}
+      <WeekendShowsGrid />
 
       {/* Guest Mixes Banner Section */}
       <section className="bg-primary relative overflow-hidden py-24 md:py-32">
