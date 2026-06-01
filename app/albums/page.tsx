@@ -164,7 +164,8 @@ export default function AlbumsPage() {
       <section className="py-16 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatCard value={24} suffix="K+" label="Monthly Listeners" color="bg-primary" />
+            <StatCard value={375} suffix="K+" label="Monthly Listeners" color="bg-primary" />
+            <StatCard value={12} suffix="K+" label="Daily Listeners" color="bg-primary" />
             <StatCard value={2} suffix="" label="Exclusive Tracks" color="bg-primary" />
             <StatCard value={3} suffix="" label="Album Reviews" color="bg-orange-500" />
           </div>
