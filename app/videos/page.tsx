@@ -172,6 +172,13 @@ const categoryData = [
         id: 'ayi8P9Pfufo', 
         title: 'The Long Wait is Over: Arsenal Fans Celebrate Historic Title Win!', 
         views: '450K Views' 
+      },
+      { 
+        id: 'UgkxRl-0CYTLZX0qFS9nkp3XuckW90L53cc8', 
+        title: 'HSBC SVNS World Championship Semis', 
+        views: 'LIVE',
+        image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Rugby.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvUnVnYnkuanBnIiwiaWF0IjoxNzc5MjI0MDU3LCJleHAiOjE4MTA3NjAwNTd9.o3F5K5N8ZJ9X0Y1M2P3Q4R5S6T7U8V9W0X1Y2Z3A4',
+        link: 'http://youtube.com/post/UgkxRl-0CYTLZX0qFS9nkp3XuckW90L53cc8?si=3NVnQek5WHjpk7hr'
       }
     ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
   },
@@ -751,7 +758,7 @@ export default function VideosPage() {
                const allVideos = categoryData.flatMap(c => c.videos || [])
                const selectedVideo = allVideos.find(v => v.id === activeVideo)
                
-               if (selectedVideo?.isImageOnly && selectedVideo?.image) {
+               if (selectedVideo?.image) {
                  return (
                    <div className="relative w-full h-full">
                      <Image 
@@ -765,24 +772,6 @@ export default function VideosPage() {
                        <h3 className="text-xl md:text-2xl font-black text-white mb-2">{selectedVideo.title}</h3>
                        <p className="text-gray-400 text-xs md:text-sm font-bold uppercase tracking-wider text-red-500">🏆 CHAMPIONS OF ENGLAND 🔴</p>
                      </div>
-                   </div>
-                 )
-               }
-               
-               if (selectedVideo?.link) {
-                 return (
-                   <div className="relative w-full h-full flex flex-col items-center justify-center bg-black/60 p-8 text-center">
-                     <div className="text-6xl mb-4">⚽</div>
-                     <h3 className="text-2xl md:text-3xl font-black text-white mb-4 max-w-2xl">{selectedVideo.title}</h3>
-                     <p className="text-gray-400 mb-8 max-w-md">This video is hosted on Sky Sports. Click the button below to watch the official Premier League highlights directly on their platform.</p>
-                     <a 
-                       href={selectedVideo.link}
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-sm rounded-full transition-all shadow-[0_0_30px_rgba(220,38,38,0.5)] hover:scale-105"
-                     >
-                       Watch on Sky Sports
-                     </a>
                    </div>
                  )
                }
