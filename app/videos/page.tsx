@@ -177,7 +177,7 @@ const categoryData = [
         id: 'UgkxRl-0CYTLZX0qFS9nkp3XuckW90L53cc8', 
         title: 'HSBC SVNS World Championship Semis', 
         views: 'LIVE',
-        image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Rugby.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvUnVnYnkuanBnIiwiaWF0IjoxNzc5MjI0MDU3LCJleHAiOjE4MTA3NjAwNTd9.o3F5K5N8ZJ9X0Y1M2P3Q4R5S6T7U8V9W0X1Y2Z3A4',
+        image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Rugby.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvUnVnYnkuanBnIiwiaWF0IjoxNzgwNDgxNTc0LCJleHAiOjE4MTIwMTc1NzR9.Y6Jh_cX_XEtTVotJAZqG8byF2X8wogqQQxeDcUA4U3I',
         link: 'http://youtube.com/post/UgkxRl-0CYTLZX0qFS9nkp3XuckW90L53cc8?si=3NVnQek5WHjpk7hr'
       }
     ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
