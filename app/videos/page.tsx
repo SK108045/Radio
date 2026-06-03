@@ -758,7 +758,7 @@ export default function VideosPage() {
                const allVideos = categoryData.flatMap(c => c.videos || [])
                const selectedVideo = allVideos.find(v => v.id === activeVideo)
                
-               if (selectedVideo?.isImageOnly && selectedVideo?.image) {
+               if (selectedVideo?.image) {
                  return (
                    <div className="relative w-full h-full">
                      <Image 
@@ -772,24 +772,6 @@ export default function VideosPage() {
                        <h3 className="text-xl md:text-2xl font-black text-white mb-2">{selectedVideo.title}</h3>
                        <p className="text-gray-400 text-xs md:text-sm font-bold uppercase tracking-wider text-red-500">🏆 CHAMPIONS OF ENGLAND 🔴</p>
                      </div>
-                   </div>
-                 )
-               }
-               
-               if (selectedVideo?.link) {
-                 return (
-                   <div className="relative w-full h-full flex flex-col items-center justify-center bg-black/60 p-8 text-center">
-                     <div className="text-6xl mb-4">⚽</div>
-                     <h3 className="text-2xl md:text-3xl font-black text-white mb-4 max-w-2xl">{selectedVideo.title}</h3>
-                     <p className="text-gray-400 mb-8 max-w-md">This video is hosted on Sky Sports. Click the button below to watch the official Premier League highlights directly on their platform.</p>
-                     <a 
-                       href={selectedVideo.link}
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-sm rounded-full transition-all shadow-[0_0_30px_rgba(220,38,38,0.5)] hover:scale-105"
-                     >
-                       Watch on Sky Sports
-                     </a>
                    </div>
                  )
                }
