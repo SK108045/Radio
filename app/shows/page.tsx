@@ -71,6 +71,15 @@ const dailyShows = [
     features: ['Live Sports Analysis', 'Athlete Interviews', 'Fantasy Football Talk']
   },
   {
+    title: 'SUNRISE WORSHIP - LIVE',
+    host: 'HEALING & RENEWED LIVES CENTRE × RIENG RADIO',
+    schedule: 'Sunday | 11:00 AM - 2:00 PM',
+    description: 'A faith-filled radio experience featuring healing conversations, inspiring testimonies, worship, counseling insights, and practical guidance for stronger families, relationships, and communities.',
+    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Guidance.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvR3VpZGFuY2UuanBnIiwiaWF0IjoxNzgwNTE1NzUzLCJleHAiOjE4MTIwNTE3NTN9.QETbkxT8Fmm0ZCythheoAl08c1zP-fdqU3JoAFmBqcw',
+    color: 'from-emerald-500/20 to-transparent',
+    features: ['Faith-Based Guidance','Healing Conversations','Inspiring Testimonies']
+  },
+  {
     title: 'POLITICS SHOW - STARTING SOON',
     host: 'HON MICHAEL THIONGO KAZIDUU',
     schedule: 'Saturday | 9:00 AM - 1:00 PM',
