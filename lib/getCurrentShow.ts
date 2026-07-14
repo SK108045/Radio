@@ -39,7 +39,7 @@ export function getCurrentShow(day: number, hour: number): ShowDetails {
     // Sunday
     if (hour >= 5 && hour < 7) return { title: 'Gospel / Worship', host: 'RIENG Radio', image: GOSPEL_WORSHIP_IMG };
     if (hour >= 13 && hour < 15) return { title: 'US R&B', host: 'RIENG Radio', image: US_RNB_IMG };
-    if (hour >= 15 && hour < 19) return { title: 'US Hip-Hop', host: 'RIENG Radio', image: US_HIPHOP_IMG };
+    if (hour >= 15 && hour < 17) return { title: 'US Hip-Hop', host: 'RIENG Radio', image: US_HIPHOP_IMG };
     if (hour >= 19 && hour < 21) return { title: 'New Kenyan Music', host: 'RIENG Radio', image: NEW_KENYAN_MUSIC_IMG };
     return { title: 'Gospel Kenya', host: 'RIENG Radio', image: DAILY_GOSPEL_IMG };
   }

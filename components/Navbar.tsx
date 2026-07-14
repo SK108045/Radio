@@ -44,7 +44,7 @@ export default function Navbar() {
           
           <div className="relative z-10 flex items-center justify-center gap-2 flex-wrap pr-6">
             <span className="bg-white text-red-700 px-2 py-0.5 rounded font-black text-[9px] tracking-widest animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]">BREAKING NEWS</span>
-            <span className="font-bold normal-case sm:uppercase">🌍 FIFA World Cup 2026 is HERE! 🏆⚽ Tune in to our Sports Show to watch Live Matches, Highlights & Expert Analysis — only on RIENG Radio! 🎙️🔥</span>
+            <span className="font-bold normal-case sm:uppercase">🚨 Arsenal are Premier League champions after Manchester City drew 1-1 with Bournemouth, and they still have a game in hand! 🏆🔴. City Bottle It 🍼</span>
           </div>
           
           <button 
