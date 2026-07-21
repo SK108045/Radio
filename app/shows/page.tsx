@@ -148,7 +148,7 @@ const weekendShows = [
   {
     title: 'US Hip-Hop',
     day: 'Sunday',
-    schedule: '3:00 PM - 5:00 PM',
+    schedule: '3:00 PM - 7:00 PM',
     description: 'The bars-and-attitude slot: lyric-heavy, culture-heavy, and built for replay value. Kendrick Lamar and Drake are the cleanest headliners here.',
     image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/US_HipHop.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL1VTX0hpcEhvcC5qcGciLCJpYXQiOjE3Nzk3ODYyMzQsImV4cCI6MTgxMTMyMjIzNH0.7MVsXgaAO9xv5rtNh023kqxgCwmbbUBuZmPok4LxuTQ',
     color: 'from-gray-500 to-gray-900',
