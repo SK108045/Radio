@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { supabase, TopPerformingTrack } from '@/lib/supabase'
 
-export async function TopTracksTable() {
+export async function TopTracksTable({ artistId }: { artistId?: string } = {}) {
   const { data: tracks, error } = await supabase
     .from('vw_top_performing_tracks')
     .select('*')

@@ -14,7 +14,7 @@ interface ChartPoint {
   streams: number
 }
 
-export function RevenueChart() {
+export function RevenueChart({ artistId }: { artistId?: string } = {}) {
   const [data, setData] = useState<ChartPoint[]>([])
   const [loading, setLoading] = useState(true)
 

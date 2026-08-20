@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, type Variants } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import Navbar from '@/components/Navbar'
 import HeroSection from '@/components/HeroSection'
@@ -17,7 +17,7 @@ import SectionTitle from '@/components/SectionTitle'
 import Footer from '@/components/Footer'
 import PartnersSlider from '@/components/PartnersSlider'
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -28,7 +28,7 @@ const containerVariants = {
   },
 }
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
@@ -40,7 +40,7 @@ const itemVariants = {
   },
 }
 
-const headerVariants = {
+const headerVariants: Variants = {
   hidden: { opacity: 0, y: -20 },
   visible: {
     opacity: 1,

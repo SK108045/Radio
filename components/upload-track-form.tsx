@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Upload, X, Check, AlertCircle, Loader2, Music } from 'lucide-react'
 import { supabase, ARTIST_ID, STORAGE_BUCKET } from '@/lib/supabase'
 
-export function UploadTrackForm() {
+export function UploadTrackForm({ artistId }: { artistId?: string } = {}) {
   const router = useRouter()
   const [formData, setFormData] = useState({
     trackName: '',

@@ -47,7 +47,7 @@ function trend(current: number, prev: number) {
   return { label: `${Math.abs(Number(pct))}% from last month`, up: Number(pct) >= 0 }
 }
 
-export async function KPICards() {
+export async function KPICards({ artistId }: { artistId?: string } = {}) {
   const thisMonth = getMonthStart(0)
   const lastMonth = getMonthStart(-1)
 
