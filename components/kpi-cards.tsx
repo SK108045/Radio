@@ -51,10 +51,14 @@ export async function KPICards({ artistId }: { artistId?: string } = {}) {
   const thisMonth = getMonthStart(0)
   const lastMonth = getMonthStart(-1)
 
+  const artistQuery = artistId
+    ? supabase.from('artists').select('total_active_listeners').eq('id', artistId).maybeSingle()
+    : supabase.from('artists').select('total_active_listeners').limit(1).maybeSingle()
+
   const [{ data: cur }, { data: prev }, { data: artist }] = await Promise.all([
     supabase.from('track_performance').select('streams, downloads, revenue_ksh').eq('metric_month', thisMonth),
     supabase.from('track_performance').select('streams, downloads, revenue_ksh').eq('metric_month', lastMonth),
-    supabase.from('artists').select('total_active_listeners').single(),
+    artistQuery,
   ])
 
   const sum = (arr: typeof cur, key: 'streams' | 'downloads' | 'revenue_ksh') =>

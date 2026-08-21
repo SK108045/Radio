@@ -46,7 +46,7 @@ export interface TopPerformingTrack {
 }
 
 // ── Helpers ────────────────────────────────────────────
-export const ARTIST_ID = '11111111-1111-1111-1111-111111111111'
+export const ARTIST_ID = '33333333-3333-3333-3333-333333333331'
 export const STORAGE_BUCKET = 'artist-tracks'
 
 export function getMonthStart(offset = 0): string {

@@ -7,24 +7,50 @@ import { Badge } from '@/components/ui/badge'
 import { supabase, TopPerformingTrack } from '@/lib/supabase'
 
 export async function TopTracksTable({ artistId }: { artistId?: string } = {}) {
-  const { data: tracks, error } = await supabase
-    .from('vw_top_performing_tracks')
-    .select('*')
-    .limit(10)
+  let query = supabase.from('vw_top_performing_tracks').select('*')
+  if (artistId) {
+    query = query.eq('artist_id', artistId)
+  }
+  const { data: viewTracks, error } = await query.limit(10)
 
-  const rows: TopPerformingTrack[] = tracks ?? []
+  let rows: TopPerformingTrack[] = viewTracks ?? []
+
+  // If view is empty, fall back to recent tracks from tracks table
+  if (rows.length === 0) {
+    let rawQuery = supabase
+      .from('tracks')
+      .select('id, title, price_ksh, artist_id, created_at, artists(stage_name)')
+      
+    if (artistId) {
+      rawQuery = rawQuery.eq('artist_id', artistId)
+    }
+    
+    const { data: rawTracks } = await rawQuery.order('created_at', { ascending: false }).limit(10)
+    
+    if (rawTracks && rawTracks.length > 0) {
+      rows = rawTracks.map((t: any) => ({
+        track_id: t.id,
+        artist_id: t.artist_id,
+        track_title: t.title,
+        stage_name: t.artists?.stage_name || 'Artist',
+        total_streams: 0,
+        total_downloads: 0,
+        total_revenue_ksh: 0,
+      }))
+    }
+  }
 
   return (
     <Card className="bg-card border-border mb-6">
       <CardHeader>
-        <CardTitle>Top Performing Tracks</CardTitle>
+        <CardTitle>Top Performing Tracks &amp; Uploads</CardTitle>
         <CardDescription>
-          {error ? 'Could not load tracks.' : 'Your best-performing tracks (all time)'}
+          {error ? 'Could not load tracks.' : 'Your catalog and performance overview'}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4">No track data found.</p>
+          <p className="text-sm text-muted-foreground py-4">No tracks uploaded yet. Use the form below to upload your first track.</p>
         ) : (
           <div className="overflow-x-auto">
             <Table>
