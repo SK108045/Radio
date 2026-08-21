@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Table, TableBody, TableCell, TableHead,
   TableHeader, TableRow,
@@ -16,7 +17,11 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { Music, Play, Download, Copy, Check, Calendar, Tag, DollarSign, Activity, ExternalLink, Info } from 'lucide-react'
+import {
+  Music, Play, Download, Copy, Check, Calendar, Tag, Info,
+  Trash2, AlertTriangle, Loader2
+} from 'lucide-react'
+import { deleteTrackAction } from '@/app/sales/actions'
 
 export interface TrackDetailItem {
   track_id: string
@@ -38,8 +43,18 @@ interface TopTracksTableClientProps {
 }
 
 export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProps) {
+  const router = useRouter()
+  const [trackList, setTrackList] = useState<TrackDetailItem[]>(tracks)
   const [selectedTrack, setSelectedTrack] = useState<TrackDetailItem | null>(null)
   const [copied, setCopied] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteNotice, setDeleteNotice] = useState<string | null>(null)
+
+  // Keep trackList updated when props change
+  if (tracks !== trackList && tracks.length !== trackList.length) {
+    setTrackList(tracks)
+  }
 
   const handleCopyUrl = (url?: string | null) => {
     if (!url) return
@@ -64,8 +79,41 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
     }
   }
 
+  // ── Delete Track from Supabase ──
+  const handleDeleteTrack = async (track: TrackDetailItem) => {
+    setDeletingId(track.track_id)
+    try {
+      const res = await deleteTrackAction(track.track_id, track.mp3_file_path)
+      if (res?.error) {
+        alert(`Delete failed: ${res.error}`)
+      } else {
+        setTrackList((prev) => prev.filter((t) => t.track_id !== track.track_id))
+        setDeleteNotice(`"${track.track_title}" deleted permanently from Supabase.`)
+        setSelectedTrack(null)
+        setShowDeleteConfirm(false)
+        router.refresh()
+        setTimeout(() => setDeleteNotice(null), 4000)
+      }
+    } catch (err) {
+      console.error('Delete error:', err)
+      alert('Could not delete track. Please try again.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <>
+      {deleteNotice && (
+        <div className="mb-4 p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-between gap-3 text-emerald-400 text-sm font-semibold animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{deleteNotice}</span>
+          </div>
+          <button onClick={() => setDeleteNotice(null)} className="text-emerald-400/60 hover:text-emerald-400 text-xs">Dismiss</button>
+        </div>
+      )}
+
       <Card className="bg-card border-border mb-6 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
@@ -74,18 +122,18 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
               Top Performing Tracks &amp; Uploads
             </CardTitle>
             <CardDescription>
-              {error ? 'Could not load tracks.' : 'Click on any song row to view full details, price, and audio preview'}
+              {error ? 'Could not load tracks.' : 'Click on any song row to view full details, audio preview, or delete'}
             </CardDescription>
           </div>
-          {tracks.length > 0 && (
+          {trackList.length > 0 && (
             <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 text-xs font-semibold px-3 py-1">
-              {tracks.length} Track{tracks.length !== 1 ? 's' : ''} in Catalog
+              {trackList.length} Track{trackList.length !== 1 ? 's' : ''} in Catalog
             </Badge>
           )}
         </CardHeader>
 
         <CardContent>
-          {tracks.length === 0 ? (
+          {trackList.length === 0 ? (
             <div className="text-center py-10 border border-dashed border-border rounded-xl bg-card/50">
               <Music className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
               <p className="text-sm font-medium text-foreground">No tracks uploaded yet</p>
@@ -101,14 +149,17 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
                     <TableHead className="text-right text-muted-foreground font-semibold">Streams</TableHead>
                     <TableHead className="text-right text-muted-foreground font-semibold">Downloads</TableHead>
                     <TableHead className="text-right text-muted-foreground font-semibold">Revenue</TableHead>
-                    <TableHead className="text-center text-muted-foreground font-semibold w-16">Details</TableHead>
+                    <TableHead className="text-center text-muted-foreground font-semibold w-24">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tracks.map((track, index) => (
+                  {trackList.map((track, index) => (
                     <TableRow
                       key={track.track_id}
-                      onClick={() => setSelectedTrack(track)}
+                      onClick={() => {
+                        setSelectedTrack(track)
+                        setShowDeleteConfirm(false)
+                      }}
                       className="border-border hover:bg-primary/10 cursor-pointer transition-colors group"
                       title="Click to view song details"
                     >
@@ -158,11 +209,32 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
                         KSh {Number(track.total_revenue_ksh).toLocaleString()}
                       </TableCell>
 
-                      {/* Click prompt icon */}
+                      {/* Actions */}
                       <TableCell className="text-center py-4">
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/5 group-hover:bg-primary text-muted-foreground group-hover:text-primary-foreground transition-colors">
-                          <Info className="w-4 h-4" />
-                        </span>
+                        <div className="flex items-center justify-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedTrack(track)
+                              setShowDeleteConfirm(false)
+                            }}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-primary text-muted-foreground hover:text-primary-foreground transition-colors"
+                            title="View Track Details"
+                          >
+                            <Info className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedTrack(track)
+                              setShowDeleteConfirm(true)
+                            }}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors"
+                            title="Delete Track from Supabase"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -173,8 +245,8 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
         </CardContent>
       </Card>
 
-      {/* ── TRACK DETAILS MODAL ── */}
-      <Dialog open={!!selectedTrack} onOpenChange={(open) => { if (!open) setSelectedTrack(null) }}>
+      {/* ── TRACK DETAILS & DELETE MODAL ── */}
+      <Dialog open={!!selectedTrack} onOpenChange={(open) => { if (!open) { setSelectedTrack(null); setShowDeleteConfirm(false) } }}>
         <DialogContent className="max-w-xl bg-[#0d0d0d] border border-white/10 text-foreground shadow-2xl p-6 sm:p-8 rounded-2xl">
           {selectedTrack && (
             <>
@@ -198,8 +270,52 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
                 </DialogDescription>
               </DialogHeader>
 
+              {/* Delete Confirmation Warning Box */}
+              {showDeleteConfirm && (
+                <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl space-y-3 animate-in fade-in my-2">
+                  <div className="flex items-center gap-2 text-destructive font-bold text-sm">
+                    <AlertTriangle className="w-5 h-5 shrink-0" />
+                    <span>Permanent Deletion Confirmation</span>
+                  </div>
+                  <p className="text-xs text-destructive/90 leading-relaxed">
+                    Are you sure you want to delete <strong>"{selectedTrack.track_title}"</strong>? This will permanently delete the audio MP3 file from Supabase storage and remove the track from your store catalog.
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      disabled={deletingId === selectedTrack.track_id}
+                      onClick={() => handleDeleteTrack(selectedTrack)}
+                      className="font-bold text-xs"
+                    >
+                      {deletingId === selectedTrack.track_id ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                          Deleting from Supabase…
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                          Yes, Delete Permanently
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="border-white/10 hover:bg-white/10 text-xs font-bold"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Audio Player Preview */}
-              {selectedTrack.mp3_file_path && (
+              {selectedTrack.mp3_file_path && !showDeleteConfirm && (
                 <div className="my-2 p-4 bg-white/[0.03] border border-white/10 rounded-xl space-y-2">
                   <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
                     <span className="flex items-center gap-1.5 text-primary font-bold">
@@ -261,48 +377,67 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
               </div>
 
               {/* Footer Actions */}
-              <DialogFooter className="flex flex-col sm:flex-row items-center gap-2 pt-3 border-t border-white/10 mt-2">
-                {selectedTrack.mp3_file_path && (
-                  <>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleCopyUrl(selectedTrack.mp3_file_path)}
-                      className="w-full sm:w-auto border-white/10 hover:bg-white/10 text-xs font-bold"
-                    >
-                      {copied ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-emerald-400 mr-1.5" />
-                          Copied Audio Link
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5 mr-1.5" />
-                          Copy Audio URL
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="sm"
-                      className="w-full sm:w-auto border-white/10 hover:bg-white/10 text-xs font-bold"
-                    >
-                      <a href={selectedTrack.mp3_file_path} target="_blank" rel="noopener noreferrer" download>
-                        <Download className="w-3.5 h-3.5 mr-1.5" />
-                        Download File
-                      </a>
-                    </Button>
-                  </>
-                )}
-                <Button
-                  type="button"
-                  onClick={() => setSelectedTrack(null)}
-                  className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-xs ml-auto"
-                >
-                  Close
-                </Button>
+              <DialogFooter className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-3 border-t border-white/10 mt-2">
+                {/* Delete Button */}
+                {!showDeleteConfirm ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="w-full sm:w-auto text-destructive hover:bg-destructive/10 hover:text-destructive text-xs font-bold mr-auto"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                    Delete Track
+                  </Button>
+                ) : null}
+
+                <div className="flex items-center gap-2 w-full sm:w-auto ml-auto justify-end">
+                  {selectedTrack.mp3_file_path && (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCopyUrl(selectedTrack.mp3_file_path)}
+                        className="w-full sm:w-auto border-white/10 hover:bg-white/10 text-xs font-bold"
+                      >
+                        {copied ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-400 mr-1.5" />
+                            Copied Audio Link
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5 mr-1.5" />
+                            Copy Audio URL
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="w-full sm:w-auto border-white/10 hover:bg-white/10 text-xs font-bold"
+                      >
+                        <a href={selectedTrack.mp3_file_path} target="_blank" rel="noopener noreferrer" download>
+                          <Download className="w-3.5 h-3.5 mr-1.5" />
+                          Download File
+                        </a>
+                      </Button>
+                    </>
+                  )}
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setSelectedTrack(null)
+                      setShowDeleteConfirm(false)
+                    }}
+                    className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-xs"
+                  >
+                    Close
+                  </Button>
+                </div>
               </DialogFooter>
             </>
           )}
