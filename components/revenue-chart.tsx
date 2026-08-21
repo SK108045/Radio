@@ -20,14 +20,20 @@ export function RevenueChart({ artistId }: { artistId?: string } = {}) {
 
   useEffect(() => {
     async function fetch() {
-      const { data: rows } = await supabase
+      let query = supabase
         .from('track_performance')
-        .select('metric_month, streams, revenue_ksh')
+        .select('metric_month, streams, revenue_ksh, tracks!inner(artist_id)')
         .order('metric_month', { ascending: true })
+
+      if (artistId) {
+        query = query.eq('tracks.artist_id', artistId)
+      }
+
+      const { data: rows } = await query
 
       if (rows) {
         const grouped: Record<string, { revenue: number; streams: number }> = {}
-        rows.forEach((r) => {
+        rows.forEach((r: any) => {
           const key = r.metric_month
           if (!grouped[key]) grouped[key] = { revenue: 0, streams: 0 }
           grouped[key].revenue += Number(r.revenue_ksh ?? 0)
@@ -40,8 +46,8 @@ export function RevenueChart({ artistId }: { artistId?: string } = {}) {
           streams: v.streams,
         }))
 
-        let finalData = points;
-        
+        let finalData = points
+
         if (points.length === 0) {
           const d = new Date()
           const emptyPoints: ChartPoint[] = []
@@ -55,18 +61,18 @@ export function RevenueChart({ artistId }: { artistId?: string } = {}) {
           }
           finalData = emptyPoints
         }
-        
+
         setData(finalData)
       }
       setLoading(false)
     }
     fetch()
-  }, [])
+  }, [artistId])
 
   return (
     <Card className="bg-card border-border mb-6">
       <CardHeader>
-        <CardTitle>Revenue & Streams</CardTitle>
+        <CardTitle>Revenue &amp; Streams</CardTitle>
         <CardDescription>Monthly performance from Supabase</CardDescription>
       </CardHeader>
       <CardContent>

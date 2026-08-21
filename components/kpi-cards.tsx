@@ -55,14 +55,29 @@ export async function KPICards({ artistId }: { artistId?: string } = {}) {
     ? supabase.from('artists').select('total_active_listeners').eq('id', artistId).maybeSingle()
     : supabase.from('artists').select('total_active_listeners').limit(1).maybeSingle()
 
+  let curQuery = supabase
+    .from('track_performance')
+    .select('streams, downloads, revenue_ksh, tracks!inner(artist_id)')
+    .eq('metric_month', thisMonth)
+
+  let prevQuery = supabase
+    .from('track_performance')
+    .select('streams, downloads, revenue_ksh, tracks!inner(artist_id)')
+    .eq('metric_month', lastMonth)
+
+  if (artistId) {
+    curQuery = curQuery.eq('tracks.artist_id', artistId)
+    prevQuery = prevQuery.eq('tracks.artist_id', artistId)
+  }
+
   const [{ data: cur }, { data: prev }, { data: artist }] = await Promise.all([
-    supabase.from('track_performance').select('streams, downloads, revenue_ksh').eq('metric_month', thisMonth),
-    supabase.from('track_performance').select('streams, downloads, revenue_ksh').eq('metric_month', lastMonth),
+    curQuery,
+    prevQuery,
     artistQuery,
   ])
 
   const sum = (arr: typeof cur, key: 'streams' | 'downloads' | 'revenue_ksh') =>
-    (arr ?? []).reduce((s, r) => s + Number(r[key] ?? 0), 0)
+    (arr ?? []).reduce((s: number, r: any) => s + Number(r[key] ?? 0), 0)
 
   const curStreams = sum(cur, 'streams')
   const curRevenue = sum(cur, 'revenue_ksh')
