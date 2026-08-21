@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Upload, X, Check, AlertCircle, Loader2, Music } from 'lucide-react'
+import { Upload, X, Check, AlertCircle, Loader2, Music, Sparkles } from 'lucide-react'
 import { supabase, STORAGE_BUCKET } from '@/lib/supabase'
 
 interface UploadTrackFormProps {
@@ -28,6 +28,8 @@ export function UploadTrackForm({ artistId }: UploadTrackFormProps = {}) {
   const [success, setSuccess] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState('')
+  const [enhancing, setEnhancing] = useState(false)
+  const [enhancedBadge, setEnhancedBadge] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -74,6 +76,42 @@ export function UploadTrackForm({ artistId }: UploadTrackFormProps = {}) {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
+  // ── AI Enhance Description with Gemini 3.1 Flash Lite ──
+  const handleAIEnhance = async () => {
+    if (!formData.trackName.trim()) {
+      setError('Please enter a Track Name first before enhancing with Gemini AI')
+      return
+    }
+
+    setEnhancing(true)
+    setError('')
+
+    try {
+      const res = await fetch('/api/ai/enhance-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.trackName.trim(),
+          rawDescription: formData.description.trim(),
+        }),
+      })
+
+      const data = await res.json()
+      if (data.enhancedDescription) {
+        setFormData((prev) => ({ ...prev, description: data.enhancedDescription }))
+        setEnhancedBadge(true)
+        setTimeout(() => setEnhancedBadge(false), 4000)
+      } else {
+        setError('Could not generate AI description. You can keep typing manually.')
+      }
+    } catch (err) {
+      console.error('AI enhance client error:', err)
+      setError('AI service temporarily unreachable.')
+    } finally {
+      setEnhancing(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -95,7 +133,7 @@ export function UploadTrackForm({ artistId }: UploadTrackFormProps = {}) {
     setSuccess(false)
 
     try {
-      // Determine valid artist ID (use passed artistId or fallback to querying artists table)
+      // Determine target artist ID
       let targetArtistId = artistId
 
       if (!targetArtistId) {
@@ -111,8 +149,30 @@ export function UploadTrackForm({ artistId }: UploadTrackFormProps = {}) {
         targetArtistId = defaultArtist.id
       }
 
+      // Auto-enhance description with Gemini if very short (< 15 chars)
+      let finalDescription = formData.description.trim()
+      if (!finalDescription || finalDescription.length < 15) {
+        setUploadProgress('Polishing description with Gemini AI ✨…')
+        try {
+          const aiRes = await fetch('/api/ai/enhance-description', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: formData.trackName.trim(),
+              rawDescription: finalDescription,
+            }),
+          })
+          const aiData = await aiRes.json()
+          if (aiData.enhancedDescription) {
+            finalDescription = aiData.enhancedDescription
+          }
+        } catch {
+          // Fallback to manual if offline
+        }
+      }
+
       // 1. Upload audio to Supabase Storage
-      setUploadProgress('Uploading audio file to storage…')
+      setUploadProgress('Uploading audio file to Supabase storage…')
       const ext = formData.mp3File.name.split('.').pop()?.toLowerCase() || 'mp3'
       const randomSuffix = Math.random().toString(36).substring(2, 8)
       const cleanFileName = `${Date.now()}-${randomSuffix}.${ext}`
@@ -136,11 +196,11 @@ export function UploadTrackForm({ artistId }: UploadTrackFormProps = {}) {
       const publicAudioUrl = urlData.publicUrl
 
       // 3. Insert track into DB
-      setUploadProgress('Saving track details to database…')
+      setUploadProgress('Registering track in catalog…')
       const { error: insertErr } = await supabase.from('tracks').insert({
         artist_id: targetArtistId,
         title: formData.trackName.trim(),
-        description: formData.description.trim() || null,
+        description: finalDescription || null,
         price_ksh: Number(formData.price),
         mp3_file_path: publicAudioUrl,
       })
@@ -168,13 +228,13 @@ export function UploadTrackForm({ artistId }: UploadTrackFormProps = {}) {
   }
 
   return (
-    <Card className="bg-card border-border mb-6">
+    <Card className="bg-card border-border mb-6 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Music className="w-5 h-5 text-primary" />
           Upload New Track
         </CardTitle>
-        <CardDescription>Add a new track to your catalog — stored securely in Supabase</CardDescription>
+        <CardDescription>Add a new track to your catalog with Gemini AI description polishing</CardDescription>
       </CardHeader>
       <CardContent>
         {error && (
@@ -186,7 +246,7 @@ export function UploadTrackForm({ artistId }: UploadTrackFormProps = {}) {
         {success && (
           <div className="mb-4 p-3 bg-primary/10 border border-primary/30 rounded-lg flex items-center gap-2">
             <Check className="w-5 h-5 text-primary" />
-            <span className="text-sm text-primary">Track uploaded successfully! Dashboard updated.</span>
+            <span className="text-sm text-primary">Track uploaded successfully! Registered in Other Artists Store.</span>
           </div>
         )}
 
@@ -203,7 +263,7 @@ export function UploadTrackForm({ artistId }: UploadTrackFormProps = {}) {
                 value={formData.trackName}
                 onChange={handleInputChange}
                 className="bg-input border-border text-foreground placeholder:text-muted-foreground"
-                disabled={uploading}
+                disabled={uploading || enhancing}
                 required
               />
             </div>
@@ -220,20 +280,48 @@ export function UploadTrackForm({ artistId }: UploadTrackFormProps = {}) {
                 value={formData.price}
                 onChange={handleInputChange}
                 className="bg-input border-border text-foreground placeholder:text-muted-foreground"
-                disabled={uploading}
+                disabled={uploading || enhancing}
                 required
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="description" className="block text-sm font-medium text-foreground">
-              Description (Optional)
-            </label>
+            <div className="flex items-center justify-between">
+              <label htmlFor="description" className="block text-sm font-medium text-foreground">
+                Description
+              </label>
+              <div className="flex items-center gap-2">
+                {enhancedBadge && (
+                  <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                    <Check className="w-3 h-3" /> Polished with Gemini
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={handleAIEnhance}
+                  disabled={enhancing || uploading || !formData.trackName.trim()}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/30 px-3 py-1 rounded-full transition-all duration-300 disabled:opacity-50"
+                  title="Enhance notes with Gemini 3.1 Flash Lite"
+                >
+                  {enhancing ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Enhancing…
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3 h-3" />
+                      AI Enhance with Gemini ✨
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
             <Textarea
               id="description"
               name="description"
-              placeholder="Describe your track, mood, genre, features…"
+              placeholder="Describe your track, mood, vibe, features… (or click AI Enhance ✨ to generate automatically)"
               value={formData.description}
               onChange={handleInputChange}
               rows={3}
@@ -284,8 +372,8 @@ export function UploadTrackForm({ artistId }: UploadTrackFormProps = {}) {
 
           <Button
             type="submit"
-            disabled={uploading}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-6"
+            disabled={uploading || enhancing}
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-6 text-sm"
           >
             {uploading ? (
               <span className="flex items-center gap-2">
@@ -293,7 +381,7 @@ export function UploadTrackForm({ artistId }: UploadTrackFormProps = {}) {
                 {uploadProgress || 'Uploading…'}
               </span>
             ) : (
-              'Upload Track'
+              'Upload Track & Sync to Store'
             )}
           </Button>
         </form>
