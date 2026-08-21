@@ -1,6 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Other Artists Store — Single Source of Truth
 // Featured Artists: Mr MAPEMA PRODUCER & Ethic Entertainment
+// ONLY Real Database Tracks are displayed. No placeholders.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const ARTIST_DB_MAP: Record<string, string> = {
@@ -46,9 +47,9 @@ export interface OtherArtistTrack {
   bpm: string
   duration: string
   releaseDate: string
-  status: 'Available Now' | 'Future Drop' | 'In Studio' | 'Coming Soon'
+  status: 'Available Now' | 'Live Drop'
   downloadUrl?: string
-  isLive?: boolean
+  isLive: boolean
 }
 
 export const otherArtistsList: ArtistProfile[] = [
@@ -64,7 +65,7 @@ export const otherArtistsList: ArtistProfile[] = [
     stats: {
       listeners: '150K+',
       hits: '30+ Productions',
-      status: 'In Studio 🎙️',
+      status: 'Live on Store 🔥',
     },
     popularTracks: ['Late', 'Umechoma', 'Kashfa', '100 Years'],
   },
@@ -82,67 +83,7 @@ export const otherArtistsList: ArtistProfile[] = [
       hits: '15M+ Streams',
       status: 'Live on Store 🔥',
     },
-    popularTracks: ['Candy Date', 'Taki', 'MASUPUU', 'Bazenga'],
-  },
-]
-
-export const defaultUpcomingDrops: OtherArtistTrack[] = [
-  {
-    id: 'default-1',
-    artistId: 'mr-mapema-producer',
-    artistDbId: '33333333-3333-3333-3333-333333333334',
-    artistName: 'Mr MAPEMA PRODUCER',
-    title: 'Late',
-    feat: 'Mr. Mapema ft. Moti the NRG',
-    desc: 'The highly anticipated future release by Mr. Mapema featuring Moti the NRG. Engineered with signature heavy 808 slides, rolling percussion, and authentic Nairobi street energy.',
-    price: 'KSH 300 on Release',
-    priceNum: 300,
-    genre: 'Kenyan Hip-Hop / Arbantone',
-    image: '/Studio.jpg',
-    tag: 'Future Drop ⏳',
-    bpm: '125 BPM',
-    duration: '3:18',
-    releaseDate: 'Dropping in the Future',
-    status: 'In Studio',
-    isLive: false,
-  },
-  {
-    id: 'default-2',
-    artistId: 'ethic-entertainment',
-    artistDbId: '33333333-3333-3333-3333-333333333333',
-    artistName: 'Ethic Entertainment',
-    title: 'Candy Date',
-    feat: 'Ethic Entertainment (Rekles, Swat, Seska, Zilla)',
-    desc: 'Upcoming new release from Ethic Entertainment featuring energetic verses from Swat and Zilla with Rekles leading the hook over a contagious Gengetone groove.',
-    price: 'KSH 300 on Release',
-    priceNum: 300,
-    genre: 'Gengetone / Upcoming',
-    image: '/Group.jpg',
-    tag: 'Future Drop ⏳',
-    bpm: '112 BPM',
-    duration: '3:04',
-    releaseDate: 'Dropping in the Future',
-    status: 'Coming Soon',
-    isLive: false,
-  },
-  {
-    id: 'default-3',
-    artistId: 'mr-mapema-producer',
-    artistDbId: '33333333-3333-3333-3333-333333333334',
-    artistName: 'Mr MAPEMA PRODUCER',
-    title: 'Umechoma',
-    feat: 'Mbogi Sembe (Prod. by Mr. Mapema)',
-    desc: 'Street banger produced and mixed by Mr. Mapema for Mbogi Sembe. Packed with signature tempo, rhythmic claps, and relentless Sheng flows.',
-    price: 'KSH 300 on Release',
-    priceNum: 300,
-    genre: 'Gengetone / Street Banger',
-    image: '/Banner.jpg',
-    tag: 'Future Drop ⏳',
-    bpm: '130 BPM',
-    duration: '3:05',
-    releaseDate: 'Dropping in the Future',
-    status: 'Coming Soon',
-    isLive: false,
+    popularTracks: ['LAMBA LOLO', 'Pandana', 'Tarimbo', 'Candy Date'],
   },
 ]
 

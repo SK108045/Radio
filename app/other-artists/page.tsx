@@ -8,10 +8,8 @@ import Link from 'next/link'
 import PaymentModal from '@/components/PaymentModal'
 import {
   otherArtistsList,
-  defaultUpcomingDrops,
   artistReviews,
   OtherArtistTrack,
-  DB_TO_ARTIST_SLUG,
 } from '@/lib/otherArtistsData'
 import { supabase } from '@/lib/supabase'
 
@@ -23,7 +21,7 @@ const tickerTags = [
   'Instant M-Pesa Downloads',
   'Direct From Kenya\'s Hitmakers',
   'RIENG Music Store',
-  'Studio Masters Available',
+  'Real Studio Masters',
 ]
 
 // ─── Animated Counter Hook ────────────────────────────────────────────────────
@@ -87,13 +85,13 @@ function WaveformBars() {
 export default function OtherArtistsPage() {
   const [hoveredSong, setHoveredSong] = useState<string | number | null>(null)
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'mr-mapema-producer' | 'ethic-entertainment'>('all')
-  const [tracks, setTracks] = useState<OtherArtistTrack[]>(defaultUpcomingDrops)
+  const [tracks, setTracks] = useState<OtherArtistTrack[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedSongForBuy, setSelectedSongForBuy] = useState<any>(null)
   const [playingAudioId, setPlayingAudioId] = useState<string | number | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  // ── Sync Live Tracks from Supabase Database ──
+  // ── Sync ONLY Real Tracks from Supabase Database ──
   useEffect(() => {
     async function fetchLiveTracks() {
       try {
@@ -103,109 +101,64 @@ export default function OtherArtistsPage() {
           .order('created_at', { ascending: false })
 
         if (error) {
-          console.warn('Could not fetch dynamic tracks, using default catalog:', error)
+          console.warn('Could not fetch dynamic tracks:', error)
           setLoading(false)
           return
         }
 
         if (dbTracks && dbTracks.length > 0) {
-          const liveList: OtherArtistTrack[] = []
-
-          // Group by artist
           const mapemaDbId = '33333333-3333-3333-3333-333333333334'
           const ethicDbId = '33333333-3333-3333-3333-333333333333'
 
-          const mapemaTracks = dbTracks.filter((t: any) => t.artist_id === mapemaDbId)
-          const ethicTracks = dbTracks.filter((t: any) => t.artist_id === ethicDbId)
-          const otherDbTracks = dbTracks.filter((t: any) => t.artist_id !== mapemaDbId && t.artist_id !== ethicDbId)
+          const list: OtherArtistTrack[] = dbTracks.map((t: any) => {
+            const isMapema = t.artist_id === mapemaDbId
+            const isEthic = t.artist_id === ethicDbId
 
-          // Map Mapema live tracks
-          if (mapemaTracks.length > 0) {
-            mapemaTracks.forEach((t: any) => {
-              liveList.push({
-                id: t.id,
-                artistId: 'mr-mapema-producer',
-                artistDbId: t.artist_id,
-                artistName: 'Mr MAPEMA PRODUCER',
-                title: t.title,
-                feat: `Produced by Mr. Mapema · ${t.artists?.stage_name || 'Mr MAPEMA PRODUCER'}`,
-                desc: t.description || 'Exclusive studio master produced and engineered by Mr MAPEMA PRODUCER.',
-                price: `KSH ${t.price_ksh}`,
-                priceNum: Number(t.price_ksh),
-                genre: 'Arbantone / Hip-Hop',
-                image: '/Studio.jpg',
-                tag: 'Available Now 🔥',
-                bpm: '125 BPM',
-                duration: '3:15',
-                releaseDate: 'Instant Download',
-                status: 'Available Now',
-                downloadUrl: t.mp3_file_path,
-                isLive: true,
-              })
-            })
-          } else {
-            // Keep Mapema fallbacks
-            defaultUpcomingDrops
-              .filter(d => d.artistId === 'mr-mapema-producer')
-              .forEach(d => liveList.push(d))
-          }
+            let artistSlug = 'other-creators'
+            let artistName = t.artists?.stage_name || 'Kenyan Creator'
+            let image = '/Banner.jpg'
+            let genre = 'Kenyan Urban'
+            let feat = t.artists?.stage_name || 'Kenyan Creator'
 
-          // Map Ethic live tracks
-          if (ethicTracks.length > 0) {
-            ethicTracks.forEach((t: any) => {
-              liveList.push({
-                id: t.id,
-                artistId: 'ethic-entertainment',
-                artistDbId: t.artist_id,
-                artistName: 'Ethic Entertainment',
-                title: t.title,
-                feat: `Ethic Entertainment · ${t.artists?.stage_name || 'Ethic'}`,
-                desc: t.description || 'Raw Gengetone street anthem from Ethic Entertainment.',
-                price: `KSH ${t.price_ksh}`,
-                priceNum: Number(t.price_ksh),
-                genre: 'Gengetone',
-                image: '/Group.jpg',
-                tag: 'Available Now 🔥',
-                bpm: '112 BPM',
-                duration: '3:05',
-                releaseDate: 'Instant Download',
-                status: 'Available Now',
-                downloadUrl: t.mp3_file_path,
-                isLive: true,
-              })
-            })
-          } else {
-            // Keep Ethic fallbacks
-            defaultUpcomingDrops
-              .filter(d => d.artistId === 'ethic-entertainment')
-              .forEach(d => liveList.push(d))
-          }
+            if (isMapema) {
+              artistSlug = 'mr-mapema-producer'
+              artistName = 'Mr MAPEMA PRODUCER'
+              image = '/Studio.jpg'
+              genre = 'Arbantone / Hip-Hop'
+              feat = `Produced by Mr. Mapema · ${t.artists?.stage_name || 'Mr MAPEMA PRODUCER'}`
+            } else if (isEthic) {
+              artistSlug = 'ethic-entertainment'
+              artistName = 'Ethic Entertainment'
+              image = '/Group.jpg'
+              genre = 'Gengetone'
+              feat = `Ethic Entertainment · ${t.artists?.stage_name || 'Ethic'}`
+            }
 
-          // Also append any other artist tracks if uploaded in portal
-          otherDbTracks.forEach((t: any) => {
-            liveList.push({
+            return {
               id: t.id,
-              artistId: 'other-creators',
+              artistId: artistSlug,
               artistDbId: t.artist_id,
-              artistName: t.artists?.stage_name || 'Kenyan Creator',
+              artistName,
               title: t.title,
-              feat: t.artists?.stage_name || 'Kenyan Creator',
-              desc: t.description || 'Exclusive new Kenyan music drop.',
+              feat,
+              desc: t.description || `Official audio release by ${artistName} on the RIENG Store.`,
               price: `KSH ${t.price_ksh}`,
               priceNum: Number(t.price_ksh),
-              genre: 'Kenyan Urban',
-              image: '/Banner.jpg',
+              genre,
+              image,
               tag: 'Available Now 🔥',
-              bpm: '120 BPM',
-              duration: '3:00',
+              bpm: '125 BPM',
+              duration: '3:20',
               releaseDate: 'Instant Download',
               status: 'Available Now',
               downloadUrl: t.mp3_file_path,
               isLive: true,
-            })
+            }
           })
 
-          setTracks(liveList)
+          setTracks(list)
+        } else {
+          setTracks([])
         }
       } catch (err) {
         console.error('Error querying live tracks:', err)
@@ -308,7 +261,7 @@ export default function OtherArtistsPage() {
               </h1>
               
               <p className="text-gray-300 text-lg md:text-xl max-w-2xl font-medium border-l-4 border-primary pl-6 leading-relaxed">
-                Explore exclusive beats, unreleased studio masters, and future street anthems from <span className="text-white font-bold">Mr MAPEMA PRODUCER</span> and <span className="text-white font-bold">Ethic Entertainment</span>. Buy directly with M-Pesa.
+                Explore exclusive beats, unreleased studio masters, and official tracks from <span className="text-white font-bold">Mr MAPEMA PRODUCER</span> and <span className="text-white font-bold">Ethic Entertainment</span>. Buy directly with M-Pesa.
               </p>
 
               {/* Quick Jump Buttons */}
@@ -343,7 +296,7 @@ export default function OtherArtistsPage() {
               </div>
               <div className="flex gap-3">
                 <span className="bg-primary/10 border border-primary/20 text-primary text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest">
-                  {tracks.length} Tracks Live
+                  {tracks.length} {tracks.length === 1 ? 'Track' : 'Tracks'} Live
                 </span>
                 <span className="bg-white/5 border border-white/10 text-white/60 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest">
                   M-Pesa Instant Pay
@@ -370,8 +323,8 @@ export default function OtherArtistsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard value={2} suffix=" Artists" label="Featured Creators" color="bg-primary" />
-            <StatCard value={tracks.length} suffix=" Tracks" label="Catalog Releases" color="bg-orange-500" />
-            <StatCard value={300} suffix=" KSH" label="Average Price" color="bg-primary" />
+            <StatCard value={tracks.length} suffix=" Tracks" label="Live in Store" color="bg-orange-500" />
+            <StatCard value={tracks.length > 0 ? Math.round(tracks.reduce((a, b) => a + b.priceNum, 0) / tracks.length) : 300} suffix=" KSH" label="Average Price" color="bg-primary" />
             <StatCard value={100} suffix="%" label="Studio Quality" color="bg-amber-500" />
           </div>
         </div>
@@ -484,7 +437,7 @@ export default function OtherArtistsPage() {
         </div>
       </section>
 
-      {/* ── MUSIC TRACKS SECTION ── */}
+      {/* ── MUSIC TRACKS SECTION (REAL DB SONGS ONLY) ── */}
       <section id="tracks-section" className="py-24 md:py-32 relative overflow-hidden">
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 blur-[150px] rounded-full pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -494,7 +447,7 @@ export default function OtherArtistsPage() {
             <div>
               <span className="text-primary font-black uppercase tracking-[0.4em] text-xs block mb-4 flex items-center gap-3">
                 <span className="w-8 h-px bg-primary inline-block"></span>
-                Official Releases &amp; Studio Drops
+                Official Releases · {tracks.length} Live
               </span>
               <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tight">
                 Featured <span className="italic text-primary pr-2">Music Catalog</span>
@@ -536,6 +489,27 @@ export default function OtherArtistsPage() {
             </div>
           </div>
 
+          {/* Empty State if no real tracks exist in DB for this filter */}
+          {filteredTracks.length === 0 && !loading && (
+            <div className="text-center py-20 border border-dashed border-white/10 rounded-[2.5rem] bg-[#080808]/50 max-w-2xl mx-auto p-8">
+              <div className="w-16 h-16 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-2">No Releases in this Category</h3>
+              <p className="text-gray-400 text-sm max-w-md mx-auto leading-relaxed mb-6">
+                No songs have been uploaded to the database for this artist yet. Upload new songs via the Artist Portal to have them appear here automatically.
+              </p>
+              <Link
+                href="/sales/login"
+                className="inline-flex items-center gap-2 bg-primary/15 hover:bg-primary text-primary hover:text-white border border-primary/30 text-xs font-black uppercase tracking-widest px-6 py-3 rounded-full transition-all duration-300"
+              >
+                Artist Portal Login →
+              </Link>
+            </div>
+          )}
+
           {/* Track Cards */}
           <div className="flex flex-col gap-8">
             {filteredTracks.map((song, idx) => (
@@ -557,9 +531,7 @@ export default function OtherArtistsPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#080808] to-transparent md:hidden pointer-events-none"></div>
                   
                   {/* Tag badge */}
-                  <span className={`absolute top-5 left-5 text-white text-[10px] font-black px-3.5 py-1.5 uppercase tracking-widest shadow-lg ${
-                    song.isLive ? 'bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.5)]' : 'bg-primary shadow-[0_0_20px_rgba(255,107,53,0.5)]'
-                  }`}>
+                  <span className="absolute top-5 left-5 text-white text-[10px] font-black px-3.5 py-1.5 uppercase tracking-widest shadow-lg bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.5)]">
                     {song.tag}
                   </span>
 
@@ -568,7 +540,7 @@ export default function OtherArtistsPage() {
                     {song.artistName}
                   </span>
 
-                  {/* Audio Preview Button (if live audio is available) */}
+                  {/* Audio Preview Button */}
                   {song.downloadUrl && (
                     <button
                       onClick={() => togglePlayPreview(song)}
@@ -607,7 +579,7 @@ export default function OtherArtistsPage() {
                       <span className="text-white/30 font-bold uppercase tracking-[0.3em] text-[10px] border border-white/10 px-3 py-1 rounded-full">
                         {song.duration}
                       </span>
-                      <span className={`${song.isLive ? 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5' : 'text-amber-400 border-amber-400/20 bg-amber-400/5'} font-bold uppercase tracking-[0.3em] text-[10px] border px-3 py-1 rounded-full`}>
+                      <span className="text-emerald-400 border-emerald-400/20 bg-emerald-400/5 font-bold uppercase tracking-[0.3em] text-[10px] border px-3 py-1 rounded-full">
                         {song.releaseDate}
                       </span>
                     </div>
@@ -628,35 +600,27 @@ export default function OtherArtistsPage() {
                     <WaveformBars />
                   </div>
 
-                  {/* Price & Action Button (Buy Now if live, Coming Soon if future) */}
+                  {/* Price & Action Button (Buy Now) */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mt-10 pt-8 border-t border-white/5">
                     <div>
                       <p className="text-white/30 font-bold uppercase tracking-widest text-[10px] mb-1">
-                        {song.isLive ? 'Direct Price' : 'Expected Release Price'}
+                        Direct Price
                       </p>
                       <p className="text-3xl md:text-4xl font-black text-white tracking-tighter group-hover:text-primary transition-colors duration-700">
                         {song.price}
                       </p>
                     </div>
 
-                    {song.isLive ? (
-                      /* ── ACTIVE BUY NOW BUTTON ── */
-                      <button
-                        onClick={() => handleBuyClick(song)}
-                        className="relative bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-10 py-4 rounded-full font-black uppercase tracking-widest text-sm flex items-center gap-3 shadow-[0_0_35px_rgba(255,107,53,0.3)] hover:shadow-[0_0_45px_rgba(255,107,53,0.5)] transform hover:scale-105"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        Buy Now ({song.price})
-                      </button>
-                    ) : (
-                      /* ── FUTURE RELEASE STATUS PILL ── */
-                      <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-4 rounded-full text-white/80 text-xs font-black uppercase tracking-widest shadow-inner">
-                        <span className="w-2.5 h-2.5 rounded-full bg-orange-400 animate-pulse shadow-[0_0_10px_rgba(251,146,60,0.8)]"></span>
-                        <span>Future Drop · Coming Soon</span>
-                      </div>
-                    )}
+                    {/* ── ACTIVE BUY NOW BUTTON ── */}
+                    <button
+                      onClick={() => handleBuyClick(song)}
+                      className="relative bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-10 py-4 rounded-full font-black uppercase tracking-widest text-sm flex items-center gap-3 shadow-[0_0_35px_rgba(255,107,53,0.3)] hover:shadow-[0_0_45px_rgba(255,107,53,0.5)] transform hover:scale-105"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                      </svg>
+                      Buy Now ({song.price})
+                    </button>
                   </div>
                 </div>
               </div>
