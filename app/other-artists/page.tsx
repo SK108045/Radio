@@ -680,16 +680,16 @@ export default function OtherArtistsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-2">No Releases in this Category</h3>
+              <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-2">New Drops Coming Soon</h3>
               <p className="text-gray-400 text-sm max-w-md mx-auto leading-relaxed mb-6">
-                No songs have been uploaded to the database for this artist yet. Upload new songs via the Artist Portal to have them appear here automatically.
+                Stay tuned! New exclusive masters and releases from this creator will drop here soon.
               </p>
-              <Link
-                href="/sales/login"
-                className="inline-flex items-center gap-2 bg-primary/15 hover:bg-primary text-primary hover:text-white border border-primary/30 text-xs font-black uppercase tracking-widest px-6 py-3 rounded-full transition-all duration-300"
+              <button
+                onClick={() => setSelectedFilter('all')}
+                className="inline-flex items-center gap-2 bg-white/5 hover:bg-primary text-white border border-white/10 hover:border-primary text-xs font-black uppercase tracking-widest px-6 py-3 rounded-full transition-all duration-300"
               >
-                Artist Portal Login →
-              </Link>
+                View All Active Releases →
+              </button>
             </div>
           )}
 
