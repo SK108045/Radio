@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TrendingUp, Music, Users, Download } from 'lucide-react'
+import { TrendingUp, Music, Users } from 'lucide-react'
 import { supabase, getMonthStart } from '@/lib/supabase'
 
 interface KPICardProps {
@@ -57,12 +57,12 @@ export async function KPICards({ artistId }: { artistId?: string } = {}) {
 
   let curQuery = supabase
     .from('track_performance')
-    .select('streams, downloads, revenue_ksh, tracks!inner(artist_id)')
+    .select('streams, revenue_ksh, tracks!inner(artist_id)')
     .eq('metric_month', thisMonth)
 
   let prevQuery = supabase
     .from('track_performance')
-    .select('streams, downloads, revenue_ksh, tracks!inner(artist_id)')
+    .select('streams, revenue_ksh, tracks!inner(artist_id)')
     .eq('metric_month', lastMonth)
 
   if (artistId) {
@@ -76,12 +76,11 @@ export async function KPICards({ artistId }: { artistId?: string } = {}) {
     artistQuery,
   ])
 
-  const sum = (arr: typeof cur, key: 'streams' | 'downloads' | 'revenue_ksh') =>
+  const sum = (arr: typeof cur, key: 'streams' | 'revenue_ksh') =>
     (arr ?? []).reduce((s: number, r: any) => s + Number(r[key] ?? 0), 0)
 
   const curStreams = sum(cur, 'streams')
   const curRevenue = sum(cur, 'revenue_ksh')
-  const curDownloads = sum(cur, 'downloads')
   const prevStreams = sum(prev, 'streams')
   const prevRevenue = sum(prev, 'revenue_ksh')
 
@@ -89,7 +88,7 @@ export async function KPICards({ artistId }: { artistId?: string } = {}) {
   const revTrend = trend(curRevenue, prevRevenue)
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
       <KPICard
         title="Total Streams"
         value={fmt(curStreams)}
@@ -105,12 +104,6 @@ export async function KPICards({ artistId }: { artistId?: string } = {}) {
         icon={<TrendingUp className="w-5 h-5" />}
         trend={revTrend?.label}
         trendUp={revTrend?.up}
-      />
-      <KPICard
-        title="Downloads"
-        value={fmt(curDownloads)}
-        description="This month"
-        icon={<Download className="w-5 h-5" />}
       />
       <KPICard
         title="Active Listeners"

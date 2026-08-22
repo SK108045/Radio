@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Song {
-  id: number
+  id: string | number
   title: string
   feat: string
   price: string
@@ -18,34 +18,15 @@ interface PaymentModalProps {
   isOpen: boolean
   onClose: () => void
   song: Song | null
+  onSuccessUnlock?: (trackId: string, token: string, expiresAt: number) => void
 }
 
-// Paystack inline JS declaration
-declare global {
-  interface Window {
-    PaystackPop: {
-      setup: (config: Record<string, unknown>) => { openIframe: () => void }
-    }
-  }
-}
-
-export default function PaymentModal({ isOpen, onClose, song }: PaymentModalProps) {
+export default function PaymentModal({ isOpen, onClose, song, onSuccessUnlock }: PaymentModalProps) {
   const [phone, setPhone] = useState('')
   const [error, setError] = useState('')
   const [animateIn, setAnimateIn] = useState(false)
   const [step, setStep] = useState<'details' | 'processing' | 'success'>('details')
-  const [downloading, setDownloading] = useState(false)
-  const scriptLoaded = useRef(false)
-
-  // Load Paystack inline JS once
-  useEffect(() => {
-    if (scriptLoaded.current) return
-    const script = document.createElement('script')
-    script.src = 'https://js.paystack.co/v1/inline.js'
-    script.async = true
-    script.onload = () => { scriptLoaded.current = true }
-    document.head.appendChild(script)
-  }, [])
+  const [payUrl, setPayUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (isOpen) {
@@ -58,7 +39,7 @@ export default function PaymentModal({ isOpen, onClose, song }: PaymentModalProp
         setStep('details')
         setPhone('')
         setError('')
-        setDownloading(false)
+        setPayUrl(null)
       }, 400)
     }
     return () => { document.body.style.overflow = 'unset' }
@@ -69,20 +50,7 @@ export default function PaymentModal({ isOpen, onClose, song }: PaymentModalProp
     setTimeout(onClose, 400)
   }
 
-  const triggerDownload = (url: string, fileName: string) => {
-    setDownloading(true)
-    // Use the API endpoint to force download instead of playing
-    const downloadUrl = `/api/download?url=${encodeURIComponent(url)}&name=${encodeURIComponent(fileName)}`
-    const a = document.createElement('a')
-    a.href = downloadUrl
-    a.download = fileName
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    setDownloading(false)
-  }
-
-  const handlePay = (e: React.FormEvent) => {
+  const handlePay = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!song) return
 
@@ -95,40 +63,39 @@ export default function PaymentModal({ isOpen, onClose, song }: PaymentModalProp
     setError('')
     setStep('processing')
 
-    const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!
     const fakeEmail = `${cleaned.replace('+', '')}@riengmusicstore.co.ke`
+    const callbackUrl = `${window.location.origin}/other-artists?payment=success&trackId=${encodeURIComponent(String(song.id))}`
 
-    const handler = window.PaystackPop.setup({
-      key: publicKey,
-      email: fakeEmail,
-      amount: song.priceNum * 100, // kobo/pesewas
-      currency: 'KES',
-      phone: cleaned,
-      channels: ['mobile_money', 'card', 'ussd', 'bank_transfer'],
-      metadata: {
-        custom_fields: [
-          { display_name: 'Song', variable_name: 'song', value: song.title },
-          { display_name: 'Phone', variable_name: 'phone', value: cleaned },
-        ]
-      },
-      onClose: () => {
-        // user closed popup without paying
-        setStep('details')
-      },
-      callback: (response: { reference: string }) => {
-        console.log('Payment successful:', response.reference)
-        setStep('success')
-        // Auto-trigger download
-        setTimeout(() => triggerDownload(song.downloadUrl, song.fileName), 600)
+    try {
+      // 1. Initialize transaction directly on server (fast, reliable)
+      const res = await fetch('/api/paystack/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: fakeEmail,
+          amount: song.priceNum,
+          songTitle: song.title,
+          songId: String(song.id),
+          phone: cleaned,
+          callbackUrl,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || !data.authorization_url) {
+        throw new Error(data.error || 'Could not initialize payment gateway. Please check connection.')
       }
-    })
 
-    // Small delay so "Processing..." state is visible before popup opens
-    setTimeout(() => {
-      handler.openIframe()
-      // Reset to details while popup is open (it's overlaid by Paystack)
+      setPayUrl(data.authorization_url)
+
+      // 2. Redirect to Paystack's official secure checkout (instant M-Pesa STK push & Card gateway)
+      window.location.href = data.authorization_url
+    } catch (err: any) {
+      console.error('Payment initialization error:', err)
+      setError(err?.message || 'Payment service error. Please try again.')
       setStep('details')
-    }, 400)
+    }
   }
 
   if (!isOpen || !song) return null
@@ -172,8 +139,10 @@ export default function PaymentModal({ isOpen, onClose, song }: PaymentModalProp
           {step !== 'success' && (
             <form onSubmit={handlePay} className="space-y-6">
               <div>
-                <p className="text-white font-black text-xl uppercase tracking-tight mb-1">Complete Purchase</p>
-                <p className="text-gray-500 text-sm">Enter your M-Pesa number. Your song downloads instantly after payment.</p>
+                <p className="text-white font-black text-xl uppercase tracking-tight mb-1">Unlock Full Track</p>
+                <p className="text-gray-400 text-xs leading-relaxed">
+                  Enter your M-Pesa phone number to unlock <strong className="text-primary">15-minute full streaming access</strong> on the player.
+                </p>
               </div>
 
               <div>
@@ -186,7 +155,8 @@ export default function PaymentModal({ isOpen, onClose, song }: PaymentModalProp
                     onChange={e => { setPhone(e.target.value); setError('') }}
                     placeholder="0712 345 678"
                     required
-                    className="w-full bg-white/5 border border-white/10 focus:border-primary/60 focus:bg-white/8 rounded-xl pl-12 pr-5 py-4 text-white placeholder-white/20 font-medium outline-none transition-all duration-300 text-sm tracking-widest"
+                    disabled={step === 'processing'}
+                    className="w-full bg-white/5 border border-white/10 focus:border-primary/60 focus:bg-white/8 rounded-xl pl-12 pr-5 py-4 text-white placeholder-white/20 font-medium outline-none transition-all duration-300 text-sm tracking-widest disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -209,43 +179,56 @@ export default function PaymentModal({ isOpen, onClose, song }: PaymentModalProp
               <button
                 type="submit"
                 disabled={step === 'processing'}
-                className="w-full bg-primary hover:bg-primary/80 disabled:bg-primary/50 text-white font-black uppercase tracking-widest py-5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 text-sm shadow-[0_0_30px_rgba(255,107,53,0.25)] hover:shadow-[0_0_50px_rgba(255,107,53,0.45)]"
+                className="w-full bg-primary hover:bg-primary/80 disabled:bg-primary/50 text-white font-black uppercase tracking-widest py-5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 text-sm shadow-[0_0_30px_rgba(255,107,53,0.25)] hover:shadow-[0_0_50px_rgba(255,107,53,0.45)] cursor-pointer"
               >
                 {step === 'processing' ? (
                   <>
                     <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                    Opening Payment...
+                    Opening Secure M-Pesa Checkout...
                   </>
                 ) : (
                   <>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                    Pay {song.price}
+                    Pay {song.price} to Unlock
                   </>
                 )}
               </button>
+
+              {/* Direct Link fallback if popups take time */}
+              {payUrl && (
+                <div className="text-center pt-2">
+                  <a
+                    href={payUrl}
+                    className="text-xs text-primary underline font-bold"
+                  >
+                    Click here if checkout does not open automatically →
+                  </a>
+                </div>
+              )}
+
               <p className="text-center text-white/15 text-[10px] font-bold">Secured by Paystack · 256-bit SSL Encryption</p>
             </form>
           )}
 
-          {/* ── Step: Success + Download ── */}
+          {/* ── Step: Success + Unlocked ── */}
           {step === 'success' && (
             <div className="flex flex-col items-center text-center gap-6 py-6">
               <div className="w-20 h-20 bg-green-500/10 border border-green-500/30 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(34,197,94,0.2)]">
                 <svg className="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
               </div>
               <div>
-                <p className="text-white font-black text-2xl uppercase tracking-tight mb-2">Payment Received! 🔥</p>
-                <p className="text-gray-400 text-sm leading-relaxed">Your download is starting automatically.<br />Check your downloads folder.</p>
+                <p className="text-white font-black text-2xl uppercase tracking-tight mb-2">Access Pass Unlocked! 🔥</p>
+                <p className="text-gray-300 text-sm leading-relaxed mb-2">
+                  You now have <strong className="text-emerald-400">15 minutes of unrestricted full streaming access</strong> on the player!
+                </p>
               </div>
               <button
-                onClick={() => triggerDownload(song.downloadUrl, song.fileName)}
-                disabled={downloading}
-                className="bg-primary/10 hover:bg-primary border border-primary/30 hover:border-primary text-primary hover:text-white font-black uppercase tracking-widest px-8 py-4 rounded-full transition-all duration-300 flex items-center gap-3 text-sm"
+                onClick={handleClose}
+                className="bg-primary hover:bg-white text-white hover:text-black font-black uppercase tracking-widest px-8 py-4 rounded-full transition-all duration-300 flex items-center gap-3 text-sm shadow-[0_0_30px_rgba(255,107,53,0.3)]"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                {downloading ? 'Downloading...' : 'Download Again'}
+                <span>Listen to Full Track Now</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
               </button>
-              <button onClick={handleClose} className="text-white/20 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors">Close</button>
             </div>
           )}
 

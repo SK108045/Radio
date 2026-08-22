@@ -17,11 +17,11 @@ import { supabase } from '@/lib/supabase'
 const tickerTags = [
   'Mr MAPEMA PRODUCER',
   'Ethic Entertainment',
-  'Exclusive Tracks & Beats',
-  'Instant M-Pesa Downloads',
+  '15s Free Audio Previews',
+  '15-Minute Full Access Passes',
+  'Instant M-Pesa Streaming',
   'Direct From Kenya\'s Hitmakers',
   'RIENG Music Store',
-  'Real Studio Masters',
 ]
 
 // ─── Animated Counter Hook ────────────────────────────────────────────────────
@@ -82,14 +82,105 @@ function WaveformBars() {
   )
 }
 
+interface UnlockedSession {
+  token: string
+  expiresAt: number
+}
+
+const PREVIEW_DURATION_SECONDS = 15
+
 export default function OtherArtistsPage() {
   const [hoveredSong, setHoveredSong] = useState<string | number | null>(null)
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'mr-mapema-producer' | 'ethic-entertainment'>('all')
   const [tracks, setTracks] = useState<OtherArtistTrack[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedSongForBuy, setSelectedSongForBuy] = useState<any>(null)
+  
+  // Audio playback state
   const [playingAudioId, setPlayingAudioId] = useState<string | number | null>(null)
+  const [playbackTime, setPlaybackTime] = useState(0)
+  const [previewNotification, setPreviewNotification] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  // 15-Minute Unlocked Sessions map: { [trackId]: { token, expiresAt } }
+  const [unlockedMap, setUnlockedMap] = useState<Record<string, UnlockedSession>>({})
+  const [currentTimeMs, setCurrentTimeMs] = useState<number>(Date.now())
+
+  // ── Load unlocked tokens from localStorage ──
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('rieng_unlocked_tracks')
+      if (saved) {
+        const parsed: Record<string, UnlockedSession> = JSON.parse(saved)
+        const now = Date.now()
+        const active: Record<string, UnlockedSession> = {}
+        for (const [id, session] of Object.entries(parsed)) {
+          if (session.expiresAt > now) {
+            active[id] = session
+          }
+        }
+        setUnlockedMap(active)
+      }
+    } catch {
+      // ignore
+    }
+  }, [])
+
+  // ── 1-Second Timer for Live Countdown Tickers ──
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = Date.now()
+      setCurrentTimeMs(now)
+      setUnlockedMap((prev) => {
+        let changed = false
+        const updated: Record<string, UnlockedSession> = {}
+        for (const [id, session] of Object.entries(prev)) {
+          if (session.expiresAt > now) {
+            updated[id] = session
+          } else {
+            changed = true
+          }
+        }
+        if (changed) {
+          try {
+            localStorage.setItem('rieng_unlocked_tracks', JSON.stringify(updated))
+          } catch {}
+          return updated
+        }
+        return prev
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
+  // ── Handle Return from Paystack Redirect (URL Query Params) ──
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const payment = params.get('payment')
+    const ref = params.get('reference') || params.get('trxref')
+    const trackId = params.get('trackId')
+
+    if (payment === 'success' && ref && trackId) {
+      window.history.replaceState({}, '', '/other-artists')
+
+      fetch('/api/access/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reference: ref, trackId }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success && data.token) {
+            handleUnlockSuccess(trackId, data.token, data.expiresAt)
+            setPreviewNotification('Payment Successful! 15-Minute Full Access Pass Unlocked.')
+            setTimeout(() => setPreviewNotification(null), 6000)
+          }
+        })
+        .catch((e) => console.warn('Callback verify error:', e))
+    }
+  }, [tracks])
 
   // ── Sync ONLY Real Tracks from Supabase Database ──
   useEffect(() => {
@@ -149,7 +240,7 @@ export default function OtherArtistsPage() {
               tag: 'Available Now 🔥',
               bpm: '125 BPM',
               duration: '3:20',
-              releaseDate: 'Instant Download',
+              releaseDate: 'Instant Streaming',
               status: 'Available Now',
               downloadUrl: t.mp3_file_path,
               isLive: true,
@@ -174,6 +265,45 @@ export default function OtherArtistsPage() {
     ? tracks
     : tracks.filter(t => t.artistId === selectedFilter)
 
+  // ── Audio Time Update & 15-Second Limiter ──
+  const handleTimeUpdate = () => {
+    if (!audioRef.current || !playingAudioId) return
+    const current = audioRef.current.currentTime
+    setPlaybackTime(current)
+
+    const isUnlocked = isTrackUnlocked(String(playingAudioId))
+
+    // If NOT unlocked, limit audio to PREVIEW_DURATION_SECONDS (15s)
+    if (!isUnlocked && current >= PREVIEW_DURATION_SECONDS) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      setPlayingAudioId(null)
+      setPlaybackTime(0)
+
+      const track = tracks.find(t => String(t.id) === String(playingAudioId))
+      if (track) {
+        setPreviewNotification(`15-Second Free Preview Ended! Unlock full 15-minute access for ${track.price}`)
+        handleBuyClick(track)
+      }
+    }
+  }
+
+  // ── Helper to check if a track is unlocked ──
+  const isTrackUnlocked = (trackId: string | number) => {
+    const session = unlockedMap[String(trackId)]
+    return !!(session && session.expiresAt > currentTimeMs)
+  }
+
+  // ── Helper to get remaining time string MM:SS ──
+  const getRemainingTimeStr = (trackId: string | number) => {
+    const session = unlockedMap[String(trackId)]
+    if (!session) return null
+    const diffSec = Math.max(0, Math.floor((session.expiresAt - currentTimeMs) / 1000))
+    const mins = Math.floor(diffSec / 60)
+    const secs = diffSec % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
   // ── Audio Preview Play/Pause ──
   const togglePlayPreview = (track: OtherArtistTrack) => {
     if (!track.downloadUrl) return
@@ -184,8 +314,10 @@ export default function OtherArtistsPage() {
     } else {
       if (audioRef.current) {
         audioRef.current.src = track.downloadUrl
+        audioRef.current.currentTime = 0
         audioRef.current.play().catch(e => console.warn('Audio autoplay blocked:', e))
         setPlayingAudioId(track.id)
+        setPlaybackTime(0)
       }
     }
   }
@@ -193,7 +325,7 @@ export default function OtherArtistsPage() {
   // ── Handle Buy Trigger ──
   const handleBuyClick = (track: OtherArtistTrack) => {
     setSelectedSongForBuy({
-      id: typeof track.id === 'number' ? track.id : 99,
+      id: track.id,
       title: track.title,
       feat: track.feat,
       price: track.price,
@@ -205,6 +337,32 @@ export default function OtherArtistsPage() {
     })
   }
 
+  // ── Handle Payment Success & Unlock 15-Minute Pass ──
+  const handleUnlockSuccess = (trackId: string, token: string, expiresAt: number) => {
+    setUnlockedMap((prev) => {
+      const updated = {
+        ...prev,
+        [trackId]: { token, expiresAt },
+      }
+      try {
+        localStorage.setItem('rieng_unlocked_tracks', JSON.stringify(updated))
+      } catch {}
+      return updated
+    })
+
+    setPreviewNotification(null)
+
+    // Automatically start full track playback
+    const track = tracks.find(t => String(t.id) === String(trackId))
+    if (track && track.downloadUrl && audioRef.current) {
+      audioRef.current.src = track.downloadUrl
+      audioRef.current.currentTime = 0
+      audioRef.current.play().catch(e => console.warn('Audio play blocked:', e))
+      setPlayingAudioId(track.id)
+      setPlaybackTime(0)
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#050505] selection:bg-primary selection:text-white overflow-x-hidden">
       <Navbar />
@@ -212,9 +370,34 @@ export default function OtherArtistsPage() {
       {/* Hidden audio element for preview */}
       <audio
         ref={audioRef}
-        onEnded={() => setPlayingAudioId(null)}
-        onError={() => setPlayingAudioId(null)}
+        onTimeUpdate={handleTimeUpdate}
+        onEnded={() => {
+          setPlayingAudioId(null)
+          setPlaybackTime(0)
+        }}
+        onError={() => {
+          setPlayingAudioId(null)
+          setPlaybackTime(0)
+        }}
       />
+
+      {/* Top Banner Alert for Preview Notification */}
+      {previewNotification && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[150] w-full max-w-xl px-4 animate-in slide-in-from-top-4 duration-300">
+          <div className="bg-[#111] border border-primary/40 rounded-2xl p-4 shadow-[0_0_50px_rgba(255,107,53,0.3)] flex items-center justify-between gap-3 backdrop-blur-xl">
+            <div className="flex items-center gap-3">
+              <span className="w-3 h-3 rounded-full bg-primary animate-ping"></span>
+              <p className="text-white text-xs sm:text-sm font-bold">{previewNotification}</p>
+            </div>
+            <button
+              onClick={() => setPreviewNotification(null)}
+              className="text-white/40 hover:text-white text-xs font-bold px-2 py-1"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── HERO ── */}
       <section className="relative pt-28 pb-20 overflow-hidden border-b border-white/5">
@@ -249,7 +432,7 @@ export default function OtherArtistsPage() {
                 </Link>
                 <span className="text-primary font-black uppercase tracking-[0.3em] text-xs flex items-center gap-2 bg-primary/10 border border-primary/20 px-3.5 py-1.5 rounded-full">
                   <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                  DIRECT ARTIST STORE · M-PESA &amp; CARD
+                  15S FREE PREVIEW · 15-MIN UNLOCKED PASS · M-PESA
                 </span>
               </div>
 
@@ -261,7 +444,7 @@ export default function OtherArtistsPage() {
               </h1>
               
               <p className="text-gray-300 text-lg md:text-xl max-w-2xl font-medium border-l-4 border-primary pl-6 leading-relaxed">
-                Explore exclusive beats, unreleased studio masters, and official tracks from <span className="text-white font-bold">Mr MAPEMA PRODUCER</span> and <span className="text-white font-bold">Ethic Entertainment</span>. Buy directly with M-Pesa.
+                Enjoy <span className="text-white font-bold">15 seconds of free audio preview</span> on every release. Unlock full 15-minute streaming access with M-Pesa.
               </p>
 
               {/* Quick Jump Buttons */}
@@ -290,7 +473,7 @@ export default function OtherArtistsPage() {
               <div className="bg-[#080808] border border-white/10 rounded-2xl px-6 py-5 flex items-center gap-5 shadow-2xl">
                 <div className="flex flex-col">
                   <span className="text-white/30 text-[10px] font-black uppercase tracking-widest mb-1">Catalog Status</span>
-                  <span className="text-white font-black text-sm">Live Store &amp; Drops</span>
+                  <span className="text-white font-black text-sm">15s Preview &amp; Unlock</span>
                 </div>
                 <WaveformBars />
               </div>
@@ -299,7 +482,7 @@ export default function OtherArtistsPage() {
                   {tracks.length} {tracks.length === 1 ? 'Track' : 'Tracks'} Live
                 </span>
                 <span className="bg-white/5 border border-white/10 text-white/60 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest">
-                  M-Pesa Instant Pay
+                  M-Pesa Instant Unlock
                 </span>
               </div>
             </div>
@@ -324,8 +507,8 @@ export default function OtherArtistsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard value={2} suffix=" Artists" label="Featured Creators" color="bg-primary" />
             <StatCard value={tracks.length} suffix=" Tracks" label="Live in Store" color="bg-orange-500" />
-            <StatCard value={tracks.length > 0 ? Math.round(tracks.reduce((a, b) => a + b.priceNum, 0) / tracks.length) : 300} suffix=" KSH" label="Average Price" color="bg-primary" />
-            <StatCard value={100} suffix="%" label="Studio Quality" color="bg-amber-500" />
+            <StatCard value={15} suffix=" Sec" label="Free Audio Preview" color="bg-amber-500" />
+            <StatCard value={15} suffix=" Min" label="Full Access Pass" color="bg-primary" />
           </div>
         </div>
       </section>
@@ -437,7 +620,7 @@ export default function OtherArtistsPage() {
         </div>
       </section>
 
-      {/* ── MUSIC TRACKS SECTION (REAL DB SONGS ONLY) ── */}
+      {/* ── MUSIC TRACKS SECTION ── */}
       <section id="tracks-section" className="py-24 md:py-32 relative overflow-hidden">
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 blur-[150px] rounded-full pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -447,7 +630,7 @@ export default function OtherArtistsPage() {
             <div>
               <span className="text-primary font-black uppercase tracking-[0.4em] text-xs block mb-4 flex items-center gap-3">
                 <span className="w-8 h-px bg-primary inline-block"></span>
-                Official Releases · {tracks.length} Live
+                Official Releases · 15s Preview Available
               </span>
               <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tight">
                 Featured <span className="italic text-primary pr-2">Music Catalog</span>
@@ -512,119 +695,193 @@ export default function OtherArtistsPage() {
 
           {/* Track Cards */}
           <div className="flex flex-col gap-8">
-            {filteredTracks.map((song, idx) => (
-              <div
-                key={song.id}
-                onMouseEnter={() => setHoveredSong(song.id)}
-                onMouseLeave={() => setHoveredSong(null)}
-                className="group relative flex flex-col md:flex-row border border-white/8 hover:border-primary/50 rounded-[2rem] overflow-hidden transition-all duration-700 hover:shadow-[0_0_80px_rgba(255,107,53,0.15)] bg-[#080808]"
-              >
-                {/* Left image */}
-                <div className="relative w-full md:w-80 lg:w-96 aspect-[4/3] md:aspect-auto flex-shrink-0 overflow-hidden">
-                  <Image
-                    src={song.image}
-                    alt={song.title}
-                    fill
-                    className="object-cover transition-transform duration-[3s] group-hover:scale-110 opacity-75 group-hover:opacity-100"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#080808] hidden md:block pointer-events-none"></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#080808] to-transparent md:hidden pointer-events-none"></div>
-                  
-                  {/* Tag badge */}
-                  <span className="absolute top-5 left-5 text-white text-[10px] font-black px-3.5 py-1.5 uppercase tracking-widest shadow-lg bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.5)]">
-                    {song.tag}
-                  </span>
+            {filteredTracks.map((song, idx) => {
+              const isUnlocked = isTrackUnlocked(song.id)
+              const remainingTimeStr = getRemainingTimeStr(song.id)
+              const isCurrentPlaying = playingAudioId === song.id
 
-                  {/* Artist Tag on Card */}
-                  <span className="absolute top-5 right-5 md:right-auto md:left-5 md:top-14 bg-black/70 backdrop-blur-md border border-white/10 text-white/80 text-[9px] font-black px-3 py-1 uppercase tracking-widest">
-                    {song.artistName}
-                  </span>
-
-                  {/* Audio Preview Button */}
-                  {song.downloadUrl && (
-                    <button
-                      onClick={() => togglePlayPreview(song)}
-                      className="absolute bottom-5 left-5 z-20 bg-black/80 hover:bg-primary border border-white/20 hover:border-primary text-white text-xs font-bold px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur-md transition-all duration-300 shadow-xl"
-                    >
-                      {playingAudioId === song.id ? (
-                        <>
-                          <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                          <span>Pause Preview</span>
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                          <span>Preview Audio</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-
-                  {/* Watermark Index */}
-                  <span className="absolute bottom-4 right-4 text-[90px] font-black text-white/5 leading-none select-none pointer-events-none">
-                    {String(idx + 1).padStart(2, '0')}
-                  </span>
-                </div>
-
-                {/* Right info */}
-                <div className="flex flex-col justify-between flex-1 p-8 md:p-10 lg:p-12">
-                  <div>
-                    <div className="flex items-center gap-3 flex-wrap mb-4">
-                      <span className="text-primary font-bold uppercase tracking-[0.3em] text-[10px] border border-primary/30 px-3 py-1 rounded-full bg-primary/5">
-                        {song.genre}
+              return (
+                <div
+                  key={song.id}
+                  onMouseEnter={() => setHoveredSong(song.id)}
+                  onMouseLeave={() => setHoveredSong(null)}
+                  className={`group relative flex flex-col md:flex-row border rounded-[2rem] overflow-hidden transition-all duration-700 bg-[#080808] ${
+                    isUnlocked
+                      ? 'border-emerald-500/50 shadow-[0_0_80px_rgba(16,185,129,0.15)]'
+                      : 'border-white/8 hover:border-primary/50 hover:shadow-[0_0_80px_rgba(255,107,53,0.15)]'
+                  }`}
+                >
+                  {/* Left image */}
+                  <div className="relative w-full md:w-80 lg:w-96 aspect-[4/3] md:aspect-auto flex-shrink-0 overflow-hidden">
+                    <Image
+                      src={song.image}
+                      alt={song.title}
+                      fill
+                      className="object-cover transition-transform duration-[3s] group-hover:scale-110 opacity-75 group-hover:opacity-100"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#080808] hidden md:block pointer-events-none"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#080808] to-transparent md:hidden pointer-events-none"></div>
+                    
+                    {/* Status Badge */}
+                    {isUnlocked ? (
+                      <span className="absolute top-5 left-5 text-white text-[10px] font-black px-3.5 py-1.5 uppercase tracking-widest shadow-lg bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                        FULL ACCESS · {remainingTimeStr}
                       </span>
-                      <span className="text-white/30 font-bold uppercase tracking-[0.3em] text-[10px] border border-white/10 px-3 py-1 rounded-full">
-                        {song.bpm}
+                    ) : (
+                      <span className="absolute top-5 left-5 text-white text-[10px] font-black px-3.5 py-1.5 uppercase tracking-widest shadow-lg bg-amber-600 shadow-[0_0_20px_rgba(245,158,11,0.5)]">
+                        15s Free Preview 🎧
                       </span>
-                      <span className="text-white/30 font-bold uppercase tracking-[0.3em] text-[10px] border border-white/10 px-3 py-1 rounded-full">
-                        {song.duration}
-                      </span>
-                      <span className="text-emerald-400 border-emerald-400/20 bg-emerald-400/5 font-bold uppercase tracking-[0.3em] text-[10px] border px-3 py-1 rounded-full">
-                        {song.releaseDate}
-                      </span>
-                    </div>
+                    )}
 
-                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-tight mb-2 group-hover:text-primary transition-colors duration-300">
-                      {song.title}
-                    </h3>
-                    <p className="text-gray-400 font-bold text-sm uppercase tracking-widest mb-6">
-                      {song.feat}
-                    </p>
-                    <p className="text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl border-l-[3px] border-white/10 group-hover:border-primary/50 pl-5 transition-colors duration-300">
-                      {song.desc}
-                    </p>
+                    {/* Artist Tag on Card */}
+                    <span className="absolute top-5 right-5 md:right-auto md:left-5 md:top-14 bg-black/70 backdrop-blur-md border border-white/10 text-white/80 text-[9px] font-black px-3 py-1 uppercase tracking-widest">
+                      {song.artistName}
+                    </span>
+
+                    {/* Audio Preview Button */}
+                    {song.downloadUrl && (
+                      <button
+                        onClick={() => togglePlayPreview(song)}
+                        className={`absolute bottom-5 left-5 z-20 border text-white text-xs font-bold px-4 py-2.5 rounded-full flex items-center gap-2 backdrop-blur-md transition-all duration-300 shadow-xl ${
+                          isUnlocked
+                            ? 'bg-emerald-600/90 hover:bg-emerald-500 border-emerald-400/40 shadow-[0_0_20px_rgba(16,185,129,0.4)]'
+                            : 'bg-black/80 hover:bg-primary border-white/20 hover:border-primary'
+                        }`}
+                      >
+                        {isCurrentPlaying ? (
+                          <>
+                            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            <span>Pause {isUnlocked ? 'Track' : 'Preview'}</span>
+                            <span className="text-[11px] font-mono opacity-80">
+                              ({Math.floor(playbackTime)}s{isUnlocked ? '' : '/15s'})
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            <span>{isUnlocked ? 'Play Full Master' : 'Play 15s Preview'}</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+
+                    {/* Watermark Index */}
+                    <span className="absolute bottom-4 right-4 text-[90px] font-black text-white/5 leading-none select-none pointer-events-none">
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
                   </div>
 
-                  {/* Animated waveform when hovered */}
-                  <div className={`mt-6 transition-all duration-500 ${hoveredSong === song.id || playingAudioId === song.id ? 'opacity-100 h-10' : 'opacity-0 h-0 overflow-hidden'}`}>
-                    <WaveformBars />
-                  </div>
-
-                  {/* Price & Action Button (Buy Now) */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mt-10 pt-8 border-t border-white/5">
+                  {/* Right info */}
+                  <div className="flex flex-col justify-between flex-1 p-8 md:p-10 lg:p-12">
                     <div>
-                      <p className="text-white/30 font-bold uppercase tracking-widest text-[10px] mb-1">
-                        Direct Price
+                      <div className="flex items-center gap-3 flex-wrap mb-4">
+                        <span className="text-primary font-bold uppercase tracking-[0.3em] text-[10px] border border-primary/30 px-3 py-1 rounded-full bg-primary/5">
+                          {song.genre}
+                        </span>
+                        <span className="text-white/30 font-bold uppercase tracking-[0.3em] text-[10px] border border-white/10 px-3 py-1 rounded-full">
+                          {song.bpm}
+                        </span>
+                        <span className="text-white/30 font-bold uppercase tracking-[0.3em] text-[10px] border border-white/10 px-3 py-1 rounded-full">
+                          {song.duration}
+                        </span>
+                        {isUnlocked ? (
+                          <span className="text-emerald-400 border-emerald-400/30 bg-emerald-400/10 font-bold uppercase tracking-[0.2em] text-[10px] border px-3 py-1 rounded-full flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Unlocked ({remainingTimeStr} left)
+                          </span>
+                        ) : (
+                          <span className="text-amber-400 border-amber-400/20 bg-amber-400/5 font-bold uppercase tracking-[0.2em] text-[10px] border px-3 py-1 rounded-full">
+                            15s Free Preview
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="text-3xl md:text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-tight mb-2 group-hover:text-primary transition-colors duration-300">
+                        {song.title}
+                      </h3>
+                      <p className="text-gray-400 font-bold text-sm uppercase tracking-widest mb-6">
+                        {song.feat}
                       </p>
-                      <p className="text-3xl md:text-4xl font-black text-white tracking-tighter group-hover:text-primary transition-colors duration-700">
-                        {song.price}
+                      <p className="text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl border-l-[3px] border-white/10 group-hover:border-primary/50 pl-5 transition-colors duration-300">
+                        {song.desc}
                       </p>
                     </div>
 
-                    {/* ── ACTIVE BUY NOW BUTTON ── */}
-                    <button
-                      onClick={() => handleBuyClick(song)}
-                      className="relative bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-10 py-4 rounded-full font-black uppercase tracking-widest text-sm flex items-center gap-3 shadow-[0_0_35px_rgba(255,107,53,0.3)] hover:shadow-[0_0_45px_rgba(255,107,53,0.5)] transform hover:scale-105"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                      </svg>
-                      Buy Now ({song.price})
-                    </button>
+                    {/* Animated waveform when hovered or playing */}
+                    <div className={`mt-6 transition-all duration-500 ${hoveredSong === song.id || isCurrentPlaying ? 'opacity-100 h-10' : 'opacity-0 h-0 overflow-hidden'}`}>
+                      <WaveformBars />
+                    </div>
+
+                    {/* Price & Action Buttons */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mt-10 pt-8 border-t border-white/5">
+                      <div>
+                        <p className="text-white/30 font-bold uppercase tracking-widest text-[10px] mb-1">
+                          {isUnlocked ? 'Access Status' : 'Unlock Price (15-Min Access)'}
+                        </p>
+                        <p className={`text-3xl md:text-4xl font-black tracking-tighter transition-colors duration-700 ${isUnlocked ? 'text-emerald-400' : 'text-white group-hover:text-primary'}`}>
+                          {isUnlocked ? `ACTIVE (${remainingTimeStr})` : song.price}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {isUnlocked ? (
+                          /* Unlocked Mode: Prominent Play Full Master / Pause Button */
+                          <button
+                            onClick={() => togglePlayPreview(song)}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white transition-all duration-300 px-8 py-4 rounded-full font-black uppercase tracking-widest text-xs flex items-center gap-2 shadow-[0_0_35px_rgba(16,185,129,0.3)] hover:shadow-[0_0_45px_rgba(16,185,129,0.5)] transform hover:scale-105"
+                          >
+                            {isCurrentPlaying ? (
+                              <>
+                                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                                <span>Pause Master Track</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                <span>Play Full Master Track</span>
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          /* Locked Mode: 15s Preview and Unlock Full Track Buttons */
+                          <>
+                            {song.downloadUrl && (
+                              <button
+                                onClick={() => togglePlayPreview(song)}
+                                className="bg-white/5 hover:bg-white/15 border border-white/10 text-white font-bold text-xs uppercase tracking-widest px-6 py-4 rounded-full transition-all flex items-center gap-2"
+                              >
+                                {isCurrentPlaying ? (
+                                  <>
+                                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                                    <span>Pause</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    <span>Play 15s Preview</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => handleBuyClick(song)}
+                              className="relative bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-8 py-4 rounded-full font-black uppercase tracking-widest text-xs flex items-center gap-3 shadow-[0_0_35px_rgba(255,107,53,0.3)] hover:shadow-[0_0_45px_rgba(255,107,53,0.5)] transform hover:scale-105"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              </svg>
+                              Unlock Full Track ({song.price})
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -687,6 +944,7 @@ export default function OtherArtistsPage() {
         isOpen={!!selectedSongForBuy}
         onClose={() => setSelectedSongForBuy(null)}
         song={selectedSongForBuy}
+        onSuccessUnlock={handleUnlockSuccess}
       />
 
       {/* Keyframe Injection */}

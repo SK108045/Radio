@@ -18,7 +18,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import {
-  Music, Play, Download, Copy, Check, Calendar, Tag, Info,
+  Music, Play, Copy, Check, Calendar, Tag, Info,
   Trash2, AlertTriangle, Loader2
 } from 'lucide-react'
 import { deleteTrackAction } from '@/app/sales/actions'
@@ -147,7 +147,6 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
                     <TableHead className="text-muted-foreground font-semibold">Track</TableHead>
                     <TableHead className="text-center text-muted-foreground font-semibold">Price</TableHead>
                     <TableHead className="text-right text-muted-foreground font-semibold">Streams</TableHead>
-                    <TableHead className="text-right text-muted-foreground font-semibold">Downloads</TableHead>
                     <TableHead className="text-right text-muted-foreground font-semibold">Revenue</TableHead>
                     <TableHead className="text-center text-muted-foreground font-semibold w-24">Actions</TableHead>
                   </TableRow>
@@ -195,13 +194,6 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
                         {Number(track.total_streams) >= 1000
                           ? `${(Number(track.total_streams) / 1000).toFixed(0)}K`
                           : track.total_streams}
-                      </TableCell>
-
-                      {/* Downloads */}
-                      <TableCell className="text-right py-4 font-semibold text-foreground/80">
-                        {Number(track.total_downloads) >= 1000
-                          ? `${(Number(track.total_downloads) / 1000).toFixed(1)}K`
-                          : track.total_downloads}
                       </TableCell>
 
                       {/* Revenue */}
@@ -278,7 +270,7 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
                     <span>Permanent Deletion Confirmation</span>
                   </div>
                   <p className="text-xs text-destructive/90 leading-relaxed">
-                    Are you sure you want to delete <strong>"{selectedTrack.track_title}"</strong>? This will permanently delete the audio MP3 file from Supabase storage and remove the track from your store catalog.
+                    Are you sure you want to delete <strong>"{selectedTrack.track_title}"</strong>? This will permanently delete the audio file from Supabase storage and remove the track from your store catalog.
                   </p>
                   <div className="flex items-center gap-2 pt-1">
                     <Button
@@ -321,7 +313,7 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
                     <span className="flex items-center gap-1.5 text-primary font-bold">
                       <Play className="w-3.5 h-3.5 fill-current" /> Audio Preview
                     </span>
-                    <span>Direct MP3 Stream</span>
+                    <span>Direct Stream</span>
                   </div>
                   <audio
                     controls
@@ -334,8 +326,8 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
                 </div>
               )}
 
-              {/* Key Metrics Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-2">
+              {/* Key Metrics Grid (Price, Streams, Revenue) */}
+              <div className="grid grid-cols-3 gap-3 my-2">
                 <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl text-center">
                   <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">Price</p>
                   <p className="text-base font-black text-emerald-400">KSh {selectedTrack.price_ksh}</p>
@@ -343,10 +335,6 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
                 <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl text-center">
                   <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">Streams</p>
                   <p className="text-base font-black text-primary">{selectedTrack.total_streams}</p>
-                </div>
-                <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl text-center">
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">Downloads</p>
-                  <p className="text-base font-black text-foreground">{selectedTrack.total_downloads}</p>
                 </div>
                 <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl text-center">
                   <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">Revenue</p>
@@ -394,38 +382,25 @@ export function TopTracksTableClient({ tracks, error }: TopTracksTableClientProp
 
                 <div className="flex items-center gap-2 w-full sm:w-auto ml-auto justify-end">
                   {selectedTrack.mp3_file_path && (
-                    <>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleCopyUrl(selectedTrack.mp3_file_path)}
-                        className="w-full sm:w-auto border-white/10 hover:bg-white/10 text-xs font-bold"
-                      >
-                        {copied ? (
-                          <>
-                            <Check className="w-3.5 h-3.5 text-emerald-400 mr-1.5" />
-                            Copied Audio Link
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3.5 h-3.5 mr-1.5" />
-                            Copy Audio URL
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        asChild
-                        variant="outline"
-                        size="sm"
-                        className="w-full sm:w-auto border-white/10 hover:bg-white/10 text-xs font-bold"
-                      >
-                        <a href={selectedTrack.mp3_file_path} target="_blank" rel="noopener noreferrer" download>
-                          <Download className="w-3.5 h-3.5 mr-1.5" />
-                          Download File
-                        </a>
-                      </Button>
-                    </>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopyUrl(selectedTrack.mp3_file_path)}
+                      className="w-full sm:w-auto border-white/10 hover:bg-white/10 text-xs font-bold"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-400 mr-1.5" />
+                          Copied Audio Link
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 mr-1.5" />
+                          Copy Audio URL
+                        </>
+                      )}
+                    </Button>
                   )}
                   <Button
                     type="button"
