@@ -262,7 +262,7 @@ export default function AccountSuspended() {
               </div>
               <div className="th-info__row">
                 <span className="th-info__label">Due Date</span>
-                <span className="th-info__value th-info__value--red">4th June 2026 (Overdue)</span>
+                <span className="th-info__value th-info__value--red">23rd Aug 2026 (Overdue)</span>
               </div>
             </div>
 
