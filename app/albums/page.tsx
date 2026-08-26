@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
+import Link from 'next/link'
 import PaymentModal from '@/components/PaymentModal'
 import { songsForSale } from '@/lib/musicData'
 
@@ -127,9 +128,23 @@ export default function AlbumsPage() {
               <h1 className="text-6xl md:text-8xl lg:text-[9rem] font-black text-white uppercase tracking-tighter leading-[0.85] mb-8">
                 Albums<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400 italic pr-4">&amp; Songs</span>
               </h1>
-              <p className="text-gray-400 text-lg md:text-xl max-w-2xl font-medium border-l-4 border-primary pl-6">
+              <p className="text-gray-400 text-lg md:text-xl max-w-2xl font-medium border-l-4 border-primary pl-6 mb-8">
                 Expert breakdowns on the most important Kenyan projects dropping right now — plus exclusive RIENG tracks you can own.
               </p>
+
+              {/* ── OTHER ARTISTS QUICK ACTION BUTTON ── */}
+              <div className="flex items-center gap-4 flex-wrap">
+                <Link
+                  href="/other-artists"
+                  className="relative bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-8 py-4 rounded-full font-black uppercase tracking-widest text-xs flex items-center gap-3 shadow-[0_0_30px_rgba(255,107,53,0.3)] hover:shadow-[0_0_40px_rgba(255,107,53,0.5)] transform hover:-translate-y-0.5"
+                >
+                  <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
+                  Other Artists (Mr MAPEMA &amp; Ethic) →
+                </Link>
+                <span className="text-white/40 text-xs font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-4 py-2 rounded-full">
+                  Future Music · KSH 300
+                </span>
+              </div>
             </div>
             {/* Live waveform visual */}
             <div className="flex flex-col items-end gap-4">
@@ -140,8 +155,12 @@ export default function AlbumsPage() {
                 </div>
                 <WaveformBars />
               </div>
-              <div className="flex gap-3">
-                <span className="bg-primary/10 border border-primary/20 text-primary text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest">2 Tracks Available</span>
+              <div className="flex gap-3 flex-wrap justify-end">
+                <span className="bg-primary/10 border border-primary/20 text-primary text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest">2 RIENG Tracks</span>
+                <Link href="/other-artists" className="bg-orange-500/15 border border-orange-500/30 text-orange-400 hover:bg-orange-500 hover:text-white transition-colors text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping inline-block"></span>
+                  Other Artists Store (KSH 300)
+                </Link>
                 <span className="bg-white/5 border border-white/10 text-white/50 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest">3 Reviews</span>
               </div>
             </div>
@@ -163,7 +182,7 @@ export default function AlbumsPage() {
       {/* ── STATS BAR ── */}
       <section className="py-16 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard value={375} suffix="K+" label="Monthly Listeners" color="bg-primary" />
             <StatCard value={12} suffix="K+" label="Daily Listeners" color="bg-primary" />
             <StatCard value={2} suffix="" label="Exclusive Tracks" color="bg-primary" />
@@ -177,7 +196,7 @@ export default function AlbumsPage() {
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
-          <div className="flex items-end justify-between mb-16 border-b border-white/5 pb-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 border-b border-white/5 pb-10 gap-6">
             <div>
               <span className="text-primary font-black uppercase tracking-[0.4em] text-xs block mb-4 flex items-center gap-3">
                 <span className="w-8 h-px bg-primary inline-block"></span>
@@ -185,9 +204,19 @@ export default function AlbumsPage() {
               </span>
               <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tight">Buy <span className="italic text-primary pr-2">Tracks</span></h2>
             </div>
-            <div className="hidden md:flex flex-col items-end gap-2">
-              <span className="text-white/20 font-black uppercase tracking-widest text-xs border border-white/10 px-4 py-2">{songsForSale.length} Available</span>
-              <span className="text-white/10 text-xs font-bold">M-Pesa integration coming soon</span>
+            
+            <div className="flex items-center gap-4 flex-wrap">
+              <Link
+                href="/other-artists"
+                className="bg-primary/10 hover:bg-primary border border-primary/30 hover:border-primary text-primary hover:text-white text-xs font-black uppercase tracking-widest px-6 py-3.5 rounded-full transition-all duration-300 flex items-center gap-2.5 shadow-lg group"
+              >
+                <span className="w-2 h-2 rounded-full bg-orange-400 group-hover:bg-white animate-pulse"></span>
+                Other Artists Drops (KSH 300) →
+              </Link>
+              <div className="hidden md:flex flex-col items-end gap-1">
+                <span className="text-white/20 font-black uppercase tracking-widest text-xs border border-white/10 px-4 py-2">{songsForSale.length} Available</span>
+                <span className="text-white/10 text-[10px] font-bold">M-Pesa / Card Instant Download</span>
+              </div>
             </div>
           </div>
 
@@ -261,8 +290,37 @@ export default function AlbumsPage() {
         </div>
       </section>
 
+      {/* ── OTHER ARTISTS PROMO BANNER ── */}
+      <section className="py-12 border-y border-white/5 bg-gradient-to-r from-primary/10 via-[#0a0a0a] to-[#080808]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="border border-primary/30 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden bg-[#0a0a0a]/90 backdrop-blur-xl flex flex-col lg:flex-row items-center justify-between gap-8 shadow-[0_0_60px_rgba(255,107,53,0.12)]">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 blur-[100px] rounded-full pointer-events-none"></div>
+            <div className="relative z-10 max-w-2xl">
+              <span className="inline-flex items-center gap-2 bg-primary/20 border border-primary/40 text-primary text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase tracking-widest mb-4">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                Other Artists Hub · Direct Drops
+              </span>
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-white uppercase tracking-tight mb-3">
+                Mr MAPEMA PRODUCER &amp; <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400 italic">Ethic Entertainment</span>
+              </h3>
+              <p className="text-gray-300 text-base md:text-lg leading-relaxed">
+                Explore exclusive unreleased beats, studio masters, and future street anthems available directly from Kenya&apos;s leading creators for <strong className="text-primary font-black">KSH 300</strong> per track.
+              </p>
+            </div>
+            <div className="relative z-10 flex-shrink-0">
+              <Link
+                href="/other-artists"
+                className="bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-10 py-5 rounded-full font-black uppercase tracking-widest text-sm flex items-center gap-3 shadow-[0_0_40px_rgba(255,107,53,0.35)] transform hover:scale-105"
+              >
+                Explore Other Artists (KSH 300) →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── SUBMIT YOUR MUSIC CTA ── */}
-      <section className="py-20 relative overflow-hidden bg-[#030303] border-y border-white/5">
+      <section className="py-20 relative overflow-hidden bg-[#030303] border-b border-white/5">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-white/3 rounded-full animate-[spin_30s_linear_infinite]"></div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border border-primary/5 rounded-full animate-[spin_20s_linear_infinite_reverse]"></div>

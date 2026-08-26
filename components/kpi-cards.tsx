@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TrendingUp, Music, Users, Download } from 'lucide-react'
+import { TrendingUp, Music, Users } from 'lucide-react'
 import { supabase, getMonthStart } from '@/lib/supabase'
 
 interface KPICardProps {
@@ -47,22 +47,40 @@ function trend(current: number, prev: number) {
   return { label: `${Math.abs(Number(pct))}% from last month`, up: Number(pct) >= 0 }
 }
 
-export async function KPICards() {
+export async function KPICards({ artistId }: { artistId?: string } = {}) {
   const thisMonth = getMonthStart(0)
   const lastMonth = getMonthStart(-1)
 
+  const artistQuery = artistId
+    ? supabase.from('artists').select('total_active_listeners').eq('id', artistId).maybeSingle()
+    : supabase.from('artists').select('total_active_listeners').limit(1).maybeSingle()
+
+  let curQuery = supabase
+    .from('track_performance')
+    .select('streams, revenue_ksh, tracks!inner(artist_id)')
+    .eq('metric_month', thisMonth)
+
+  let prevQuery = supabase
+    .from('track_performance')
+    .select('streams, revenue_ksh, tracks!inner(artist_id)')
+    .eq('metric_month', lastMonth)
+
+  if (artistId) {
+    curQuery = curQuery.eq('tracks.artist_id', artistId)
+    prevQuery = prevQuery.eq('tracks.artist_id', artistId)
+  }
+
   const [{ data: cur }, { data: prev }, { data: artist }] = await Promise.all([
-    supabase.from('track_performance').select('streams, downloads, revenue_ksh').eq('metric_month', thisMonth),
-    supabase.from('track_performance').select('streams, downloads, revenue_ksh').eq('metric_month', lastMonth),
-    supabase.from('artists').select('total_active_listeners').single(),
+    curQuery,
+    prevQuery,
+    artistQuery,
   ])
 
-  const sum = (arr: typeof cur, key: 'streams' | 'downloads' | 'revenue_ksh') =>
-    (arr ?? []).reduce((s, r) => s + Number(r[key] ?? 0), 0)
+  const sum = (arr: typeof cur, key: 'streams' | 'revenue_ksh') =>
+    (arr ?? []).reduce((s: number, r: any) => s + Number(r[key] ?? 0), 0)
 
   const curStreams = sum(cur, 'streams')
   const curRevenue = sum(cur, 'revenue_ksh')
-  const curDownloads = sum(cur, 'downloads')
   const prevStreams = sum(prev, 'streams')
   const prevRevenue = sum(prev, 'revenue_ksh')
 
@@ -70,7 +88,7 @@ export async function KPICards() {
   const revTrend = trend(curRevenue, prevRevenue)
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
       <KPICard
         title="Total Streams"
         value={fmt(curStreams)}
@@ -86,12 +104,6 @@ export async function KPICards() {
         icon={<TrendingUp className="w-5 h-5" />}
         trend={revTrend?.label}
         trendUp={revTrend?.up}
-      />
-      <KPICard
-        title="Downloads"
-        value={fmt(curDownloads)}
-        description="This month"
-        icon={<Download className="w-5 h-5" />}
       />
       <KPICard
         title="Active Listeners"

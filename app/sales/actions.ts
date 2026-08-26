@@ -133,3 +133,51 @@ export async function updateUsernameAction(prevState: any, formData: FormData) {
   
   return { success: 'Username updated successfully!' }
 }
+
+export async function deleteTrackAction(trackId: string, mp3FilePath?: string | null) {
+  const session = await getSession()
+  if (!session) return { error: 'Not authenticated' }
+
+  try {
+    // 1. Remove from Supabase Storage if file path is available
+    if (mp3FilePath) {
+      let bucketPath = ''
+      if (mp3FilePath.includes('artist-tracks/')) {
+        bucketPath = mp3FilePath.split('artist-tracks/')[1]
+      } else if (mp3FilePath.startsWith('http')) {
+        const parts = mp3FilePath.split('/')
+        bucketPath = parts.slice(-2).join('/')
+      } else {
+        bucketPath = mp3FilePath
+      }
+
+      if (bucketPath) {
+        const { error: storageErr } = await supabase.storage
+          .from('artist-tracks')
+          .remove([bucketPath])
+
+        if (storageErr) {
+          console.warn('Storage delete warning:', storageErr)
+        }
+      }
+    }
+
+    // 2. Delete track performance rows if present
+    await supabase.from('track_performance').delete().eq('track_id', trackId)
+
+    // 3. Delete track from database table
+    const { error: dbErr } = await supabase
+      .from('tracks')
+      .delete()
+      .eq('id', trackId)
+
+    if (dbErr) {
+      return { error: `Database delete failed: ${dbErr.message}` }
+    }
+
+    return { success: true }
+  } catch (err: any) {
+    console.error('Delete track action error:', err)
+    return { error: err?.message || 'Failed to delete track' }
+  }
+}

@@ -117,7 +117,28 @@ const socialDrops = [
   }
 ]
 
-const categoryData = [
+interface VideoItem {
+  id: string
+  title: string
+  views: string
+  image?: string
+  isAudio?: boolean
+  isImageOnly?: boolean
+  link?: string
+}
+
+interface CategoryItem {
+  name: string
+  num: string
+  accentColor: string
+  accentClass: string
+  glow: string
+  borderActive: string
+  textActive: string
+  videos: VideoItem[]
+}
+
+const categoryData: CategoryItem[] = [
   {
     name: 'Music',
     num: '01',
@@ -127,7 +148,7 @@ const categoryData = [
     borderActive: 'border-orange-500/50',
     textActive: 'text-orange-400',
     // Dynamically sourced from lib/musicData.ts — add songs there to update this
-    videos: [] as { id: string; title: string; views: string; image?: string; isAudio?: boolean }[],
+    videos: [],
   },
   {
     name: 'Comedy',
@@ -143,7 +164,7 @@ const categoryData = [
       { id: 'v9Nor4dkT0M', title: 'Pilipili Primary School Edition', views: '55K Views' },
       { id: '5iJXQA0JP28', title: 'JUA SHENG Episode 2', views: '42K Views' },
       { id: 'q5KpAN3Wg0s', title: 'DRYSPELL SI FUNNY', views: '65K Views' },
-    ] as { id: string; title: string; views: string }[],
+    ],
   },
   {
     name: 'Sports',
@@ -180,7 +201,7 @@ const categoryData = [
         image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Rugby.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvUnVnYnkuanBnIiwiaWF0IjoxNzgwNDgxNTc0LCJleHAiOjE4MTIwMTc1NzR9.Y6Jh_cX_XEtTVotJAZqG8byF2X8wogqQQxeDcUA4U3I',
         link: 'http://youtube.com/post/UgkxRl-0CYTLZX0qFS9nkp3XuckW90L53cc8?si=3NVnQek5WHjpk7hr'
       }
-    ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
+    ],
   },
   {
     name: 'Movies',
@@ -190,7 +211,7 @@ const categoryData = [
     glow: 'rgba(168,85,247,0.15)',
     borderActive: 'border-purple-500/50',
     textActive: 'text-purple-400',
-    videos: [] as { id: string; title: string; views: string }[],
+    videos: [],
   },
   {
     name: 'Reality',
@@ -204,7 +225,7 @@ const categoryData = [
       { id: 'yaiNt80SjiM', title: '"Miracle Baby Aliteka Karao" | Police Brutality', views: '69K Views' },
       { id: 'M9tIVvCgowg', title: '"Kuimpress Madame Ni Ngumu" | Heartbreaks', views: '65K Views' },
       { id: 'DrdbQ1I-aIA', title: 'Rieng Radio Reunion | How Big Dreams Die', views: '107K Views' },
-    ] as { id: string; title: string; views: string }[],
+    ],
   },
   {
     name: 'News',
@@ -214,7 +235,7 @@ const categoryData = [
     glow: 'rgba(56,189,248,0.15)',
     borderActive: 'border-sky-400/50',
     textActive: 'text-sky-400',
-    videos: [] as { id: string; title: string; views: string }[],
+    videos: [],
   },
   {
     name: 'Books',
@@ -227,7 +248,7 @@ const categoryData = [
     videos: [
       { id: 'f_Jb27a3VfM', title: 'Kidagaa Kimemwozea Audiobook Summary & Analysis', views: '12K Views' },
       { id: 'ayi8P9Pfufo', title: 'The River Between Complete Book Discussion', views: '8.5K Views' }
-    ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
+    ],
   },
   {
     name: 'Entertainment Podcasts',
@@ -245,7 +266,7 @@ const categoryData = [
       { id: 'M9tIVvCgowg', title: '"Kuimpress Madame Ni Ngumu" | Heartbreaks', views: '65K Views' },
       { id: 'DrdbQ1I-aIA', title: 'Rieng Radio Reunion | How Big Dreams Die', views: '107K Views' },
       { id: '5iJXQA0JP28', title: 'JUA SHENG Episode 2', views: '42K Views' },
-    ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
+    ],
   },
   {
     name: 'Politics',
@@ -258,7 +279,7 @@ const categoryData = [
     videos: [
       { id: 'aH837tU7eDk', title: 'Inside the Senate: Live Debates & Policy Decisions', views: '100K Views' },
       { id: 'vJ_l94v0r1k', title: 'Analysis of the New Economic Policies and Trade Agreements', views: '65K Views' }
-    ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
+    ],
   },
   {
     name: 'Vines',
@@ -271,7 +292,7 @@ const categoryData = [
     videos: [
       { id: 'SlagKsO_xAU', title: 'The Funniest Vines and Street Comedy of the Week', views: '120K Views' },
       { id: 'OUFm3s1wn48', title: 'Best Funny Moments Compilation', views: '85K Views' }
-    ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
+    ],
   },
   {
     name: 'Documentaries',
@@ -281,7 +302,7 @@ const categoryData = [
     glow: 'rgba(56,189,248,0.15)',
     borderActive: 'border-sky-400/50',
     textActive: 'text-sky-400',
-    videos: [] as { id: string; title: string; views: string }[],
+    videos: [],
   },
   {
     name: 'Business',
@@ -294,7 +315,7 @@ const categoryData = [
     videos: [
       { id: 'M9tIVvCgowg', title: 'Starting a Small Business in Nairobi: Key Tips & Pitfalls', views: '45K Views' },
       { id: 'DrdbQ1I-aIA', title: 'Tech Startups Showcase: Funding & Innovation in East Africa', views: '32K Views' }
-    ] as { id: string; title: string; views: string; image?: string; isImageOnly?: boolean; link?: string }[],
+    ],
   },
 ]
 

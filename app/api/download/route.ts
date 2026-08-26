@@ -1,16 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyAccessToken } from '@/lib/accessTokens'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const fileUrl = searchParams.get('url')
     const fileName = searchParams.get('name')
+    const token = searchParams.get('token')
 
     if (!fileUrl || !fileName) {
       return NextResponse.json(
         { error: 'Missing url or name parameter' },
         { status: 400 }
       )
+    }
+
+    // If a token is provided, verify it hasn't expired
+    if (token) {
+      const verification = verifyAccessToken(token)
+      if (!verification.valid) {
+        return NextResponse.json(
+          { error: verification.error || 'Access token expired or invalid' },
+          { status: 403 }
+        )
+      }
     }
 
     // Fetch the file from Supabase

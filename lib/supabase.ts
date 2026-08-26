@@ -46,12 +46,22 @@ export interface TopPerformingTrack {
 }
 
 // ── Helpers ────────────────────────────────────────────
-export const ARTIST_ID = '11111111-1111-1111-1111-111111111111'
+export const ARTIST_ID = '33333333-3333-3333-3333-333333333331'
 export const STORAGE_BUCKET = 'artist-tracks'
 
 export function getMonthStart(offset = 0): string {
   const d = new Date()
-  return new Date(d.getFullYear(), d.getMonth() + offset, 1)
-    .toISOString()
-    .split('T')[0]
+  let year = d.getFullYear()
+  let month = d.getMonth() + 1 + offset // 1-indexed
+
+  while (month < 1) {
+    month += 12
+    year -= 1
+  }
+  while (month > 12) {
+    month -= 12
+    year += 1
+  }
+
+  return `${year}-${String(month).padStart(2, '0')}-01`
 }

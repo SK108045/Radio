@@ -1,84 +1,57 @@
-import {
-  Table, TableBody, TableCell, TableHead,
-  TableHeader, TableRow,
-} from '@/components/ui/table'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { supabase, TopPerformingTrack } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
+import { TopTracksTableClient, TrackDetailItem } from './top-tracks-table-client'
 
-export async function TopTracksTable() {
-  const { data: tracks, error } = await supabase
-    .from('vw_top_performing_tracks')
-    .select('*')
-    .limit(10)
+export async function TopTracksTable({ artistId }: { artistId?: string } = {}) {
+  // 1. Fetch tracks for this artist
+  let rawQuery = supabase
+    .from('tracks')
+    .select('id, title, description, price_ksh, mp3_file_path, created_at, artist_id, artists(stage_name)')
+    .order('created_at', { ascending: false })
 
-  const rows: TopPerformingTrack[] = tracks ?? []
+  if (artistId) {
+    rawQuery = rawQuery.eq('artist_id', artistId)
+  }
 
-  return (
-    <Card className="bg-card border-border mb-6">
-      <CardHeader>
-        <CardTitle>Top Performing Tracks</CardTitle>
-        <CardDescription>
-          {error ? 'Could not load tracks.' : 'Your best-performing tracks (all time)'}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4">No track data found.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-border hover:bg-transparent">
-                  <TableHead className="text-muted-foreground">Track</TableHead>
-                  <TableHead className="text-right text-muted-foreground">Streams</TableHead>
-                  <TableHead className="text-right text-muted-foreground">Downloads</TableHead>
-                  <TableHead className="text-right text-muted-foreground">Revenue (KSh)</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((track, index) => (
-                  <TableRow key={track.track_id} className="border-border hover:bg-primary/5">
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-3">
-                        <Badge
-                          variant="secondary"
-                          className="w-6 h-6 rounded-full p-0 flex items-center justify-center text-xs bg-accent/20 text-accent"
-                        >
-                          {index + 1}
-                        </Badge>
-                        <div>
-                          <p className="font-semibold text-foreground">{track.track_title}</p>
-                          <p className="text-xs text-muted-foreground">{track.stage_name}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <span className="text-primary font-semibold">
-                        {Number(track.total_streams) >= 1000
-                          ? `${(Number(track.total_streams) / 1000).toFixed(0)}K`
-                          : track.total_streams}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <span className="text-accent font-semibold">
-                        {Number(track.total_downloads) >= 1000
-                          ? `${(Number(track.total_downloads) / 1000).toFixed(1)}K`
-                          : track.total_downloads}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <span className="text-foreground font-semibold">
-                        KSh {Number(track.total_revenue_ksh).toLocaleString()}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
+  // 2. Fetch performance stats
+  let perfQuery = supabase.from('vw_top_performing_tracks').select('*')
+  if (artistId) {
+    perfQuery = perfQuery.eq('artist_id', artistId)
+  }
+
+  const [{ data: rawTracks, error }, { data: perfRows }] = await Promise.all([
+    rawQuery.limit(25),
+    perfQuery,
+  ])
+
+  // 3. Map performance by track ID
+  const perfMap = new Map<string, { streams: number; downloads: number; revenue: number }>()
+  if (perfRows) {
+    for (const p of perfRows) {
+      perfMap.set(p.track_id, {
+        streams: Number(p.total_streams ?? 0),
+        downloads: Number(p.total_downloads ?? 0),
+        revenue: Number(p.total_revenue_ksh ?? 0),
+      })
+    }
+  }
+
+  // 4. Build comprehensive track details
+  const tracks: TrackDetailItem[] = (rawTracks ?? []).map((t: any) => {
+    const perf = perfMap.get(t.id) || { streams: 0, downloads: 0, revenue: 0 }
+    return {
+      track_id: t.id,
+      artist_id: t.artist_id,
+      track_title: t.title,
+      stage_name: t.artists?.stage_name || 'Artist',
+      description: t.description || null,
+      price_ksh: Number(t.price_ksh ?? 0),
+      mp3_file_path: t.mp3_file_path || null,
+      created_at: t.created_at || null,
+      total_streams: perf.streams,
+      total_downloads: perf.downloads,
+      total_revenue_ksh: perf.revenue,
+    }
+  })
+
+  return <TopTracksTableClient tracks={tracks} error={error ? error.message : null} />
 }
