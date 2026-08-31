@@ -19,9 +19,10 @@ interface PaymentModalProps {
   onClose: () => void
   song: Song | null
   onSuccessUnlock?: (trackId: string, token: string, expiresAt: number) => void
+  callbackPath?: string
 }
 
-export default function PaymentModal({ isOpen, onClose, song, onSuccessUnlock }: PaymentModalProps) {
+export default function PaymentModal({ isOpen, onClose, song, onSuccessUnlock, callbackPath }: PaymentModalProps) {
   const [phone, setPhone] = useState('')
   const [error, setError] = useState('')
   const [animateIn, setAnimateIn] = useState(false)
@@ -64,7 +65,8 @@ export default function PaymentModal({ isOpen, onClose, song, onSuccessUnlock }:
     setStep('processing')
 
     const fakeEmail = `${cleaned.replace('+', '')}@riengmusicstore.co.ke`
-    const callbackUrl = `${window.location.origin}/other-artists?payment=success&trackId=${encodeURIComponent(String(song.id))}`
+    const targetPath = callbackPath || (typeof window !== 'undefined' ? window.location.pathname : '/other-artists')
+    const callbackUrl = `${window.location.origin}${targetPath}?payment=success&trackId=${encodeURIComponent(String(song.id))}`
 
     try {
       // 1. Initialize transaction directly on server (fast, reliable)

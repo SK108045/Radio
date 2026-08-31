@@ -42,9 +42,11 @@ export default function Navbar() {
           {/* Glowing animated background lines */}
           <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.08)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.08)_75%,transparent_75%,transparent)] bg-[length:30px_30px] animate-[pulse_2s_infinite] opacity-40" />
           
-          <div className="relative z-10 flex items-center justify-center gap-2 flex-wrap pr-6">
+          <div className="relative z-10 flex items-center justify-center gap-2 flex-wrap pr-6 text-center">
             <span className="bg-white text-red-700 px-2 py-0.5 rounded font-black text-[9px] tracking-widest animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]">BREAKING NEWS</span>
-            <span className="font-bold normal-case sm:uppercase">🌍 FIFA World Cup 2026 is HERE! 🏆⚽ Tune in to our Sports Show to watch Live Matches, Highlights & Expert Analysis — only on RIENG Radio! 🎙️🔥</span>
+            <span className="font-bold normal-case sm:uppercase">
+              We are partnering with Ethics Entertainment for exclusive future drops! 🎙️🔥
+            </span>
           </div>
           
           <button 
