@@ -1,23 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import {
   ShoppingBag,
-  Sparkles,
   Ticket,
   Flame,
   CheckCircle2,
+  X,
+  CreditCard,
   Truck,
   ShieldCheck,
-  CreditCard,
-  X,
-  ChevronRight,
-  Clock,
-  ArrowRight,
+  Tag,
 } from 'lucide-react'
 
 // ─── Products Data ────────────────────────────────────────────────────────────
@@ -29,17 +26,18 @@ export interface MerchProduct {
   price: string
   priceNum: number
   image: string
-  badge: string
+  tag: string
   stockStatus: string
-  description: string
+  desc: string
   sizes?: string[]
   details: string[]
   isTicket?: boolean
   eventDate?: string
   venue?: string
+  materialOrType: string
 }
 
-const merchProducts: MerchProduct[] = [
+export const merchList: MerchProduct[] = [
   {
     id: 'ethics-hoodie-01',
     name: 'ETHICS Heavyweight Oversized Hoodie',
@@ -48,11 +46,11 @@ const merchProducts: MerchProduct[] = [
     price: 'KES 3,800',
     priceNum: 3800,
     image: '/merch/hoodie.jpg',
-    badge: 'Drop 01 Best Seller 🔥',
-    stockStatus: 'Only 6 left in stock',
-    description:
-      'Engineered from 480 GSM ultra-dense French Terry cotton. Features high-density neon orange silicone print on chest, custom metallic eyelets, double-layered hood, and relaxed boxy streetwear drape.',
+    tag: 'Best Seller 🔥',
+    stockStatus: 'Only 6 Left in Stock',
+    desc: 'Engineered from 480 GSM ultra-dense French Terry cotton. Features high-density neon orange silicone typography on chest, custom metallic hardware, double-layered hood, and relaxed boxy streetwear drape.',
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    materialOrType: '480 GSM Cotton · Street Fit',
     details: [
       '480 GSM 100% Heavyweight Cotton',
       'High-Density 3D Screenprint',
@@ -68,13 +66,13 @@ const merchProducts: MerchProduct[] = [
     price: 'KES 2,500',
     priceNum: 2500,
     image: '/merch/ticket.jpg',
-    badge: 'VIP Golden Pass 🎟️',
+    tag: 'VIP Access 🎟️',
     stockStatus: 'Limited Batch · Fast Selling',
-    description:
-      'Official All-Access VIP Pass for Ethics Entertainment Live at RIENG Fest 2026. Includes fast-track express entry, backstage artist lounge access, complimentary welcome drink, and digital commemorative holographic NFT badge.',
+    desc: 'Official All-Access VIP Pass for Ethics Entertainment Live at RIENG Fest 2026. Includes fast-track express entry, backstage artist lounge access, complimentary drink voucher, and digital holographic QR ticket.',
     isTicket: true,
     eventDate: 'Saturday, November 14, 2026 · 6:00 PM EAT',
     venue: 'Nairobi Carnivore Grounds (Main Arena)',
+    materialOrType: 'All-Access VIP Pass · Nairobi Arena',
     details: [
       'Instant SMS & WhatsApp QR E-Ticket',
       'Backstage Lounge & Dedicated VIP Bar',
@@ -90,11 +88,11 @@ const merchProducts: MerchProduct[] = [
     price: 'KES 2,200',
     priceNum: 2200,
     image: '/merch/tee.jpg',
-    badge: 'Street Classic ⚡',
+    tag: 'Street Classic ⚡',
     stockStatus: 'In Stock',
-    description:
-      'Custom acid-washed 260 GSM single-stitch cotton t-shirt with signature Nairobi Sound distressed typography. Built for ultimate comfort with a drop-shoulder cut and ribbed collar.',
+    desc: 'Custom acid-washed 260 GSM single-stitch cotton t-shirt with signature Nairobi Sound distressed typography. Built for ultimate comfort with a drop-shoulder cut and reinforced ribbed collar.',
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    materialOrType: '260 GSM Combed Cotton · Acid Wash',
     details: [
       '260 GSM Premium Combed Cotton',
       'Hand-Distressed Acid Wash Finish',
@@ -110,11 +108,11 @@ const merchProducts: MerchProduct[] = [
     price: 'KES 5,500',
     priceNum: 5500,
     image: '/merch/bomber.jpg',
-    badge: 'Limited Vault Drop 🏆',
-    stockStatus: 'Only 3 left in stock',
-    description:
-      'High-grade water-resistant flight satin jacket featuring heavy-duty silver YKK zippers, embroidered vibrant orange back crest, utility arm pocket, and custom orange quilted lining.',
+    tag: 'Vault Limited 🏆',
+    stockStatus: 'Only 3 Left in Stock',
+    desc: 'High-grade water-resistant flight satin jacket featuring heavy-duty silver dual zippers, custom vibrant orange chainstitch embroidered crest, utility arm zip pocket, and quilted insulation.',
     sizes: ['M', 'L', 'XL'],
+    materialOrType: 'Water-Resistant Satin · Quilted',
     details: [
       'Waterproof Flight Satin Shell',
       'Full Orange Quilted Insulation',
@@ -130,10 +128,10 @@ const merchProducts: MerchProduct[] = [
     price: 'KES 1,600',
     priceNum: 1600,
     image: '/merch/cap.jpg',
-    badge: 'Popular 🧢',
+    tag: 'Trending 🧢',
     stockStatus: 'In Stock',
-    description:
-      'Structured 5-panel curved trucker hat with 3D raised puff embroidery on front, breathable mesh back, contrast visor stitching, and adjustable snapback strap.',
+    desc: 'Structured 5-panel curved trucker hat with 3D raised puff embroidery on front, breathable heavy-duty mesh back, contrast visor stitching, and adjustable snapback closure.',
+    materialOrType: '5-Panel Structured · Snapback',
     details: [
       'Structured 5-Panel Profile',
       '3D Puff Embroidery Logo',
@@ -143,16 +141,16 @@ const merchProducts: MerchProduct[] = [
   },
   {
     id: 'ethics-vinyl-lp-01',
-    name: 'ETHICS "MASTER CUTS" Translucent Orange Vinyl LP',
+    name: 'ETHICS "MASTER CUTS" Neon Orange Marbled Vinyl LP',
     artist: 'Ethics Entertainment',
     category: 'Collectibles',
     price: 'KES 4,200',
     priceNum: 4200,
     image: '/merch/vinyl.jpg',
-    badge: 'Numbered 1st Pressing 💿',
+    tag: '1st Pressing 💿',
     stockStatus: 'Numbered 1 of 200 Copies',
-    description:
-      'Collector edition 180-gram translucent neon orange 12-inch vinyl LP. Pressed from uncompressed analog 24-bit studio masters. Encased in a matte black soft-touch gatefold jacket with exclusive studio photos and lyric sheet.',
+    desc: 'Collector edition 180-gram translucent neon orange 12-inch vinyl LP pressed directly from uncompressed 24-bit analog master studio tapes. Encased in a soft-touch matte black gatefold sleeve with lyric booklet.',
+    materialOrType: '180g Audiophile Vinyl · Gatefold',
     details: [
       '180g Heavyweight Audiophile Vinyl',
       'Direct-From-Master Analog Audio Cut',
@@ -163,45 +161,108 @@ const merchProducts: MerchProduct[] = [
 ]
 
 // ─── Ticker Items ────────────────────────────────────────────────────────────
-const merchTicker = [
+const merchTickerTags = [
   'OFFICIAL MERCH STORE',
   'ETHICS ENTERTAINMENT × RIENG RADIO',
+  'HEAVYWEIGHT STREETWEAR',
   'INSTANT M-PESA CHECKOUT',
+  'VIP CONCERT PASSES & TICKETS',
   'SAME-DAY NAIROBI DELIVERY',
-  'LIMITED RUN DROPS',
-  'CONCERT & VIP FESTIVAL TICKETS',
-  '100% AUTHENTIC STREETWEAR',
+  'LIMITED 1ST PRESSING VINYL',
+  '100% GENUINE AUTHENTIC DROPS',
 ]
 
+// ─── Animated Counter Hook ────────────────────────────────────────────────────
+function useCounter(target: number, duration = 1800) {
+  const [count, setCount] = useState(0)
+  const ref = useRef<HTMLDivElement>(null)
+  const started = useRef(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !started.current) {
+        started.current = true
+        const step = target / (duration / 16)
+        let current = 0
+        const timer = setInterval(() => {
+          current += step
+          if (current >= target) {
+            setCount(target)
+            clearInterval(timer)
+          } else {
+            setCount(Math.floor(current))
+          }
+        }, 16)
+      }
+    }, { threshold: 0.5 })
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [target, duration])
+
+  return { count, ref }
+}
+
+// ─── Stat Card Component ──────────────────────────────────────────────────────
+function StatCard({ value, suffix, label, color }: { value: number; suffix: string; label: string; color: string }) {
+  const { count, ref } = useCounter(value)
+  return (
+    <div ref={ref} className="group relative bg-[#080808] border border-white/5 rounded-[1.5rem] p-8 overflow-hidden hover:border-primary/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,107,53,0.08)]">
+      <div className={`absolute top-0 right-0 w-32 h-32 ${color} blur-[60px] opacity-20 group-hover:opacity-40 transition-opacity rounded-full pointer-events-none`}></div>
+      <p className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-none mb-2">
+        {count.toLocaleString()}<span className="text-primary">{suffix}</span>
+      </p>
+      <p className="text-gray-500 font-bold uppercase tracking-[0.2em] text-xs">{label}</p>
+    </div>
+  )
+}
+
+// ─── Waveform Bar Component ──────────────────────────────────────────────────
+function WaveformBars() {
+  return (
+    <div className="flex items-end gap-[3px] h-8">
+      {[3, 6, 9, 5, 8, 4, 10, 7, 3, 9, 6, 4, 8, 5, 10, 3, 7, 9, 4, 6].map((h, i) => (
+        <div
+          key={i}
+          className="w-1 bg-primary rounded-full opacity-70"
+          style={{
+            height: `${h * 10}%`,
+            animation: `wave ${0.6 + (i % 5) * 0.15}s ease-in-out ${i * 0.05}s infinite alternate`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 export default function MerchPage() {
-  const [activeCategory, setActiveCategory] = useState<string>('All')
+  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
+  const [selectedFilter, setSelectedFilter] = useState<'All' | 'Apparel' | 'Tickets' | 'Accessories' | 'Collectibles'>('All')
   const [selectedProduct, setSelectedProduct] = useState<MerchProduct | null>(null)
   const [selectedSize, setSelectedSize] = useState<string>('L')
   const [quantity, setQuantity] = useState<number>(1)
   const [phoneNumber, setPhoneNumber] = useState<string>('')
   const [deliveryLocation, setDeliveryLocation] = useState<string>('')
-  const [isCheckingOut, setIsCheckingOut] = useState<boolean>(false)
   const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState<string>('')
 
-  const categories = ['All', 'Apparel', 'Tickets', 'Accessories', 'Collectibles']
+  const categories = ['All', 'Apparel', 'Tickets', 'Accessories', 'Collectibles'] as const
 
   const filteredProducts =
-    activeCategory === 'All'
-      ? merchProducts
-      : merchProducts.filter((p) => p.category === activeCategory)
+    selectedFilter === 'All'
+      ? merchList
+      : merchList.filter((p) => p.category === selectedFilter)
 
-  const handleOpenModal = (product: MerchProduct) => {
+  const handleOpenBuyModal = (product: MerchProduct) => {
     setSelectedProduct(product)
     setSelectedSize(product.sizes ? product.sizes[1] || product.sizes[0] : 'Standard')
     setQuantity(1)
+    setPhoneNumber('')
+    setDeliveryLocation('')
     setCheckoutStatus('idle')
     setErrorMessage('')
-    setIsCheckingOut(true)
   }
 
-  const handleCloseModal = () => {
-    setIsCheckingOut(false)
+  const handleCloseBuyModal = () => {
     setSelectedProduct(null)
     setCheckoutStatus('idle')
   }
@@ -217,7 +278,7 @@ export default function MerchPage() {
     }
 
     if (!selectedProduct.isTicket && !deliveryLocation.trim()) {
-      setErrorMessage('Please enter your delivery address / town')
+      setErrorMessage('Please enter your delivery location or town')
       return
     }
 
@@ -225,9 +286,9 @@ export default function MerchPage() {
     setCheckoutStatus('loading')
 
     const totalAmount = selectedProduct.priceNum * quantity
-    const orderTitle = `${selectedProduct.name} (${selectedProduct.isTicket ? 'E-Ticket' : selectedSize} × ${quantity})`
+    const orderTitle = `${selectedProduct.name} (${selectedProduct.isTicket ? 'VIP Ticket' : selectedSize} × ${quantity})`
     const fakeEmail = `${cleanedPhone.replace('+', '')}@riengmerch.co.ke`
-    const callbackUrl = `${window.location.origin}/merch?order=success&product=${encodeURIComponent(selectedProduct.id)}`
+    const callbackUrl = `${window.location.origin}/merch?payment=success&product=${encodeURIComponent(selectedProduct.id)}`
 
     try {
       const res = await fetch('/api/paystack/initialize', {
@@ -246,13 +307,12 @@ export default function MerchPage() {
       const data = await res.json()
 
       if (!res.ok || !data.authorization_url) {
-        throw new Error(data.error || 'Payment gateway initialization failed. Please try again.')
+        throw new Error(data.error || 'Could not initialize payment gateway. Please check connection.')
       }
 
-      // Redirect user directly to Paystack for M-Pesa STK push / Card
       window.location.href = data.authorization_url
     } catch (err: any) {
-      console.error('Merch checkout error:', err)
+      console.error('Checkout error:', err)
       setErrorMessage(err?.message || 'Payment service error. Please try again.')
       setCheckoutStatus('error')
     }
@@ -262,98 +322,145 @@ export default function MerchPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
-    if (params.get('order') === 'success') {
+    if (params.get('payment') === 'success') {
       window.history.replaceState({}, '', '/merch')
       setCheckoutStatus('success')
     }
   }, [])
 
   return (
-    <main className="min-h-screen bg-[#050505] selection:bg-primary selection:text-white text-white overflow-x-hidden">
+    <main className="min-h-screen bg-[#050505] selection:bg-primary selection:text-white overflow-x-hidden">
       <Navbar />
 
-      {/* ── HERO BANNER ── */}
-      <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden border-b border-white/5">
-        {/* Glow ambient spheres */}
-        <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-primary/10 blur-[150px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 left-10 w-[500px] h-[500px] bg-red-600/10 blur-[130px] rounded-full pointer-events-none" />
+      {/* ── HERO ── */}
+      <section className="relative pt-28 pb-20 overflow-hidden border-b border-white/5">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-primary/5 blur-[140px] rounded-full pointer-events-none"></div>
+        
+        {/* Animated slide lines */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent w-full"
+              style={{
+                top: `${20 + i * 20}%`,
+                animation: `slideLine ${3 + i}s ease-in-out ${i * 0.5}s infinite alternate`,
+              }}
+            ></div>
+          ))}
+        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          {/* Season Tag */}
-          <div className="inline-flex items-center gap-2.5 bg-primary/10 border border-primary/30 text-primary px-4 py-1.5 rounded-full mb-6 shadow-[0_0_20px_rgba(255,107,53,0.2)]">
-            <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
-            <span className="text-[11px] font-black uppercase tracking-[0.25em]">
-              OFFICIAL DROP 01 // ETHICS × RIENG COLLECTION
-            </span>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col lg:flex-row gap-12 items-end">
+            <div className="flex-1">
+              <p className="text-primary font-black uppercase tracking-[0.4em] text-xs mb-5 flex items-center gap-3">
+                <span className="w-8 h-px bg-primary inline-block"></span>
+                RIENG MERCH &amp; TICKET STORE
+              </p>
+              <h1 className="text-6xl md:text-8xl lg:text-[9rem] font-black text-white uppercase tracking-tighter leading-[0.85] mb-8">
+                Merch<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400 italic pr-4">
+                  &amp; Tickets
+                </span>
+              </h1>
+              <p className="text-gray-400 text-lg md:text-xl max-w-2xl font-medium border-l-4 border-primary pl-6 mb-8 leading-relaxed">
+                Official limited-edition streetwear, heavyweight hoodies, vinyl pressings, and VIP concert passes for <strong className="text-white">Ethics Entertainment</strong> and RIENG Radio.
+              </p>
 
-          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-none mb-6">
-            Merch &amp; <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-orange-400 to-red-500 italic pr-2">Tickets</span>
-          </h1>
-
-          <p className="text-gray-300 text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto font-medium leading-relaxed mb-10">
-            Exclusive streetwear, heavyweight hoodies, vintage acid-washed tees, collector vinyl, and official VIP concert passes for <strong className="text-white">Ethics Entertainment</strong> and RIENG Radio.
-          </p>
-
-          {/* Quick Features Highlight */}
-          <div className="flex items-center justify-center gap-6 sm:gap-10 flex-wrap text-xs sm:text-sm font-bold text-gray-400">
-            <div className="flex items-center gap-2">
-              <Truck className="w-4 h-4 text-primary" />
-              <span>Same-Day Nairobi Delivery</span>
+              {/* Quick Actions */}
+              <div className="flex items-center gap-4 flex-wrap">
+                <a
+                  href="#merch-catalog"
+                  className="relative bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-8 py-4 rounded-full font-black uppercase tracking-widest text-xs flex items-center gap-3 shadow-[0_0_30px_rgba(255,107,53,0.3)] hover:shadow-[0_0_40px_rgba(255,107,53,0.5)] transform hover:-translate-y-0.5"
+                >
+                  <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
+                  Shop Drop 01 Catalog →
+                </a>
+                <Link
+                  href="/ethics"
+                  className="text-white/60 hover:text-white text-xs font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-4 rounded-full transition-all"
+                >
+                  Ethics Partner Page
+                </Link>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-primary" />
-              <span>Instant M-Pesa STK Checkout</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Ticket className="w-4 h-4 text-primary" />
-              <span>Instant WhatsApp QR E-Tickets</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-primary" />
-              <span>100% Official Artist Auth</span>
+
+            {/* Live Streaming Badge & Waveform Widget */}
+            <div className="flex flex-col items-end gap-4">
+              <div className="bg-[#080808] border border-white/5 rounded-2xl px-6 py-5 flex items-center gap-5">
+                <div className="flex flex-col">
+                  <span className="text-white/30 text-[10px] font-black uppercase tracking-widest mb-1">Live Store</span>
+                  <span className="text-white font-black text-sm">Drop 01 Active 🔥</span>
+                </div>
+                <WaveformBars />
+              </div>
+              <div className="flex gap-3 flex-wrap justify-end">
+                <span className="bg-primary/10 border border-primary/20 text-primary text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest">
+                  6 Official Items
+                </span>
+                <span className="bg-orange-500/15 border border-orange-500/30 text-orange-400 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping inline-block"></span>
+                  M-Pesa Express
+                </span>
+                <span className="bg-white/5 border border-white/10 text-white/50 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest">
+                  Same-Day Delivery
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── TICKER BAR ── */}
-      <div className="w-full overflow-hidden bg-[#080808] border-y border-white/5 py-3.5 flex whitespace-nowrap">
+      {/* ── TICKER ── */}
+      <div className="w-full overflow-hidden bg-[#080808] border-y border-white/5 py-4 flex whitespace-nowrap">
         <div className="marquee-left flex items-center min-w-max">
-          {[...merchTicker, ...merchTicker, ...merchTicker].map((tag, i) => (
+          {[...merchTickerTags, ...merchTickerTags, ...merchTickerTags].map((tag, i) => (
             <span key={i} className="text-white/30 font-black uppercase tracking-[0.3em] text-xs mx-6 flex items-center gap-6">
-              {tag} <span className="w-1.5 h-1.5 bg-primary/60 rounded-full inline-block" />
+              {tag} <span className="w-1.5 h-1.5 bg-primary/50 rounded-full inline-block"></span>
             </span>
           ))}
         </div>
       </div>
 
-      {/* ── PRODUCTS SECTION ── */}
-      <section className="py-20 md:py-28 relative">
+      {/* ── STATS BAR ── */}
+      <section className="py-16 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          {/* Section Header & Filter Tabs */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 pb-8 border-b border-white/5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard value={1} suffix="st" label="Official Drop Edition" color="bg-primary" />
+            <StatCard value={100} suffix="%" label="Authentic Artist Guarantee" color="bg-primary" />
+            <StatCard value={24} suffix="h" label="Nairobi Delivery Window" color="bg-primary" />
+            <StatCard value={200} suffix=" LPs" label="Limited Vinyl Pressings" color="bg-orange-500" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── PRODUCTS / CATALOG SECTION ── */}
+      <section id="merch-catalog" className="py-24 md:py-32 relative overflow-hidden">
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 border-b border-white/5 pb-10 gap-6">
             <div>
-              <span className="text-primary font-black uppercase tracking-[0.35em] text-xs block mb-2 flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5" />
-                Featured Catalog
+              <span className="text-primary font-black uppercase tracking-[0.4em] text-xs block mb-4 flex items-center gap-3">
+                <span className="w-8 h-px bg-primary inline-block"></span>
+                Official Drops
               </span>
-              <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
-                Available <span className="text-primary italic">Drops</span>
+              <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tight">
+                Shop <span className="italic text-primary pr-2">Collection</span>
               </h2>
             </div>
 
-            {/* Category Filter Pills */}
-            <div className="flex items-center gap-2 flex-wrap bg-[#0a0a0a] p-1.5 rounded-full border border-white/10">
+            {/* Category Filter Buttons */}
+            <div className="flex items-center gap-2 flex-wrap">
               {categories.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-5 py-2 rounded-full font-black text-xs uppercase tracking-wider transition-all duration-300 ${
-                    activeCategory === cat
+                  onClick={() => setSelectedFilter(cat)}
+                  className={`px-5 py-2.5 rounded-full font-black text-xs uppercase tracking-wider transition-all duration-300 ${
+                    selectedFilter === cat
                       ? 'bg-primary text-white shadow-[0_0_20px_rgba(255,107,53,0.4)]'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                      : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10'
                   }`}
                 >
                   {cat}
@@ -362,65 +469,76 @@ export default function MerchPage() {
             </div>
           </div>
 
-          {/* Product Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProducts.map((product) => (
+          {/* Product Items List */}
+          <div className="flex flex-col gap-8">
+            {filteredProducts.map((product, idx) => (
               <div
                 key={product.id}
-                className="group relative bg-[#080808] border border-white/8 hover:border-primary/40 rounded-3xl overflow-hidden transition-all duration-500 flex flex-col justify-between hover:shadow-[0_15px_50px_rgba(255,107,53,0.12)] hover:-translate-y-1.5"
+                onMouseEnter={() => setHoveredProduct(product.id)}
+                onMouseLeave={() => setHoveredProduct(null)}
+                className="group relative flex flex-col md:flex-row border border-white/8 hover:border-primary/40 rounded-[2rem] overflow-hidden transition-all duration-700 hover:shadow-[0_0_80px_rgba(255,107,53,0.12)] bg-[#080808]"
               >
-                {/* Top Image Container */}
-                <div className="relative aspect-square w-full overflow-hidden bg-black">
+                {/* Left image */}
+                <div className="relative w-full md:w-80 lg:w-96 aspect-[4/3] md:aspect-auto flex-shrink-0 overflow-hidden">
                   <Image
                     src={product.image}
                     alt={product.name}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100"
+                    className="object-cover transition-transform duration-[3s] group-hover:scale-110 opacity-70 group-hover:opacity-100"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-transparent to-transparent opacity-80" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#080808] hidden md:block pointer-events-none"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#080808] to-transparent md:hidden pointer-events-none"></div>
 
-                  {/* Badge */}
-                  <div className="absolute top-4 left-4 flex flex-col gap-1.5">
-                    <span className="bg-primary/90 backdrop-blur-md text-white font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">
-                      {product.badge}
-                    </span>
-                    <span className="bg-black/60 backdrop-blur-md border border-white/10 text-gray-300 text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
-                      {product.artist}
-                    </span>
-                  </div>
+                  <span className="absolute top-5 left-5 bg-primary text-white text-[10px] font-black px-3 py-1.5 uppercase tracking-widest shadow-[0_0_20px_rgba(255,107,53,0.5)]">
+                    {product.tag}
+                  </span>
 
-                  {/* Stock Indicator */}
-                  <div className="absolute bottom-4 right-4 bg-black/75 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-orange-400">
-                    {product.stockStatus}
-                  </div>
+                  <span className="absolute bottom-4 right-4 text-[90px] font-black text-white/5 leading-none select-none pointer-events-none">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
                 </div>
 
-                {/* Body Details */}
-                <div className="p-6 sm:p-7 flex flex-col flex-1 justify-between gap-6">
+                {/* Right info */}
+                <div className="flex flex-col justify-between flex-1 p-8 md:p-10 lg:p-14">
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-black uppercase text-white tracking-tight mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                    <div className="flex items-center gap-3 flex-wrap mb-4">
+                      <span className="text-primary/80 font-bold uppercase tracking-[0.3em] text-[10px] border border-primary/20 px-3 py-1 rounded-full bg-primary/5">
+                        {product.category}
+                      </span>
+                      <span className="text-white/40 font-bold uppercase tracking-[0.3em] text-[10px] border border-white/10 px-3 py-1 rounded-full">
+                        {product.materialOrType}
+                      </span>
+                      <span className="text-orange-400/80 font-bold uppercase tracking-[0.3em] text-[10px] border border-orange-500/20 px-3 py-1 rounded-full bg-orange-500/5">
+                        {product.stockStatus}
+                      </span>
+                    </div>
+
+                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white uppercase tracking-tighter leading-tight mb-2 group-hover:text-primary transition-colors duration-300">
                       {product.name}
                     </h3>
+                    <p className="text-gray-500 font-bold text-xs sm:text-sm uppercase tracking-widest mb-6">
+                      {product.artist}
+                    </p>
 
                     {product.isTicket && (
-                      <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 mb-3 text-xs">
+                      <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-4 text-xs">
                         <p className="font-black text-primary uppercase tracking-wide">
                           📅 {product.eventDate}
                         </p>
-                        <p className="text-gray-300 text-[11px] font-medium mt-0.5">
+                        <p className="text-gray-300 text-xs font-medium mt-1">
                           📍 {product.venue}
                         </p>
                       </div>
                     )}
 
-                    <p className="text-gray-400 text-xs sm:text-sm leading-relaxed line-clamp-3 mb-4">
-                      {product.description}
+                    <p className="text-gray-300 text-base md:text-lg leading-relaxed max-w-xl border-l-[3px] border-white/10 group-hover:border-primary/40 pl-5 transition-colors duration-300 mb-6">
+                      {product.desc}
                     </p>
 
-                    {/* Features list */}
-                    <div className="space-y-1 mb-2">
-                      {product.details.slice(0, 2).map((detail, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-[11px] text-gray-300 font-medium">
+                    {/* Feature bullets */}
+                    <div className="grid sm:grid-cols-2 gap-2 mb-2">
+                      {product.details.map((detail, dIdx) => (
+                        <div key={dIdx} className="flex items-center gap-2 text-xs text-gray-400 font-medium">
                           <CheckCircle2 className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                           <span>{detail}</span>
                         </div>
@@ -428,21 +546,20 @@ export default function MerchPage() {
                     </div>
                   </div>
 
-                  {/* Pricing and Action */}
-                  <div className="pt-5 border-t border-white/8 flex items-center justify-between gap-4">
+                  {/* Pricing and Buy Button */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mt-10 pt-8 border-t border-white/5">
                     <div>
-                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Price</span>
-                      <span className="text-2xl font-black text-white tracking-tight">
+                      <p className="text-white/30 font-bold uppercase tracking-widest text-[10px] mb-1">Price</p>
+                      <p className="text-4xl md:text-5xl font-black text-white tracking-tighter group-hover:text-primary transition-colors duration-700">
                         {product.price}
-                      </span>
+                      </p>
                     </div>
-
                     <button
-                      onClick={() => handleOpenModal(product)}
-                      className="bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-[0_0_20px_rgba(255,107,53,0.3)] hover:scale-105"
+                      onClick={() => handleOpenBuyModal(product)}
+                      className="relative bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-10 py-4 rounded-full font-black uppercase tracking-widest text-sm flex items-center gap-3 shadow-[0_0_30px_rgba(255,107,53,0.2)] hover:shadow-[0_0_40px_rgba(255,107,53,0.4)]"
                     >
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      {product.isTicket ? 'Get Ticket' : 'Buy Now'}
+                      <ShoppingBag className="w-5 h-5" />
+                      {product.isTicket ? 'Get VIP Ticket' : 'Buy Now'}
                     </button>
                   </div>
                 </div>
@@ -452,47 +569,73 @@ export default function MerchPage() {
         </div>
       </section>
 
-      {/* ── ETHICS SPOTLIGHT BANNER ── */}
-      <section className="py-20 border-t border-white/5 bg-gradient-to-r from-primary/10 via-[#080808] to-black relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="border border-primary/30 rounded-[2.5rem] p-8 sm:p-14 bg-black/60 backdrop-blur-2xl relative overflow-hidden shadow-[0_0_80px_rgba(255,107,53,0.15)] flex flex-col lg:flex-row items-center justify-between gap-10">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 bg-primary/20 border border-primary/40 text-primary px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-4">
-                <Flame className="w-3.5 h-3.5" /> Exclusive Artist Collab
-              </div>
-              <h3 className="text-3xl sm:text-5xl font-black uppercase text-white tracking-tight mb-4">
-                Official <span className="text-primary italic">Ethics Entertainment</span> Merch Line
+      {/* ── ETHICS SPOTLIGHT PROMO BANNER ── */}
+      <section className="py-12 border-y border-white/5 bg-gradient-to-r from-primary/10 via-[#0a0a0a] to-[#080808]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="border border-primary/30 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden bg-[#0a0a0a]/90 backdrop-blur-xl flex flex-col lg:flex-row items-center justify-between gap-8 shadow-[0_0_60px_rgba(255,107,53,0.12)]">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 blur-[100px] rounded-full pointer-events-none"></div>
+            <div className="relative z-10 max-w-2xl">
+              <span className="inline-flex items-center gap-2 bg-primary/20 border border-primary/40 text-primary text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase tracking-widest mb-4">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                Official Ethics Merch Line
+              </span>
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-white uppercase tracking-tight mb-3">
+                Authentic <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400 italic">Ethics Entertainment</span> Gear
               </h3>
-              <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-6">
-                All sales directly support the creators. Delivered in premium custom vacuum-sealed packaging with authenticity certificates and exclusive sticker packs.
+              <p className="text-gray-300 text-base md:text-lg leading-relaxed">
+                Direct fan support with zero middleman deductions. Shipped in premium custom packaging with numbered hologram certificates of authenticity and sticker packs.
               </p>
-              <div className="flex items-center gap-6 text-sm font-bold text-gray-400 flex-wrap">
-                <span>✓ M-Pesa STK Instant Checkout</span>
-                <span>✓ WhatsApp Support Line</span>
-                <span>✓ Exchanges Guaranteed</span>
-              </div>
             </div>
-
-            <div className="flex-shrink-0">
+            <div className="relative z-10 flex-shrink-0">
               <Link
                 href="/ethics"
-                className="bg-white hover:bg-primary text-black hover:text-white px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-2xl transition-all hover:scale-105"
+                className="bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-10 py-5 rounded-full font-black uppercase tracking-widest text-sm flex items-center gap-3 shadow-[0_0_40px_rgba(255,107,53,0.35)] transform hover:scale-105"
               >
-                Visit Ethics Partner Page <ArrowRight className="w-4 h-4" />
+                Visit Ethics Partner Page →
               </Link>
             </div>
           </div>
         </div>
       </section>
 
+      {/* ── SUBMIT MERCH / ARTIST COLLAB CTA ── */}
+      <section className="py-20 relative overflow-hidden bg-[#030303] border-b border-white/5">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-white/3 rounded-full animate-[spin_30s_linear_infinite]"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border border-primary/5 rounded-full animate-[spin_20s_linear_infinite_reverse]"></div>
+        </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <span className="text-primary font-black uppercase tracking-[0.4em] text-xs block mb-6">
+            Artists / Creators / Designers
+          </span>
+          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">
+            Want Your Merch<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400 italic pr-4">
+              Featured Here?
+            </span>
+          </h2>
+          <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed">
+            We partner with Kenyan urban artists, record labels, and festival organizers to provide direct merchandise manufacturing, warehousing, and automated M-Pesa fulfillment.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+            <a
+              href="mailto:merch@riengradio.co.ke"
+              className="group bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-10 py-5 rounded-full font-black uppercase tracking-widest text-sm flex items-center gap-3 shadow-[0_0_30px_rgba(255,107,53,0.3)]"
+            >
+              Partner on Merch
+            </a>
+            <span className="text-white/20 font-bold text-sm">or reach out on Instagram @riengradio</span>
+          </div>
+        </div>
+      </section>
+
       {/* ── CHECKOUT MODAL ── */}
-      {isCheckingOut && selectedProduct && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="relative w-full max-w-lg bg-[#0a0a0a] border border-white/15 rounded-[2.5rem] p-6 sm:p-10 shadow-[0_0_120px_rgba(255,107,53,0.25)] max-h-[90vh] overflow-y-auto">
-            
-            {/* Close Button */}
+      {selectedProduct && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl animate-in fade-in duration-300">
+          <div className="relative w-full max-w-lg bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-6 sm:p-10 shadow-[0_0_120px_rgba(255,107,53,0.25)] max-h-[90vh] overflow-y-auto">
+            {/* Close */}
             <button
-              onClick={handleCloseModal}
+              onClick={handleCloseBuyModal}
               className="absolute top-6 right-6 w-9 h-9 rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-white flex items-center justify-center transition-colors border border-white/10"
             >
               <X className="w-4 h-4" />
@@ -507,7 +650,7 @@ export default function MerchPage() {
                 <span className="text-[10px] font-black uppercase tracking-widest text-primary block mb-0.5">
                   {selectedProduct.artist}
                 </span>
-                <h3 className="text-lg font-black uppercase text-white truncate">
+                <h3 className="text-base sm:text-lg font-black uppercase text-white truncate">
                   {selectedProduct.name}
                 </h3>
                 <p className="text-xl font-black text-primary">
@@ -516,9 +659,9 @@ export default function MerchPage() {
               </div>
             </div>
 
-            {/* Checkout Form */}
+            {/* Form */}
             <form onSubmit={handlePaystackCheckout} className="space-y-5">
-              {/* Size Selector for Apparel */}
+              {/* Size Selector */}
               {selectedProduct.sizes && (
                 <div>
                   <label className="text-xs font-black uppercase tracking-widest text-gray-400 block mb-2">
@@ -570,7 +713,7 @@ export default function MerchPage() {
                 </div>
               </div>
 
-              {/* M-Pesa Phone Number */}
+              {/* Phone */}
               <div>
                 <label className="text-xs font-black uppercase tracking-widest text-gray-400 block mb-1.5">
                   M-Pesa Phone Number:
@@ -585,7 +728,7 @@ export default function MerchPage() {
                 />
               </div>
 
-              {/* Delivery Address if physical item */}
+              {/* Delivery or Ticket info */}
               {!selectedProduct.isTicket ? (
                 <div>
                   <label className="text-xs font-black uppercase tracking-widest text-gray-400 block mb-1.5">
@@ -603,11 +746,11 @@ export default function MerchPage() {
               ) : (
                 <div className="bg-primary/10 border border-primary/20 rounded-xl p-3.5 text-xs text-gray-300">
                   <p className="font-black text-primary uppercase mb-1">🎟️ Instant Digital Delivery</p>
-                  <p>Your VIP QR Code E-Ticket will be generated and dispatched to your phone via SMS &amp; WhatsApp immediately after payment.</p>
+                  <p>Your VIP QR Code E-Ticket will be generated and dispatched to your phone via SMS &amp; WhatsApp immediately upon payment.</p>
                 </div>
               )}
 
-              {/* Error Notification */}
+              {/* Error */}
               {errorMessage && (
                 <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs font-bold">
                   {errorMessage}
@@ -633,6 +776,18 @@ export default function MerchPage() {
           </div>
         </div>
       )}
+
+      {/* Keyframe Injection */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes wave {
+          from { transform: scaleY(0.4); }
+          to   { transform: scaleY(1); }
+        }
+        @keyframes slideLine {
+          from { opacity: 0.3; transform: translateX(-5%); }
+          to   { opacity: 0.8; transform: translateX(5%); }
+        }
+      ` }} />
 
       <Footer />
     </main>
