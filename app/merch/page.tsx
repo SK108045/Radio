@@ -377,12 +377,9 @@ export default function MerchPage() {
                   <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
                   Shop Drop 01 Catalog →
                 </a>
-                <Link
-                  href="/ethics"
-                  className="text-white/60 hover:text-white text-xs font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-4 rounded-full transition-all"
-                >
-                  Ethics Partner Page
-                </Link>
+                <span className="text-white/40 text-xs font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-5 py-4 rounded-full">
+                  100% Verified Streetwear
+                </span>
               </div>
             </div>
 
@@ -569,34 +566,7 @@ export default function MerchPage() {
         </div>
       </section>
 
-      {/* ── ETHICS SPOTLIGHT PROMO BANNER ── */}
-      <section className="py-12 border-y border-white/5 bg-gradient-to-r from-primary/10 via-[#0a0a0a] to-[#080808]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border border-primary/30 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden bg-[#0a0a0a]/90 backdrop-blur-xl flex flex-col lg:flex-row items-center justify-between gap-8 shadow-[0_0_60px_rgba(255,107,53,0.12)]">
-            <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 blur-[100px] rounded-full pointer-events-none"></div>
-            <div className="relative z-10 max-w-2xl">
-              <span className="inline-flex items-center gap-2 bg-primary/20 border border-primary/40 text-primary text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase tracking-widest mb-4">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                Official Ethics Merch Line
-              </span>
-              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-white uppercase tracking-tight mb-3">
-                Authentic <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400 italic">Ethics Entertainment</span> Gear
-              </h3>
-              <p className="text-gray-300 text-base md:text-lg leading-relaxed">
-                Direct fan support with zero middleman deductions. Shipped in premium custom packaging with numbered hologram certificates of authenticity and sticker packs.
-              </p>
-            </div>
-            <div className="relative z-10 flex-shrink-0">
-              <Link
-                href="/ethics"
-                className="bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-10 py-5 rounded-full font-black uppercase tracking-widest text-sm flex items-center gap-3 shadow-[0_0_40px_rgba(255,107,53,0.35)] transform hover:scale-105"
-              >
-                Visit Ethics Partner Page →
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* ── SUBMIT MERCH / ARTIST COLLAB CTA ── */}
       <section className="py-20 relative overflow-hidden bg-[#030303] border-b border-white/5">
