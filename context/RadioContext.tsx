@@ -18,7 +18,7 @@ interface RadioContextValue {
 
 const RadioContext = createContext<RadioContextValue | null>(null)
 
-// Global reference across client transitions so audio is never destroyed between pages
+// Global reference across client navigation so audio is never destroyed between pages
 let globalAudio: HTMLAudioElement | null = null
 
 export function RadioProvider({ children }: { children: React.ReactNode }) {
@@ -42,7 +42,7 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval)
   }, [])
 
-  // Initialize persistent global audio instance
+  // Initialize persistent global audio instance with pre-buffering
   useEffect(() => {
     if (typeof window === 'undefined') return
 
@@ -58,7 +58,6 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     const handlePlay = () => setIsPlaying(true)
     const handlePause = () => setIsPlaying(false)
     const handleError = () => {
-      console.warn('Radio stream temporary error, attempting recovery...')
       if (isPlaying) {
         setTimeout(() => {
           if (globalAudio) {
@@ -76,19 +75,19 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     // Sync initial state
     setIsPlaying(!audio.paused)
 
-    // Try instant autoplay on mount
-    const startAutoplay = async () => {
+    // Attempt instant autoplay silently on mount
+    const tryAutoplay = async () => {
       try {
         await audio.play()
         setIsPlaying(true)
         setHasInteracted(true)
       } catch {
-        // Autoplay policy prevented immediate unprompted play
+        // Browser requires first user gesture (pointerdown/click/touchstart/keydown)
         setIsPlaying(false)
       }
     }
 
-    startAutoplay()
+    tryAutoplay()
 
     return () => {
       audio.removeEventListener('play', handlePlay)
@@ -97,7 +96,7 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Proactive gesture unlocker — triggers on ANY first interaction anywhere on viewport
+  // Trusted gesture unlocker — starts playing on the absolute first tap/click/keypress anywhere on page
   useEffect(() => {
     if (hasInteracted && isPlaying) return
 
@@ -110,18 +109,19 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
           setIsPlaying(true)
         }
         setHasInteracted(true)
-      } catch (e) {
-        console.warn('Auto-play unlock attempt:', e)
+      } catch {
+        // Silent catch
       }
     }
 
-    const events = ['click', 'touchstart', 'pointerdown', 'keydown', 'scroll', 'wheel']
-    events.forEach((evt) => {
+    // Only trusted browser user gestures that satisfy Chromium & WebKit Autoplay Policy
+    const trustedEvents = ['pointerdown', 'click', 'touchstart', 'keydown']
+    trustedEvents.forEach((evt) => {
       window.addEventListener(evt, unlockAndPlay, { capture: true, once: true })
     })
 
     return () => {
-      events.forEach((evt) => {
+      trustedEvents.forEach((evt) => {
         window.removeEventListener(evt, unlockAndPlay, { capture: true })
       })
     }
@@ -133,8 +133,8 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
       await globalAudio.play()
       setIsPlaying(true)
       setHasInteracted(true)
-    } catch (err) {
-      console.error('Audio play failed:', err)
+    } catch {
+      // Audio playback failed
     }
   }, [])
 

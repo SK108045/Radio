@@ -40,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark bg-background">
+    <html lang="en" className="dark bg-background" data-scroll-behavior="smooth">
       <body className="font-sans antialiased">
         <RadioProvider>
           <SmoothScroll />
