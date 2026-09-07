@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import SmoothScroll from '@/components/SmoothScroll'
 import { RadioProvider } from '@/context/RadioContext'
+import FloatingRadioBar from '@/components/FloatingRadioBar'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -44,6 +45,7 @@ export default function RootLayout({
         <RadioProvider>
           <SmoothScroll />
           {children}
+          <FloatingRadioBar />
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </RadioProvider>
       </body>

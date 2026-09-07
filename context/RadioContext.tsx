@@ -9,104 +9,171 @@ interface RadioContextValue {
   isPlaying: boolean
   currentShow: ShowDetails
   togglePlay: () => void
-  /** true once we've attempted autoplay (even if browser blocked it) */
+  play: () => Promise<void>
+  pause: () => void
   hasInteracted: boolean
+  volume: number
+  setVolume: (v: number) => void
 }
 
 const RadioContext = createContext<RadioContextValue | null>(null)
 
+// Global reference across client transitions so audio is never destroyed between pages
+let globalAudio: HTMLAudioElement | null = null
+
 export function RadioProvider({ children }: { children: React.ReactNode }) {
-  const audioRef = useRef<HTMLAudioElement | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
+  const [volume, setVolumeState] = useState(1)
   const [currentShow, setCurrentShow] = useState<ShowDetails>({
     title: 'RIENG Radio',
     host: 'RIENG Radio',
     image: '/KarteloandMiracleBaby.jpg',
   })
 
-  // Resolve current show on mount
+  // Update current show based on day/hour
   useEffect(() => {
-    const now = new Date()
-    setCurrentShow(getCurrentShow(now.getDay(), now.getHours()))
+    const updateShow = () => {
+      const now = new Date()
+      setCurrentShow(getCurrentShow(now.getDay(), now.getHours()))
+    }
+    updateShow()
+    const interval = setInterval(updateShow, 60000)
+    return () => clearInterval(interval)
   }, [])
 
-  // Create the audio element once and try to autoplay
+  // Initialize persistent global audio instance
   useEffect(() => {
-    const audio = new Audio(STREAM_URL)
-    audio.preload = 'none'
-    audioRef.current = audio
+    if (typeof window === 'undefined') return
 
-    // Update React state when the browser pauses/plays the audio externally
-    audio.addEventListener('play', () => setIsPlaying(true))
-    audio.addEventListener('pause', () => setIsPlaying(false))
+    if (!globalAudio) {
+      globalAudio = new Audio()
+      globalAudio.src = STREAM_URL
+      globalAudio.preload = 'auto'
+      globalAudio.crossOrigin = 'anonymous'
+    }
 
-    // Attempt autoplay — browsers will likely block this on first load
-    const tryAutoplay = async () => {
+    const audio = globalAudio
+
+    const handlePlay = () => setIsPlaying(true)
+    const handlePause = () => setIsPlaying(false)
+    const handleError = () => {
+      console.warn('Radio stream temporary error, attempting recovery...')
+      if (isPlaying) {
+        setTimeout(() => {
+          if (globalAudio) {
+            globalAudio.src = STREAM_URL
+            globalAudio.play().catch(() => {})
+          }
+        }, 2000)
+      }
+    }
+
+    audio.addEventListener('play', handlePlay)
+    audio.addEventListener('pause', handlePause)
+    audio.addEventListener('error', handleError)
+
+    // Sync initial state
+    setIsPlaying(!audio.paused)
+
+    // Try instant autoplay on mount
+    const startAutoplay = async () => {
       try {
         await audio.play()
         setIsPlaying(true)
         setHasInteracted(true)
       } catch {
-        // Browser blocked autoplay — we'll wait for a user gesture
+        // Autoplay policy prevented immediate unprompted play
         setIsPlaying(false)
       }
     }
 
-    tryAutoplay()
+    startAutoplay()
 
     return () => {
-      audio.pause()
-      audio.src = ''
+      audio.removeEventListener('play', handlePlay)
+      audio.removeEventListener('pause', handlePause)
+      audio.removeEventListener('error', handleError)
     }
   }, [])
 
-  // If browser blocked autoplay, start on the first user interaction anywhere on the page
+  // Proactive gesture unlocker — triggers on ANY first interaction anywhere on viewport
   useEffect(() => {
-    if (hasInteracted) return
+    if (hasInteracted && isPlaying) return
 
-    const handleFirstInteraction = async () => {
-      if (!audioRef.current || hasInteracted) return
+    const unlockAndPlay = async () => {
+      if (!globalAudio) return
+
       try {
-        await audioRef.current.play()
-        setIsPlaying(true)
+        if (globalAudio.paused) {
+          await globalAudio.play()
+          setIsPlaying(true)
+        }
         setHasInteracted(true)
-      } catch {
-        // Still blocked — user will need to press the play button
+      } catch (e) {
+        console.warn('Auto-play unlock attempt:', e)
       }
     }
 
-    window.addEventListener('click', handleFirstInteraction, { once: true })
-    window.addEventListener('keydown', handleFirstInteraction, { once: true })
-    window.addEventListener('touchstart', handleFirstInteraction, { once: true })
+    const events = ['click', 'touchstart', 'pointerdown', 'keydown', 'scroll', 'wheel']
+    events.forEach((evt) => {
+      window.addEventListener(evt, unlockAndPlay, { capture: true, once: true })
+    })
 
     return () => {
-      window.removeEventListener('click', handleFirstInteraction)
-      window.removeEventListener('keydown', handleFirstInteraction)
-      window.removeEventListener('touchstart', handleFirstInteraction)
+      events.forEach((evt) => {
+        window.removeEventListener(evt, unlockAndPlay, { capture: true })
+      })
     }
-  }, [hasInteracted])
+  }, [hasInteracted, isPlaying])
+
+  const play = useCallback(async () => {
+    if (!globalAudio) return
+    try {
+      await globalAudio.play()
+      setIsPlaying(true)
+      setHasInteracted(true)
+    } catch (err) {
+      console.error('Audio play failed:', err)
+    }
+  }, [])
+
+  const pause = useCallback(() => {
+    if (!globalAudio) return
+    globalAudio.pause()
+    setIsPlaying(false)
+  }, [])
 
   const togglePlay = useCallback(async () => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    if (isPlaying) {
-      audio.pause()
-      setIsPlaying(false)
+    if (!globalAudio) return
+    if (!globalAudio.paused) {
+      pause()
     } else {
-      try {
-        await audio.play()
-        setIsPlaying(true)
-        setHasInteracted(true)
-      } catch (err) {
-        console.error('Audio playback failed:', err)
-      }
+      await play()
     }
-  }, [isPlaying])
+  }, [play, pause])
+
+  const setVolume = useCallback((val: number) => {
+    const clamped = Math.max(0, Math.min(1, val))
+    setVolumeState(clamped)
+    if (globalAudio) {
+      globalAudio.volume = clamped
+    }
+  }, [])
 
   return (
-    <RadioContext.Provider value={{ isPlaying, currentShow, togglePlay, hasInteracted }}>
+    <RadioContext.Provider
+      value={{
+        isPlaying,
+        currentShow,
+        togglePlay,
+        play,
+        pause,
+        hasInteracted,
+        volume,
+        setVolume,
+      }}
+    >
       {children}
     </RadioContext.Provider>
   )

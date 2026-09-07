@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Menu, X, Flame, Tv, Play, Disc, TrendingUp } from 'lucide-react'
+import { Menu, X, Flame, Tv, Play, Disc, TrendingUp, ShoppingBag } from 'lucide-react'
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -28,6 +28,7 @@ export default function Navbar() {
     { href: '/trending', label: 'Trending', icon: TrendingUp },
     { href: '/videos', label: 'Videos', icon: Play },
     { href: '/albums', label: 'Albums', icon: Disc },
+    { href: '/merch', label: 'Merch', icon: ShoppingBag },
   ]
 
   const isActive = (href: string) => {
