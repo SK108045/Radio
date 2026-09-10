@@ -2,19 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import {
   ShoppingBag,
-  Ticket,
-  Flame,
   CheckCircle2,
   X,
   CreditCard,
-  Truck,
-  ShieldCheck,
-  Tag,
 } from 'lucide-react'
 
 // ─── Products Data ────────────────────────────────────────────────────────────
@@ -38,6 +32,65 @@ export interface MerchProduct {
 }
 
 export const merchList: MerchProduct[] = [
+  {
+    id: 'kapitani-kitemeo-tee-01',
+    name: 'KAPITANI "KITEMEO" Vintage Washed Tee',
+    artist: 'Kapitani',
+    category: 'Apparel',
+    price: 'KES 2,200',
+    priceNum: 2200,
+    image: '/merch/kapitani-kitemeo-tee.png',
+    tag: 'New Artist Drop 🌟',
+    stockStatus: 'First Run · In Stock',
+    desc: 'A heavyweight acid-washed tee built around Kapitani\'s Kitemeo era. The relaxed drop-shoulder cut, bold orange artwork, and soft broken-in finish bring the track\'s street energy into an everyday piece.',
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    materialOrType: '260 GSM Cotton · Acid Wash',
+    details: [
+      '260 GSM Premium Combed Cotton',
+      'Kitemeo Front Graphic',
+      'Relaxed Drop-Shoulder Fit',
+      'Reinforced Ribbed Collar',
+    ],
+  },
+  {
+    id: 'kapitani-control-hoodie-01',
+    name: 'KAPITANI "CONTROL" Heavyweight Hoodie',
+    artist: 'Kapitani',
+    category: 'Apparel',
+    price: 'KES 3,800',
+    priceNum: 3800,
+    image: '/merch/kapitani-control-hoodie.png',
+    tag: 'Kapitani Capsule 🔥',
+    stockStatus: 'Limited First Run',
+    desc: 'Dense French Terry, a double-layer hood, and vivid orange Kapitani embroidery give this oversized hoodie a clean but unmistakable presence. Designed as the anchor piece of the Control capsule.',
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    materialOrType: '480 GSM Cotton · Oversized Fit',
+    details: [
+      '480 GSM Heavyweight French Terry',
+      'Raised Kapitani Chest Embroidery',
+      'Double-Layered Structured Hood',
+      'Pre-shrunk Relaxed Street Fit',
+    ],
+  },
+  {
+    id: 'kapitani-trucker-cap-01',
+    name: 'KAPITANI Raised Embroidery Trucker Cap',
+    artist: 'Kapitani',
+    category: 'Accessories',
+    price: 'KES 1,600',
+    priceNum: 1600,
+    image: '/merch/kapitani-trucker-cap.png',
+    tag: 'Fresh Drop 🧢',
+    stockStatus: 'In Stock',
+    desc: 'A structured five-panel cap with raised Kapitani lettering, contrast orange stitching, a breathable mesh back, and an adjustable snap closure for an easy everyday fit.',
+    materialOrType: '5-Panel Structured · Snapback',
+    details: [
+      'Raised Puff Embroidery',
+      'Brushed Cotton Twill Front',
+      'Breathable Mesh Back',
+      'Adjustable Snapback Closure',
+    ],
+  },
   {
     id: 'ethics-hoodie-01',
     name: 'ETHICS Heavyweight Oversized Hoodie',
@@ -163,6 +216,8 @@ export const merchList: MerchProduct[] = [
 // ─── Ticker Items ────────────────────────────────────────────────────────────
 const merchTickerTags = [
   'OFFICIAL MERCH STORE',
+  'KAPITANI × RIENG RADIO',
+  'KITEMEO CAPSULE · OUT NOW',
   'ETHICS ENTERTAINMENT × RIENG RADIO',
   'HEAVYWEIGHT STREETWEAR',
   'INSTANT M-PESA CHECKOUT',
@@ -236,6 +291,7 @@ function WaveformBars() {
 
 export default function MerchPage() {
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
+  const [selectedArtist, setSelectedArtist] = useState<'All' | 'Kapitani' | 'Ethics Entertainment'>('All')
   const [selectedFilter, setSelectedFilter] = useState<'All' | 'Apparel' | 'Tickets' | 'Accessories' | 'Collectibles'>('All')
   const [selectedProduct, setSelectedProduct] = useState<MerchProduct | null>(null)
   const [selectedSize, setSelectedSize] = useState<string>('L')
@@ -246,11 +302,13 @@ export default function MerchPage() {
   const [errorMessage, setErrorMessage] = useState<string>('')
 
   const categories = ['All', 'Apparel', 'Tickets', 'Accessories', 'Collectibles'] as const
+  const artists = ['All', 'Kapitani', 'Ethics Entertainment'] as const
 
-  const filteredProducts =
-    selectedFilter === 'All'
-      ? merchList
-      : merchList.filter((p) => p.category === selectedFilter)
+  const filteredProducts = merchList.filter((product) => {
+    const matchesCategory = selectedFilter === 'All' || product.category === selectedFilter
+    const matchesArtist = selectedArtist === 'All' || product.artist.includes(selectedArtist)
+    return matchesCategory && matchesArtist
+  })
 
   const handleOpenBuyModal = (product: MerchProduct) => {
     setSelectedProduct(product)
@@ -365,17 +423,18 @@ export default function MerchPage() {
                 </span>
               </h1>
               <p className="text-gray-400 text-lg md:text-xl max-w-2xl font-medium border-l-4 border-primary pl-6 mb-8 leading-relaxed">
-                Official limited-edition streetwear, heavyweight hoodies, vinyl pressings, and VIP concert passes for <strong className="text-white">Ethics Entertainment</strong> and RIENG Radio.
+                Official artist drops from <strong className="text-white">Kapitani</strong> and <strong className="text-white">Ethics Entertainment</strong>, brought together by RIENG Radio.
               </p>
 
               {/* Quick Actions */}
               <div className="flex items-center gap-4 flex-wrap">
                 <a
                   href="#merch-catalog"
+                  onClick={() => setSelectedArtist('Kapitani')}
                   className="relative bg-primary hover:bg-white text-white hover:text-black transition-all duration-300 px-8 py-4 rounded-full font-black uppercase tracking-widest text-xs flex items-center gap-3 shadow-[0_0_30px_rgba(255,107,53,0.3)] hover:shadow-[0_0_40px_rgba(255,107,53,0.5)] transform hover:-translate-y-0.5"
                 >
                   <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
-                  Shop Drop 01 Catalog →
+                  Shop Kapitani Capsule →
                 </a>
                 <span className="text-white/40 text-xs font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-5 py-4 rounded-full">
                   100% Verified Streetwear
@@ -388,13 +447,13 @@ export default function MerchPage() {
               <div className="bg-[#080808] border border-white/5 rounded-2xl px-6 py-5 flex items-center gap-5">
                 <div className="flex flex-col">
                   <span className="text-white/30 text-[10px] font-black uppercase tracking-widest mb-1">Live Store</span>
-                  <span className="text-white font-black text-sm">Drop 01 Active 🔥</span>
+                  <span className="text-white font-black text-sm">Kapitani Capsule Live 🔥</span>
                 </div>
                 <WaveformBars />
               </div>
               <div className="flex gap-3 flex-wrap justify-end">
                 <span className="bg-primary/10 border border-primary/20 text-primary text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest">
-                  6 Official Items
+                  {merchList.length} Official Items
                 </span>
                 <span className="bg-orange-500/15 border border-orange-500/30 text-orange-400 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping inline-block"></span>
@@ -424,7 +483,7 @@ export default function MerchPage() {
       <section className="py-16 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard value={1} suffix="st" label="Official Drop Edition" color="bg-primary" />
+            <StatCard value={2} suffix="" label="Featured Artist Drops" color="bg-primary" />
             <StatCard value={100} suffix="%" label="Authentic Artist Guarantee" color="bg-primary" />
             <StatCard value={24} suffix="h" label="Nairobi Delivery Window" color="bg-primary" />
             <StatCard value={200} suffix=" LPs" label="Limited Vinyl Pressings" color="bg-orange-500" />
@@ -448,21 +507,45 @@ export default function MerchPage() {
               </h2>
             </div>
 
-            {/* Category Filter Buttons */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedFilter(cat)}
-                  className={`px-5 py-2.5 rounded-full font-black text-xs uppercase tracking-wider transition-all duration-300 ${
-                    selectedFilter === cat
-                      ? 'bg-primary text-white shadow-[0_0_20px_rgba(255,107,53,0.4)]'
-                      : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
+            <div className="flex flex-col gap-4 md:items-end">
+              {/* Artist Filter Buttons */}
+              <div className="flex items-center gap-2 flex-wrap" aria-label="Filter merchandise by artist">
+                {artists.map((artist) => (
+                  <button
+                    key={artist}
+                    onClick={() => setSelectedArtist(artist)}
+                    aria-pressed={selectedArtist === artist}
+                    className={`px-5 py-2.5 rounded-full font-black text-xs uppercase tracking-wider transition-all duration-300 ${
+                      selectedArtist === artist
+                        ? 'bg-white text-black shadow-[0_0_24px_rgba(255,255,255,0.15)]'
+                        : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10'
+                    }`}
+                  >
+                    {artist}
+                  </button>
+                ))}
+              </div>
+
+              {/* Category Filter Buttons */}
+              <div className="flex items-center gap-2 flex-wrap" aria-label="Filter merchandise by category">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedFilter(cat)}
+                    aria-pressed={selectedFilter === cat}
+                    className={`px-5 py-2.5 rounded-full font-black text-xs uppercase tracking-wider transition-all duration-300 ${
+                      selectedFilter === cat
+                        ? 'bg-primary text-white shadow-[0_0_20px_rgba(255,107,53,0.4)]'
+                        : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              <p className="text-white/35 text-[10px] font-black uppercase tracking-[0.22em]">
+                Showing {filteredProducts.length} of {merchList.length} official items
+              </p>
             </div>
           </div>
 

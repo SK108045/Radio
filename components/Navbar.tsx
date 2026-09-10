@@ -46,7 +46,7 @@ export default function Navbar() {
           <div className="relative z-10 flex items-center justify-center gap-2 flex-wrap pr-6 text-center">
             <span className="bg-white text-red-700 px-2 py-0.5 rounded font-black text-[9px] tracking-widest animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]">BREAKING NEWS</span>
             <span className="font-bold normal-case sm:uppercase">
-              We are partnering with Ethics Entertainment for exclusive future drops! 🎙️🔥
+              The Kapitani capsule is live alongside exclusive Ethics Entertainment drops! 🎙️🔥
             </span>
           </div>
           
