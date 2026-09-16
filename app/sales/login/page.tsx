@@ -17,7 +17,7 @@ export default function LoginPage() {
           <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
             <Radio className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">RiengRadio Artist Portal</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Rieng Artist Portal</h1>
           <p className="text-muted-foreground">Sign in to manage your music and sales</p>
         </div>
 

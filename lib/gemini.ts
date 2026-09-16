@@ -85,7 +85,7 @@ export async function enhanceTrackDescription({
   const apiKey =
     process.env.GEMINI_API_KEY || 'AQ.Ab8RN6LDJO6RH9quRTsyVo2TfRAX18Ijam7oNcgA8sxkG4NDLw'
 
-  const prompt = `You are an expert music critic, sound engineer, and A&R curator for RIENG Radio in Nairobi, Kenya.
+  const prompt = `You are an expert music critic, sound engineer, and A&R curator for RIENG in Nairobi, Kenya.
 Write an authentic, punchy, high-energy 2 to 3 sentence music description for a new track on the RIENG Music Store.
 
 Track Details:
@@ -111,6 +111,6 @@ Guidelines:
   // Fallback if network is completely offline
   return (
     rawDescription.trim() ||
-    `${title} by ${artistName}. Exclusive high-energy drop mastered for the streets on RIENG Radio.`
+    `${title} by ${artistName}. Exclusive high-energy drop mastered for the streets on RIENG.`
   )
 }

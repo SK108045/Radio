@@ -10,7 +10,7 @@ import { songsForSale } from '@/lib/musicData'
 const mainHeroVideo = {
   id: '3bdhwSoeZ9g',
   title: 'Sing Ama Pilipili | Kartelo ft. Modesto',
-  desc: 'One of RIENGFLIX’s absolute biggest public hits. A wild Pilipili-style studio episode with Kartelo and Modesto that takes zero prisoners and pushes the boundaries of raw radio.',
+  desc: 'One of RIENGFLIX’s absolute biggest public hits. A wild Pilipili-style studio episode with Kartelo and Modesto that takes zero prisoners and pushes the boundaries of raw sound.',
   badge: 'Blockbuster Hit',
   image: '/VidsHero.png' // <-- Download your image to the "public" folder and change this name to match (e.g., '/my-hero-pic.jpg')
 }
@@ -19,7 +19,7 @@ const theSeriesVideos = [
   {
     id: 'OUFm3s1wn48',
     title: 'ANSWER AMA PILIPILI | Miracle Baby in Tears',
-    desc: 'A high-performing RIENG Radio episode built around the answer-or-bite format.',
+    desc: 'A high-performing RIENG episode built around the answer-or-bite format.',
     duration: '22:15'
   },
   {
@@ -30,13 +30,13 @@ const theSeriesVideos = [
   },
   {
     id: 'DrdbQ1I-aIA',
-    title: 'Rieng Radio Reunion | How Big Dreams Die',
+    title: 'Rieng Reunion | How Big Dreams Die',
     desc: 'Reunion-style episode with the core crew; an intensely strong returning format.',
     duration: '45:10'
   },
   {
     id: '-DMoaDCixNo',
-    title: 'Rieng Radio Reggae Session Ep 1 | Mc Shalkido',
+    title: 'Rieng Reggae Session Ep 1 | Mc Shalkido',
     desc: 'The reggae session video that cements the brand’s culture-heavy reputation.',
     duration: '1:10:05'
   }
@@ -57,7 +57,7 @@ const theSeriesRow2 = [
   },
   {
     id: 'DrdbQ1I-aIA',
-    title: 'Rieng Radio Reunion | How Big Dreams Die',
+    title: 'Rieng Reunion | How Big Dreams Die',
     desc: 'A massive milestone episode featuring the core trio reuniting to speak frankly about the struggles of the entertainment industry.',
     duration: '107K Views'
   },
@@ -99,8 +99,8 @@ const socialDrops = [
   },
   {
     platform: 'Facebook',
-    title: 'Tuko na episode mpya ya RIENG RADIO',
-    desc: 'Promo post pushing the new RIENG Radio episodes out to the public.',
+    title: 'Tuko na episode mpya ya RIENG',
+    desc: 'Promo post pushing the new RIENG episodes out to the public.',
     url: 'https://www.facebook.com/karteloofficialke/posts/462573182194892/',
     image: '/Studio.jpg',
     color: 'bg-blue-600',
@@ -224,7 +224,7 @@ const categoryData: CategoryItem[] = [
     videos: [
       { id: 'yaiNt80SjiM', title: '"Miracle Baby Aliteka Karao" | Police Brutality', views: '69K Views' },
       { id: 'M9tIVvCgowg', title: '"Kuimpress Madame Ni Ngumu" | Heartbreaks', views: '65K Views' },
-      { id: 'DrdbQ1I-aIA', title: 'Rieng Radio Reunion | How Big Dreams Die', views: '107K Views' },
+      { id: 'DrdbQ1I-aIA', title: 'Rieng Reunion | How Big Dreams Die', views: '107K Views' },
     ],
   },
   {
@@ -259,12 +259,12 @@ const categoryData: CategoryItem[] = [
     borderActive: 'border-indigo-400/50',
     textActive: 'text-indigo-400',
     videos: [
-      { id: '-DMoaDCixNo', title: 'Rieng Radio Reggae Session Ep 1 | Mc Shalkido', views: '80K Views' },
+      { id: '-DMoaDCixNo', title: 'Rieng Reggae Session Ep 1 | Mc Shalkido', views: '80K Views' },
       { id: 'JeFwy18F1mA', title: 'Reggae Session Vol. 2 | MC Shalkido & DJ C4', views: '34K Views' },
       { id: 'RCUEd7LaHKY', title: 'Sing Ama Pilipili | Kartelo ft. Modesto', views: '379K Views' },
       { id: 'OUFm3s1wn48', title: 'ANSWER AMA PILIPILI | Miracle Baby in Tears', views: '107K Views' },
       { id: 'M9tIVvCgowg', title: '"Kuimpress Madame Ni Ngumu" | Heartbreaks', views: '65K Views' },
-      { id: 'DrdbQ1I-aIA', title: 'Rieng Radio Reunion | How Big Dreams Die', views: '107K Views' },
+      { id: 'DrdbQ1I-aIA', title: 'Rieng Reunion | How Big Dreams Die', views: '107K Views' },
       { id: '5iJXQA0JP28', title: 'JUA SHENG Episode 2', views: '42K Views' },
     ],
   },
@@ -631,7 +631,7 @@ export default function VideosPage() {
           <div className="flex items-end justify-between border-b border-white/10 pb-6">
              <div>
                 <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tight">The <span className="italic text-red-500 pr-4">Series</span></h2>
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs md:text-sm mt-3 bg-white/5 inline-block px-3 py-1 border border-white/10 rounded">Rieng Radio Originals</p>
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs md:text-sm mt-3 bg-white/5 inline-block px-3 py-1 border border-white/10 rounded">Rieng Originals</p>
              </div>
              <span className="hidden md:block text-white/30 font-black uppercase tracking-[0.2em] animate-pulse">Now Streaming &rarr;</span>
           </div>

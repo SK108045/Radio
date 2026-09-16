@@ -25,22 +25,22 @@ export function getCurrentShow(day: number, hour: number): ShowDetails {
     if (hour >= 15 && hour < 19) return { title: 'Reggae / Dancehall', host: 'inkmatic', image: REGGAE_IMG };
     if (hour >= 19 && hour < 23) return { title: 'Underground Kenyan HipHop', host: 'Joy Ohon', image: UNDERGROUND_IMG };
     if (hour >= 23 || hour < 3) return { title: 'Kenyan RnB', host: 'Modesto', image: RNB_IMG };
-    return { title: 'Gospel Kenya', host: 'RIENG Radio', image: DAILY_GOSPEL_IMG };
+    return { title: 'Gospel Kenya', host: 'RIENG', image: DAILY_GOSPEL_IMG };
   } else if (day === 6) {
     if (hour >= 8 && hour < 12) return { title: 'SPORTS SHOW', host: 'Bura & Swat', image: SPORTS_IMG };
     if (hour >= 12 && hour < 13) return { title: 'POLITICS SHOW', host: 'Panel', image: POLITICS_IMG };
-    if (hour >= 13 && hour < 15) return { title: 'Bongo', host: 'RIENG Radio', image: BONGO_IMG };
-    if (hour >= 15 && hour < 17) return { title: 'Naija', host: 'RIENG Radio', image: NAIJA_IMG };
-    if (hour >= 17 && hour < 19) return { title: 'Amapiano', host: 'RIENG Radio', image: AMAPIANO_IMG };
-    if (hour >= 19 && hour < 21) return { title: 'Lingala', host: 'RIENG Radio', image: LINGALA_IMG };
+    if (hour >= 13 && hour < 15) return { title: 'Bongo', host: 'RIENG', image: BONGO_IMG };
+    if (hour >= 15 && hour < 17) return { title: 'Naija', host: 'RIENG', image: NAIJA_IMG };
+    if (hour >= 17 && hour < 19) return { title: 'Amapiano', host: 'RIENG', image: AMAPIANO_IMG };
+    if (hour >= 19 && hour < 21) return { title: 'Lingala', host: 'RIENG', image: LINGALA_IMG };
     if (hour >= 21 || hour < 3) return { title: 'Underground Kenyan HipHop', host: 'Joy Ohon', image: UNDERGROUND_IMG };
-    return { title: 'Gospel Kenya', host: 'RIENG Radio', image: DAILY_GOSPEL_IMG };
+    return { title: 'Gospel Kenya', host: 'RIENG', image: DAILY_GOSPEL_IMG };
   } else {
     // Sunday
-    if (hour >= 5 && hour < 7) return { title: 'Gospel / Worship', host: 'RIENG Radio', image: GOSPEL_WORSHIP_IMG };
-    if (hour >= 13 && hour < 15) return { title: 'US R&B', host: 'RIENG Radio', image: US_RNB_IMG };
-    if (hour >= 15 && hour < 19) return { title: 'US Hip-Hop', host: 'RIENG Radio', image: US_HIPHOP_IMG };
-    if (hour >= 19 && hour < 21) return { title: 'New Kenyan Music', host: 'RIENG Radio', image: NEW_KENYAN_MUSIC_IMG };
-    return { title: 'Gospel Kenya', host: 'RIENG Radio', image: DAILY_GOSPEL_IMG };
+    if (hour >= 5 && hour < 7) return { title: 'Gospel / Worship', host: 'RIENG', image: GOSPEL_WORSHIP_IMG };
+    if (hour >= 13 && hour < 15) return { title: 'US R&B', host: 'RIENG', image: US_RNB_IMG };
+    if (hour >= 15 && hour < 19) return { title: 'US Hip-Hop', host: 'RIENG', image: US_HIPHOP_IMG };
+    if (hour >= 19 && hour < 21) return { title: 'New Kenyan Music', host: 'RIENG', image: NEW_KENYAN_MUSIC_IMG };
+    return { title: 'Gospel Kenya', host: 'RIENG', image: DAILY_GOSPEL_IMG };
   }
 }

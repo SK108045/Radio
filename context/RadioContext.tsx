@@ -26,8 +26,8 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
   const [hasInteracted, setHasInteracted] = useState(false)
   const [volume, setVolumeState] = useState(1)
   const [currentShow, setCurrentShow] = useState<ShowDetails>({
-    title: 'RIENG Radio',
-    host: 'RIENG Radio',
+    title: 'RIENG',
+    host: 'RIENG',
     image: '/KarteloandMiracleBaby.jpg',
   })
 

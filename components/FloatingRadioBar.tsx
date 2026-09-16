@@ -29,11 +29,11 @@ export default function FloatingRadioBar() {
         <button
           onClick={() => setIsCollapsed(false)}
           className="bg-[#0a0a0a]/90 hover:bg-black border border-primary/40 text-white p-3.5 rounded-full shadow-[0_10px_30px_rgba(255,107,53,0.3)] backdrop-blur-xl flex items-center gap-2 group transition-all"
-          title="Open RIENG Radio Player"
+          title="Open RIENG Player"
         >
           <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
           <Radio className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
-          <span className="text-xs font-black uppercase tracking-wider pr-1">Live Radio</span>
+          <span className="text-xs font-black uppercase tracking-wider pr-1">Live Stream</span>
         </button>
       ) : (
         <div className="bg-[#080808]/95 border border-white/10 rounded-2xl p-3 sm:p-3.5 shadow-[0_15px_40px_rgba(0,0,0,0.85)] backdrop-blur-2xl flex items-center gap-3.5 max-w-sm sm:max-w-md w-full relative overflow-hidden transition-all duration-300 group">

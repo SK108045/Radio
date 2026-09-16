@@ -40,7 +40,7 @@ export default function Footer() {
       <div className="absolute inset-0 z-0">
         <Image 
           src="/Banner.jpg"
-          alt="Rieng Radio Banner"
+          alt="RIENG Banner"
           fill
           className="object-cover opacity-60 mix-blend-overlay"
         />
@@ -124,7 +124,7 @@ export default function Footer() {
         {/* Bottom Socials & Copyright */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-gray-500 font-semibold text-xs tracking-widest uppercase">
-            © {new Date().getFullYear()} RIENG Radio. All rights reserved.
+            © {new Date().getFullYear()} RIENG. All rights reserved.
           </p>
           
           <div className="flex items-center gap-5">

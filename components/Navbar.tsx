@@ -73,7 +73,7 @@ export default function Navbar() {
               <div className="absolute inset-0 bg-red-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <Image
                 src="/logo.png"
-                alt="RIENG Radio Logo"
+                alt="RIENG Logo"
                 fill
                 sizes="48px"
                 className="object-contain relative z-10"

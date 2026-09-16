@@ -22,7 +22,7 @@ export default function HeroSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight text-balance uppercase drop-shadow-xl">
-            Welcome to <span className="text-primary drop-shadow-[0_0_15px_rgba(255,107,53,0.5)]">RIENG Radio</span>
+            Welcome to <span className="text-primary drop-shadow-[0_0_15px_rgba(255,107,53,0.5)]">RIENG</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl mx-auto text-balance font-medium drop-shadow">
             The pulse of Kenyan youth culture. Sheng, comedy, podcasts, and the sickest live mixes. 

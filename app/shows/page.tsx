@@ -54,7 +54,7 @@ const dailyShows = [
   },
   {
     title: 'Gospel Kenya',
-    host: 'RIENG Radio',
+    host: 'RIENG',
     schedule: 'Sundays | All Day + Daily | 3:00 AM - 5:00 AM',
     description: 'Spiritual awakening with Kenya&apos;s finest gospel music. Start your day with uplifting messages and powerful melodies.',
     image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Gospel.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0dvc3BlbC5qcGciLCJpYXQiOjE3Nzc2MTg2OTAsImV4cCI6MTgwOTE1NDY5MH0.FiCgYciSVoTbmjsZ039KJG8_hlbPa18hY7rl10hUzrw',
@@ -72,9 +72,9 @@ const dailyShows = [
   },
   {
     title: 'SUNRISE WORSHIP - LIVE',
-    host: 'HEALING & RENEWED LIVES CENTRE × RIENG RADIO',
+    host: 'HEALING & RENEWED LIVES CENTRE × RIENG',
     schedule: 'Sunday | 11:00 AM - 2:00 PM',
-    description: 'A faith-filled radio experience featuring healing conversations, inspiring testimonies, worship, counseling insights, and practical guidance for stronger families, relationships, and communities.',
+    description: 'A faith-filled live show experience featuring healing conversations, inspiring testimonies, worship, counseling insights, and practical guidance for stronger families, relationships, and communities.',
     image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Guidance.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvR3VpZGFuY2UuanBnIiwiaWF0IjoxNzgwNTE1NzUzLCJleHAiOjE4MTIwNTE3NTN9.QETbkxT8Fmm0ZCythheoAl08c1zP-fdqU3JoAFmBqcw',
     color: 'from-emerald-500/20 to-transparent',
     features: ['Faith-Based Guidance','Healing Conversations','Inspiring Testimonies']

@@ -54,11 +54,11 @@ export default function LivePlayer() {
               </div>
 
               <h2 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight uppercase drop-shadow-lg">
-                {mounted ? currentShow.title : 'RIENG Radio'}
+                {mounted ? currentShow.title : 'RIENG'}
               </h2>
 
               <p className="text-xl md:text-2xl text-gray-400 mb-8 font-medium">
-                <span className="text-white font-bold">{mounted ? currentShow.host : 'RIENG Radio'}</span> • Playing Now
+                <span className="text-white font-bold">{mounted ? currentShow.host : 'RIENG'}</span> • Playing Now
               </p>
 
               {/* Player Controls */}

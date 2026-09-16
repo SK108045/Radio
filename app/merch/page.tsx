@@ -216,9 +216,9 @@ export const merchList: MerchProduct[] = [
 // ─── Ticker Items ────────────────────────────────────────────────────────────
 const merchTickerTags = [
   'OFFICIAL MERCH STORE',
-  'KAPITANI × RIENG RADIO',
+  'KAPITANI × RIENG',
   'KITEMEO CAPSULE · OUT NOW',
-  'ETHICS ENTERTAINMENT × RIENG RADIO',
+  'ETHICS ENTERTAINMENT × RIENG',
   'HEAVYWEIGHT STREETWEAR',
   'INSTANT M-PESA CHECKOUT',
   'VIP CONCERT PASSES & TICKETS',
@@ -423,7 +423,7 @@ export default function MerchPage() {
                 </span>
               </h1>
               <p className="text-gray-400 text-lg md:text-xl max-w-2xl font-medium border-l-4 border-primary pl-6 mb-8 leading-relaxed">
-                Official artist drops from <strong className="text-white">Kapitani</strong> and <strong className="text-white">Ethics Entertainment</strong>, brought together by RIENG Radio.
+                Official artist drops from <strong className="text-white">Kapitani</strong> and <strong className="text-white">Ethics Entertainment</strong>, brought together by RIENG.
               </p>
 
               {/* Quick Actions */}

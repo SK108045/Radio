@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Artist Portal - RiengRadio',
-  description: 'Manage your music, sales, and performance on RiengRadio.',
+  title: 'Artist Portal - Rieng',
+  description: 'Manage your music, sales, and performance on Rieng.',
 }
 
 export default function SalesLayout({

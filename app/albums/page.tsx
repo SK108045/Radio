@@ -151,7 +151,7 @@ export default function AlbumsPage() {
               <div className="bg-[#080808] border border-white/5 rounded-2xl px-6 py-5 flex items-center gap-5">
                 <div className="flex flex-col">
                   <span className="text-white/30 text-[10px] font-black uppercase tracking-widest mb-1">Now Streaming</span>
-                  <span className="text-white font-black text-sm">Rieng Radio Live</span>
+                  <span className="text-white font-black text-sm">RIENG Live</span>
                 </div>
                 <WaveformBars />
               </div>

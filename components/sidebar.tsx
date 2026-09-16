@@ -21,9 +21,11 @@ export function SidebarContent({ isOpen = true }: { isOpen?: boolean }) {
         <div className={cn("flex items-center gap-2", !isOpen && "justify-center")}>
           <Radio className="w-6 h-6 text-sidebar-primary shrink-0" />
           {isOpen && (
-            <h1 className="text-xl font-bold text-sidebar-foreground text-balance">
-              RiengRadio<br />Artist Portal
-            </h1>
+            <div className="flex flex-col">
+              <span className="font-bold text-sm leading-tight">
+                Rieng<br />Artist Portal
+              </span>
+            </div>
           )}
         </div>
       </div>
@@ -55,7 +57,7 @@ export function SidebarContent({ isOpen = true }: { isOpen?: boolean }) {
 
       {/* Footer */}
       <div className={cn("py-4 border-t border-sidebar-border text-xs text-sidebar-foreground/60 whitespace-nowrap overflow-hidden", isOpen ? "px-4" : "text-center")}>
-        {isOpen ? <p>© 2026 RiengRadio</p> : <p>©</p>}
+        {isOpen ? <p>© 2026 Rieng</p> : <p>©</p>}
       </div>
     </>
   )

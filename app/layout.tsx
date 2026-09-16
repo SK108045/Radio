@@ -10,8 +10,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'RIENG Radio - Your Premium Music & Entertainment Station',
-  description: 'RIENG Radio - The ultimate destination for curated music, live shows, and entertainment. Stream your favorite music and discover new artists.',
+  title: 'RIENG - Your Premium Music & Entertainment Platform',
+  description: 'RIENG - The ultimate destination for curated music, live shows, and entertainment. Stream your favorite music and discover new artists.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -27,8 +27,8 @@ export const metadata: Metadata = {
     apple: '/logo.png',
   },
   openGraph: {
-    title: 'RIENG Radio - Your Premium Music & Entertainment Station',
-    description: 'Stream premium music, live shows, and entertainment on RIENG Radio',
+    title: 'RIENG - Your Premium Music & Entertainment Platform',
+    description: 'Stream premium music, live shows, and entertainment on RIENG',
     type: 'website',
     url: 'https://rieng-radio.com',
   },

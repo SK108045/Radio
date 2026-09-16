@@ -17,7 +17,7 @@ export default function EthicsPage() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/KarteloandMiracleBaby.jpg"
-            alt="RIENG Radio"
+            alt="RIENG"
             fill
             priority
             className="object-cover object-top"
@@ -39,7 +39,7 @@ export default function EthicsPage() {
             <div className="inline-flex items-center gap-2 bg-primary/15 border border-primary/30 text-primary px-4 py-1.5 rounded-full mb-6 shadow-[0_0_20px_rgba(255,107,53,0.2)]">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               <span className="text-[11px] font-black uppercase tracking-[0.2em]">
-                Official Partnership · Ethics Entertainment × RIENG Radio
+                Official Partnership · Ethics Entertainment × RIENG
               </span>
             </div>
 
@@ -52,7 +52,7 @@ export default function EthicsPage() {
             </h1>
 
             <p className="text-gray-300 text-base sm:text-lg md:text-xl max-w-xl mx-auto font-medium leading-relaxed mb-8 drop-shadow">
-              <strong className="text-white">Ethics Entertainment</strong> is partnering exclusively with <strong className="text-white">RIENG Radio</strong> for future releases, unreleased studio masters, and direct drops.
+              <strong className="text-white">Ethics Entertainment</strong> is partnering exclusively with <strong className="text-white">RIENG</strong> for future releases, unreleased studio masters, and direct drops.
             </p>
 
             {/* Faded Teaser Box */}
@@ -65,7 +65,7 @@ export default function EthicsPage() {
                 New Releases Coming Soon
               </h2>
               <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
-                Stay tuned to RIENG Radio for release schedules, premiere listening sessions, and official drop dates.
+                Stay tuned to RIENG for release schedules, premiere listening sessions, and official drop dates.
               </p>
             </div>
 
