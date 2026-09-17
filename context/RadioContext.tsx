@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react'
 import { getCurrentShow, ShowDetails } from '@/lib/getCurrentShow'
 
-const STREAM_URL = 'https://riengradio.xubi.org/listen/stream/radio.mp3'
+const STREAM_URL = 'https://mixes.casacam.net/public/rieng_radio'
 
 interface RadioContextValue {
   isPlaying: boolean
