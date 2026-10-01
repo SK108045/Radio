@@ -114,3 +114,42 @@ test('definitively failed attempts can retry, while the same attempt remains ide
   await payments.startPayment(failed, 'attempt-2', '0712345678', push)
   assert.equal(calls, 2)
 })
+
+test('the test request sends exactly one bob to Swifta', async () => {
+  const result = await payments.requestTestStk('0712345678', 'RIENG-TEST-12345678', async (url, options) => {
+    assert.equal(url, 'https://app.swifta.co.ke/stkpush')
+    assert.deepEqual(JSON.parse(options.body), { phone: '0712345678', amount: 1, accountReference: 'RIENG-TEST-12345678', description: 'Rieng KSh 1 payment test' })
+    return response({ success: true, checkoutRequestId: 'one-bob-checkout' })
+  })
+  assert.equal(result.status, 'pending')
+  assert.ok(result.note.includes('KSh 1.'))
+})
+test('signed test payment state cannot be used as domain payment state', () => {
+  const paidTest = { ...payments.newSession('test'), status: 'paid', receipt: 'TEST123456' }
+  const token = payments.signSession(paidTest)
+  assert.equal(payments.readSession(token), null)
+  assert.deepEqual(payments.readSession(token, 'test'), paidTest)
+  assert.equal(payments.readSession(payments.signSession(payments.newSession()), 'test'), null)
+  assert.equal(payments.summary(paidTest).amount, 1)
+  assert.equal(payments.summary(payments.newSession()).amount, 2800)
+})
+test('a one-bob receipt confirms only a test payment', async () => {
+  const fetcher = async () => response({ status: 'success', amount: 1, mpesaReceiptNumber: 'TEST123456' })
+  const testPayment = { ...payments.newSession('test'), status: 'pending', providerId: 'test-checkout' }
+  assert.equal((await payments.pollDomainPayment(testPayment, fetcher)).status, 'paid')
+  assert.equal((await payments.pollDomainPayment(pending(), fetcher)).status, 'pending')
+})
+test('test sessions choose the one-bob request by default and use test references', async () => {
+  const originalFetch = globalThis.fetch
+  try {
+    globalThis.fetch = async (url, options) => {
+      const sent = JSON.parse(options.body)
+      assert.equal(sent.amount, 1)
+      assert.ok(sent.accountReference.startsWith('RIENG-TEST-'))
+      return response({ success: true, checkoutRequestId: 'test-session-checkout' })
+    }
+    const result = await payments.startPayment(payments.newSession('test'), 'one-bob-attempt', '0712345678')
+    assert.equal(result.status, 'pending')
+    assert.equal(result.purpose, 'test')
+  } finally { globalThis.fetch = originalFetch }
+})

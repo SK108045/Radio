@@ -2,15 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { ArrowRight, Check, CheckCircle2, Globe2, Loader2, LockKeyhole, Phone, RefreshCw, ShieldCheck, Smartphone } from 'lucide-react'
-import { DOMAIN_QUOTE, type DomainPaymentSummary } from '@/lib/domain-quote'
+import { DOMAIN_QUOTE, PAYMENT_TEST_AMOUNT, type DomainPaymentSummary } from '@/lib/domain-quote'
 import styles from './payment.module.css'
 
-const recoveryKey = 'rieng-domain-payment-attempt'
-const initial: DomainPaymentSummary = { status: 'unpaid', amount: DOMAIN_QUOTE.amount, reference: null, receipt: null, phoneLast4: null, note: '' }
-const money = new Intl.NumberFormat('en-KE').format(DOMAIN_QUOTE.amount)
-
-export default function DomainPayment() {
-  const [payment, setPayment] = useState(initial)
+export default function DomainPayment({ testMode = false }: { testMode?: boolean }) {
+  const amount = testMode ? PAYMENT_TEST_AMOUNT : DOMAIN_QUOTE.amount
+  const endpoint = testMode ? '/api/payment-test' : '/api/domain-payment'
+  const recoveryKey = testMode ? 'rieng-payment-test-attempt' : 'rieng-domain-payment-attempt'
+  const money = new Intl.NumberFormat('en-KE').format(amount)
+  const [payment, setPayment] = useState<DomainPaymentSummary>(() => ({ status: 'unpaid', amount, reference: null, receipt: null, phoneLast4: null, note: '' }))
   const [phone, setPhone] = useState('')
   const [ready, setReady] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -34,14 +34,14 @@ export default function DomainPayment() {
     if (['paid', 'failed'].includes(data.payment.status)) sessionStorage.removeItem(recoveryKey)
     setPayment(recovered)
     setReady(true)
-  }, [])
+  }, [recoveryKey])
 
   const checkStatus = useCallback(async (manual = false) => {
     if (checking.current || submittingRef.current) return
     checking.current = true
     if (manual) setRefreshing(true)
     try {
-      const response = await fetch('/api/domain-payment', { cache: 'no-store', signal: AbortSignal.timeout(12000) })
+      const response = await fetch(endpoint, { cache: 'no-store', signal: AbortSignal.timeout(12000) })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Payment status is temporarily unavailable.')
       apply(data)
@@ -49,7 +49,7 @@ export default function DomainPayment() {
     } catch (failure) {
       if (manual || !csrf.current) setError(failure instanceof Error ? failure.message : 'Payment status is temporarily unavailable. Please check again.')
     } finally { checking.current = false; setRefreshing(false) }
-  }, [apply])
+  }, [apply, endpoint])
 
   useEffect(() => { void checkStatus() }, [checkStatus])
   useEffect(() => {
@@ -78,7 +78,7 @@ export default function DomainPayment() {
     setError('')
     sessionStorage.setItem(recoveryKey, attempt)
     try {
-      const response = await fetch('/api/domain-payment', {
+      const response = await fetch(endpoint, {
         method: 'POST', signal: AbortSignal.timeout(25000),
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf.current, 'Idempotency-Key': attempt },
         body: JSON.stringify({ phone: normalized }),
@@ -105,17 +105,17 @@ export default function DomainPayment() {
             <img src="/truehost-logo.svg" width="219" height="32" alt="TrueHost" />
             <span>DOMAIN REGISTRAR</span>
           </a>
-          <span className={styles.requestTag}><span /> RIENG · DOMAIN REQUEST</span>
+          <span className={styles.requestTag}><span /> RIENG · {testMode ? 'PAYMENT TEST' : 'DOMAIN REQUEST'}</span>
         </header>
 
-        <div className={styles.intro}>
-          <p className={styles.eyebrow}>A NEW ADDRESS. SAME RIENG.</p>
-          <h1>Let’s make the switch.</h1>
-          <p>One simple payment to move Rieng to its new .com domain.</p>
+        <div className={`${styles.intro} ${testMode ? styles.testIntro : ''}`}>
+          <p className={styles.eyebrow}>{testMode ? 'KSH 1 PAYMENT TEST' : 'A NEW ADDRESS. SAME RIENG.'}</p>
+          <h1>{testMode ? 'Test M-Pesa.' : 'Let’s make the switch.'}</h1>
+          <p>{testMode ? 'Send one bob to check the Swifta payment flow.' : 'One simple payment to move Rieng to its new .com domain.'}</p>
         </div>
 
-        <section className={styles.card} aria-label="Rieng domain payment request">
-          <div className={styles.details}>
+        <section className={`${styles.card} ${testMode ? styles.testCard : ''}`} aria-label={testMode ? 'KSh 1 M-Pesa test payment' : 'Rieng domain payment request'}>
+          {!testMode && <div className={styles.details}>
             <div className={styles.sectionLabel}><Globe2 size={17} aria-hidden="true" /> DOMAIN SWITCH</div>
             <div className={styles.domains}>
               <div className={styles.oldDomain}><span>CURRENT DOMAIN</span><strong>{DOMAIN_QUOTE.currentDomain}</strong></div>
@@ -133,7 +133,7 @@ export default function DomainPayment() {
               <ShieldCheck size={20} aria-hidden="true" />
               <div><strong>Domain registrar: TrueHost</strong><a href="https://truehost.co.ke/contact-us/" target="_blank" rel="noreferrer">truehost.co.ke · +254 20 790 3111</a><span>Ryanada Place, Highpoint, Juja, Kenya</span></div>
             </div>
-          </div>
+          </div>}
 
           <div className={styles.checkout}>
             <div className={`${styles.statusBadge} ${paid ? styles.badgePaid : ''}`}><span />{paid ? 'Payment confirmed' : waiting ? 'Awaiting confirmation' : 'Awaiting payment'}</div>
@@ -141,10 +141,10 @@ export default function DomainPayment() {
             {paid ? (
               <div className={styles.result} role="status">
                 <div className={`${styles.resultIcon} ${styles.successIcon}`}><CheckCircle2 size={34} aria-hidden="true" /></div>
-                <h2>Payment received.</h2>
-                <p>Your KSh {money} payment for the switch to <strong>{DOMAIN_QUOTE.newDomain}</strong> is confirmed.</p>
+                <h2>{testMode ? 'Test payment received.' : 'Payment received.'}</h2>
+                <p>{testMode ? <>Your KSh {money} M-Pesa test payment is confirmed.</> : <>Your KSh {money} payment for the switch to <strong>{DOMAIN_QUOTE.newDomain}</strong> is confirmed.</>}</p>
                 <dl className={styles.receipt}><div><dt>M-Pesa receipt</dt><dd>{payment.receipt}</dd></div><div><dt>Request reference</dt><dd>{payment.reference}</dd></div><div><dt>Amount paid</dt><dd>KSh {money}</dd></div></dl>
-                <p className={styles.smallNote}>The Rieng team can now arrange the domain registration and switch with TrueHost.</p>
+                <p className={styles.smallNote}>{testMode ? 'The payment flow worked. The domain request remains KSh 2,800.' : 'The Rieng team can now arrange the domain registration and switch with TrueHost.'}</p>
               </div>
             ) : waiting ? (
               <div className={styles.result} role="status" aria-live="polite">
@@ -172,11 +172,11 @@ export default function DomainPayment() {
               </>
             )}
             {error && <div id="payment-error" className={styles.error} role="alert"><p>{error}</p>{!ready && <button onClick={() => void checkStatus(true)} disabled={refreshing}>Try reconnecting</button>}</div>}
-            <div className={styles.collectionNote}><Check size={14} aria-hidden="true" /><p>Payment collected by <strong>Rieng</strong> for domain registration with <strong>TrueHost</strong>.</p></div>
+            <div className={styles.collectionNote}><Check size={14} aria-hidden="true" /><p>{testMode ? <>This is a real KSh 1 test payment collected by <strong>Rieng</strong>.</> : <>Payment collected by <strong>Rieng</strong> for domain registration with <strong>TrueHost</strong>.</>}</p></div>
           </div>
         </section>
 
-        <footer className={styles.footer}><span>RIENG <span className={styles.footerDot}>/</span> DOMAIN SERVICES</span><span><LockKeyhole size={12} aria-hidden="true" /> Your M-Pesa PIN stays on your phone.</span></footer>
+        <footer className={styles.footer}><span>RIENG <span className={styles.footerDot}>/</span> {testMode ? 'PAYMENT TEST' : 'DOMAIN SERVICES'}</span><span><LockKeyhole size={12} aria-hidden="true" /> Your M-Pesa PIN stays on your phone.</span></footer>
       </div>
     </main>
   )

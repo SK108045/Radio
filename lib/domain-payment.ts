@@ -2,12 +2,13 @@ import 'server-only'
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { DOMAIN_QUOTE, type DomainPaymentStatus, type DomainPaymentSummary } from './domain-quote'
+import { DOMAIN_QUOTE, paymentAmount, type PaymentPurpose, type DomainPaymentStatus, type DomainPaymentSummary } from './domain-quote'
 
 export const PAYMENT_COOKIE = 'rieng-domain-payment'
 export const SESSION_SECONDS = 7 * 24 * 60 * 60
 export type PaymentSession = {
   id: string
+  purpose: PaymentPurpose
   expiresAt: number
   status: DomainPaymentStatus
   attemptId?: string
@@ -45,14 +46,14 @@ function equal(left: string, right: string) {
   const a = Buffer.from(left), b = Buffer.from(right)
   return a.length === b.length && timingSafeEqual(a, b)
 }
-export function newSession(): PaymentSession {
-  return { id: randomUUID(), expiresAt: Date.now() + SESSION_SECONDS * 1000, status: 'unpaid', note: '' }
+export function newSession(purpose: PaymentPurpose = 'domain'): PaymentSession {
+  return { id: randomUUID(), purpose, expiresAt: Date.now() + SESSION_SECONDS * 1000, status: 'unpaid', note: '' }
 }
 export function signSession(session: PaymentSession) {
   const payload = Buffer.from(JSON.stringify(session)).toString('base64url')
   return `${payload}.${signature(payload)}`
 }
-export function readSession(value: string | undefined): PaymentSession | null {
+export function readSession(value: string | undefined, purpose: PaymentPurpose = 'domain'): PaymentSession | null {
   if (!value || value.length > 4000) return null
   const [payload, supplied, extra] = value.split('.')
   if (!payload || !supplied || extra || !equal(supplied, signature(payload))) return null
@@ -60,13 +61,16 @@ export function readSession(value: string | undefined): PaymentSession | null {
     const session = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as PaymentSession
     if (!/^[a-f0-9-]{36}$/i.test(session.id) || !Number.isFinite(session.expiresAt) || session.expiresAt < Date.now()) return null
     if (!['unpaid', 'pending', 'uncertain', 'failed', 'paid'].includes(session.status)) return null
+    // Preserve existing signed domain cookies, which predate the test route.
+    session.purpose ||= 'domain'
+    if (session.purpose !== purpose) return null
     return session
   } catch { return null }
 }
-export function csrfToken(session: PaymentSession) { return signature(`csrf:${session.id}`) }
+export function csrfToken(session: PaymentSession) { return signature(`csrf:${session.purpose}:${session.id}`) }
 export function validCsrf(session: PaymentSession, value: string) { return equal(csrfToken(session), value) }
 export function summary(session: PaymentSession): DomainPaymentSummary {
-  return { status: session.status, amount: DOMAIN_QUOTE.amount, reference: session.reference || null, receipt: session.receipt || null, phoneLast4: session.phoneLast4 || null, note: session.note }
+  return { status: session.status, amount: paymentAmount(session.purpose), reference: session.reference || null, receipt: session.receipt || null, phoneLast4: session.phoneLast4 || null, note: session.note }
 }
 export function normalizePhone(value: unknown): string | null {
   if (typeof value !== 'string' || value.length > 40) return null
@@ -75,14 +79,21 @@ export function normalizePhone(value: unknown): string | null {
 }
 
 type PushResult = { status: 'pending' | 'failed' | 'uncertain'; providerId?: string; note: string }
-export async function requestDomainStk(phone: string, reference: string, fetcher: typeof fetch = fetch): Promise<PushResult> {
+export function requestDomainStk(phone: string, reference: string, fetcher: typeof fetch = fetch): Promise<PushResult> {
+  return requestStk(phone, reference, 'domain', fetcher)
+}
+export function requestTestStk(phone: string, reference: string, fetcher: typeof fetch = fetch): Promise<PushResult> {
+  return requestStk(phone, reference, 'test', fetcher)
+}
+async function requestStk(phone: string, reference: string, purpose: PaymentPurpose, fetcher: typeof fetch): Promise<PushResult> {
+  const amount = paymentAmount(purpose)
   const key = paymentEnv('SWIFTA_API_KEY')
   if (!key) throw new Error('M-Pesa payments are not configured.')
   try {
     const response = await fetcher('https://app.swifta.co.ke/stkpush', {
       method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(20000),
       headers: { 'x-api-key': key, 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ phone, amount: DOMAIN_QUOTE.amount, accountReference: reference, description: `Rieng domain switch to ${DOMAIN_QUOTE.newDomain}` }),
+      body: JSON.stringify({ phone, amount, accountReference: reference, description: purpose === 'test' ? 'Rieng KSh 1 payment test' : `Rieng domain switch to ${DOMAIN_QUOTE.newDomain}` }),
     })
     const raw = await response.text()
     let data: any
@@ -104,7 +115,7 @@ export async function requestDomainStk(phone: string, reference: string, fetcher
     }
     // An accepted prompt is pending, never paid. Keep ambiguous responses locked.
     return providerId
-      ? { status: 'pending', providerId, note: 'Check your phone and enter your M-Pesa PIN to approve KSh 2,800.' }
+      ? { status: 'pending', providerId, note: `Check your phone and enter your M-Pesa PIN to approve KSh ${amount.toLocaleString('en-KE')}.` }
       : { status: 'uncertain', note: 'The request was sent without a payment reference. Check your phone and contact the Rieng team before retrying.' }
   } catch {
     return { status: 'uncertain', note: 'The request was interrupted. A prompt may still arrive. Check your phone and contact the Rieng team before retrying.' }
@@ -124,8 +135,9 @@ export async function pollDomainPayment(session: PaymentSession, fetcher: typeof
     const amount = transaction?.amount ?? data?.amount
     // The signed session binds this checkout to the fixed server-side quote.
     // When the provider returns an amount, additionally require an exact match.
-    if (status === 'success' && receipt && (amount === undefined || Number(amount) === DOMAIN_QUOTE.amount)) {
-      return { ...session, status: 'paid', receipt, note: 'Your KSh 2,800 M-Pesa payment is confirmed.' }
+    const expected = paymentAmount(session.purpose)
+    if (status === 'success' && receipt && (amount === undefined || Number(amount) === expected)) {
+      return { ...session, status: 'paid', receipt, note: `Your KSh ${expected.toLocaleString('en-KE')} M-Pesa payment is confirmed.` }
     }
     if (['failed', 'cancelled', 'canceled'].includes(status)) {
       return { ...session, status: 'failed', note: status === 'failed' ? 'The payment did not complete. You can try again.' : 'The M-Pesa prompt was cancelled. You can try again.' }
@@ -151,7 +163,8 @@ export function rememberSession(session: PaymentSession) {
   if (entry) { entry.session = session; return }
   if (entries.size < 1000) entries.set(session.id, { session, attempts: 0, lastAttempt: 0 })
 }
-export async function startPayment(session: PaymentSession, attemptId: string, phone: string, push: typeof requestDomainStk = requestDomainStk): Promise<PaymentSession> {
+export async function startPayment(session: PaymentSession, attemptId: string, phone: string, push?: typeof requestDomainStk): Promise<PaymentSession> {
+  const send = push || (session.purpose === 'test' ? requestTestStk : requestDomainStk)
   for (const [id, entry] of entries) if (entry.session.expiresAt < Date.now()) entries.delete(id)
   const previous = entries.get(session.id)
   if (previous?.flight) return previous.flight
@@ -160,11 +173,11 @@ export async function startPayment(session: PaymentSession, attemptId: string, p
   if (entries.size >= 1000 && !previous) throw new Error('The payment service is busy. Please try again later.')
   const recent = previous && Date.now() - previous.lastAttempt < 60 * 60 * 1000
   if (recent && previous.attempts >= 3) throw new Error('Please wait before requesting another M-Pesa prompt.')
-  const next: PaymentSession = { ...latest, status: 'uncertain', attemptId, reference: `RIENG-DOM-${randomUUID().slice(0, 8).toUpperCase()}`, phoneLast4: phone.slice(-4), providerId: undefined, receipt: undefined, note: 'The M-Pesa request is being sent. Check your phone before retrying.' }
+  const next: PaymentSession = { ...latest, status: 'uncertain', attemptId, reference: `RIENG-${session.purpose === 'test' ? 'TEST' : 'DOM'}-${randomUUID().slice(0, 8).toUpperCase()}`, phoneLast4: phone.slice(-4), providerId: undefined, receipt: undefined, note: 'The M-Pesa request is being sent. Check your phone before retrying.' }
   const entry: Entry = { session: next, attempts: recent ? previous.attempts + 1 : 1, lastAttempt: Date.now() }
   entries.set(session.id, entry)
   entry.flight = (async () => {
-    try { entry.session = { ...next, ...await push(phone, next.reference!) } }
+    try { entry.session = { ...next, ...await send(phone, next.reference!) } }
     catch { entry.session = next }
     finally { entry.flight = undefined }
     return entry.session

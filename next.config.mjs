@@ -2,6 +2,7 @@
 const nextConfig = {
   outputFileTracingIncludes: {
     '/api/domain-payment': ['./.env'],
+    '/api/payment-test': ['./.env'],
   },
   typescript: {
     ignoreBuildErrors: true,
