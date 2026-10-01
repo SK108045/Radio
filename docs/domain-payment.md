@@ -2,6 +2,10 @@
 
 Open `/domain-payment` for the KSh 2,800 request to switch **rieeng.co.ke** to **rieng.com**. The page uses TrueHost's original logo and public registrar contact details. Rieng collects the payment using the same Swifta merchant API key as the furniture project; this is not a checkout hosted by TrueHost. Registration and DNS changes are arranged separately after payment.
 
+## One-bob test
+
+Open `/payment-test` to send a **real KSh 1 M-Pesa payment** through the same Swifta flow. Enter the paying mobile number and approve the one-bob prompt on that phone. The test page shows the M-Pesa receipt after verification. It uses `/api/payment-test`, a separate HttpOnly cookie, a separate browser recovery marker and `RIENG-TEST-` references. The signed session records the payment purpose, so test state cannot be accepted by the domain endpoint. Both amounts are fixed on the server; a completed test does not pay the KSh 2,800 domain request. The test uses the existing payment environment and needs no extra configuration.
+
 ## Configuration
 
 The private repository's `.env` contains `SWIFTA_API_KEY` and a newly generated `DOMAIN_PAYMENT_SECRET`. Existing Radio variables are preserved. These values are server-only. Runtime environment variables override the committed values; Next's output tracing includes `.env` only for the domain payment API function. No new dependencies or database migration are required.

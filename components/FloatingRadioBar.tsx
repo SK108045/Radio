@@ -14,7 +14,7 @@ export default function FloatingRadioBar() {
   const [prevVolume, setPrevVolume] = useState(1)
   const [isCollapsed, setIsCollapsed] = useState(false)
 
-  if (pathname === '/domain-payment') return null
+  if (pathname === '/domain-payment' || pathname === '/payment-test') return null
 
   const handleToggleMute = () => {
     if (isMuted) {
