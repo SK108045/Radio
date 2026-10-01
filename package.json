@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:domain-payment": "node --test tests/domain-payment.test.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

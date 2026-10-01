@@ -1,16 +1,20 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRadio } from '@/context/RadioContext'
 import { Play, Pause, Volume2, VolumeX, Radio, Maximize2 } from 'lucide-react'
 
 export default function FloatingRadioBar() {
+  const pathname = usePathname()
   const { isPlaying, currentShow, togglePlay, volume, setVolume } = useRadio()
   const [isMuted, setIsMuted] = useState(false)
   const [prevVolume, setPrevVolume] = useState(1)
   const [isCollapsed, setIsCollapsed] = useState(false)
+
+  if (pathname === '/domain-payment') return null
 
   const handleToggleMute = () => {
     if (isMuted) {
