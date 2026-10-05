@@ -4,56 +4,7 @@ import { useState, useEffect } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
-
-const trendingItems = [
-  {
-    id: '01',
-    category: 'Music',
-    title: 'Sean MMG ft. Khaligraph - Personality',
-    link: 'https://www.youtube.com/watch?v=Z_wW2ywe04w',
-    videoId: 'Z_wW2ywe04w',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Sean_Ming.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvU2Vhbl9NaW5nLmpwZyIsImlhdCI6MTc3OTA4MDEwMCwiZXhwIjoxODEwNjE2MTAwfQ.43uPrestpCOyq7MjOppzoKL190MIO44Cs6FlzcQCf08',
-    excerpt: 'Sean MMG and Khaligraph Jones deliver a hard-hitting street anthem packed with raw energy and sharp bars.',
-    stats: 'Trending Now'
-  },
-  {
-    id: '02',
-    category: 'Music',
-    title: 'Mejja ft. Fik Fameica - Siaka',
-    link: 'https://youtu.be/hcAV2lxaT2E?si=0pRJNVFJth1N0T-M',
-    videoId: 'hcAV2lxaT2E',
-    image: '/Siaka2.png',
-    excerpt: 'The biggest cross-border collaboration of the year. Mejja links up with Fik Fameica to deliver an absolute street anthem that has already taken over the airwaves in Kenya and Uganda.',
-    stats: '1.2M Views'
-  },
-  {
-    id: '03',
-    category: 'Entertainment',
-    title: 'Singer Naomi Kihuha’s $90 [Sh13K] grocery bill: What it buys in Kenya vs. U.S.',
-    link: 'https://www.pulse.co.ke/entertainment',
-    image: '/Naomi.jpg',
-    excerpt: 'A viral breakdown of the cost of living that has the entire timeline debating. Naomi exposes the huge differences in purchasing power between continents.',
-    stats: 'Read Time: 5 Min'
-  },
-  {
-    id: '04',
-    category: 'Creators',
-    title: 'The cost of the gold rush: How TikTok is reshaping Kenya',
-    link: 'https://www.pulse.co.ke/story/the-cost-of-the-gold-rush-how-tiktok-is-reshaping-kenya-2026042412282549816',
-    image: '/Tiktok2.jpg',
-    excerpt: 'TikTok is changing the economic landscape for young creatives in Kenya, but are the financial gains coming at a hidden cultural cost?',
-    stats: 'Read Time: 6 Min'
-  },
-  {
-    id: '05',
-    category: 'Culture',
-    title: 'Behind stage names, real identities powering Kenya\'s music scene',
-    link: 'https://www.the-star.co.ke/sasa/entertainment/2026-04-20-behind-stage-names-real-identities-powering-kenyas-music-scene',
-    image: '/Kaligraph.jpg',
-    excerpt: 'From Gengetone groups to solo rap acts, we unpack the real names and untold origin stories of the artists running the local music industry right now.',
-    stats: 'Read Time: 5 Min'
-  }
-]
+import { trendingItems, TRENDING_UPDATED_AT, TRENDING_UPDATED_LABEL } from '@/lib/trending'
 
 export default function TrendingPage() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
@@ -102,7 +53,7 @@ export default function TrendingPage() {
             {/* Context & Text */}
             <div className="flex-1 order-2 lg:order-1">
               <div className="flex flex-wrap items-center gap-3 mb-4">
-                 <span className="bg-red-500 text-white text-[10px] font-black px-3 py-1 uppercase tracking-widest animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]">No. 1 Trending</span>
+                 <span className="bg-red-500 text-white text-[10px] font-black px-3 py-1 uppercase tracking-widest animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]">Music spotlight</span>
                  <span className="text-primary text-[10px] font-black px-3 py-1 uppercase tracking-widest border border-primary/30">{topTrend.category}</span>
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white uppercase tracking-tighter mb-4 leading-[1.1] relative">
@@ -122,6 +73,8 @@ export default function TrendingPage() {
                 </button>
                 <span className="text-gray-500 font-bold text-xs uppercase tracking-widest">{topTrend.stats}</span>
               </div>
+              <a href={topTrend.sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-5 text-sm text-primary hover:text-white transition-colors">Read coverage at {topTrend.source} · {topTrend.dateLabel} ↗</a>
+              <p className="text-xs text-gray-500 mt-4">Kenya edit · Updated <time dateTime={TRENDING_UPDATED_AT}>{TRENDING_UPDATED_LABEL}</time></p>
             </div>
 
             {/* Massive Hero Image */}
@@ -132,7 +85,7 @@ export default function TrendingPage() {
                  <div className="relative w-full h-full rounded-3xl overflow-hidden z-20 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
                    <Image 
                      src={topTrend.image}
-                     alt={topTrend.title}
+                     alt={topTrend.imageAlt}
                      fill
                      className="object-cover"
                      priority
@@ -155,7 +108,7 @@ export default function TrendingPage() {
            {[...Array(8)].map((_, i) => (
              <span key={i} className="text-black font-black uppercase md:text-lg tracking-[0.3em] mx-6 flex items-center gap-6">
                HOT THIS WEEK <span className="w-2 h-2 bg-black rounded-full"></span> 
-               RIENG CHARTS <span className="w-2 h-2 bg-black rounded-full"></span>
+               THE KENYA EDIT <span className="w-2 h-2 bg-black rounded-full"></span>
                VIRAL TOPICS <span className="w-2 h-2 bg-black rounded-full"></span>
              </span>
            ))}
@@ -188,7 +141,7 @@ export default function TrendingPage() {
                    <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors z-10 mix-blend-overlay"></div>
                    <Image 
                      src={trend.image}
-                     alt={trend.title}
+                     alt={trend.imageAlt}
                      fill
                      className="object-cover transition-transform duration-1000 group-hover:scale-110"
                    />
@@ -203,6 +156,7 @@ export default function TrendingPage() {
                     <p className="text-sm md:text-base text-gray-500 font-medium line-clamp-2 group-hover:text-gray-400 transition-colors">
                        {trend.excerpt}
                     </p>
+                    <p className="mt-3 text-xs text-gray-400">{trend.source} · {trend.dateLabel} <span aria-hidden="true">↗</span></p>
                  </div>
 
                  {/* Play / Arrow */}
@@ -230,7 +184,7 @@ export default function TrendingPage() {
                    <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors z-10 mix-blend-overlay"></div>
                    <Image 
                      src={trend.image}
-                     alt={trend.title}
+                     alt={trend.imageAlt}
                      fill
                      className="object-cover transition-transform duration-1000 group-hover:scale-110"
                    />
@@ -245,6 +199,7 @@ export default function TrendingPage() {
                     <p className="text-sm md:text-base text-gray-500 font-medium line-clamp-2 group-hover:text-gray-400 transition-colors">
                        {trend.excerpt}
                     </p>
+                    <p className="mt-3 text-xs text-gray-400">{trend.source} · {trend.dateLabel} <span aria-hidden="true">↗</span></p>
                  </div>
 
                  {/* Action / Arrow */}
@@ -255,6 +210,7 @@ export default function TrendingPage() {
                )
               ))}
            </div>
+           <p className="mt-8 text-xs text-gray-500">AI-generated editorial illustrations. Stories link to the original coverage or official programme.</p>
         </div>
       </section>
 

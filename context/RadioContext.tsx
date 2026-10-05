@@ -14,6 +14,7 @@ interface RadioContextValue {
   hasInteracted: boolean
   volume: number
   setVolume: (v: number) => void
+  toggleMute: () => void
 }
 
 const RadioContext = createContext<RadioContextValue | null>(null)
@@ -25,6 +26,7 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   const [volume, setVolumeState] = useState(1)
+  const volumeBeforeMute = useRef(1)
   const [currentShow, setCurrentShow] = useState<ShowDetails>({
     title: 'RIENG',
     host: 'RIENG',
@@ -155,11 +157,16 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
 
   const setVolume = useCallback((val: number) => {
     const clamped = Math.max(0, Math.min(1, val))
+    if (clamped > 0) volumeBeforeMute.current = clamped
     setVolumeState(clamped)
     if (globalAudio) {
       globalAudio.volume = clamped
     }
   }, [])
+
+  const toggleMute = useCallback(() => {
+    setVolume(volume === 0 ? volumeBeforeMute.current : 0)
+  }, [volume, setVolume])
 
   return (
     <RadioContext.Provider
@@ -172,6 +179,7 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
         hasInteracted,
         volume,
         setVolume,
+        toggleMute,
       }}
     >
       {children}

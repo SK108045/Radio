@@ -8,11 +8,13 @@ export default function VideoCard({
   videoId,
   views,
   badge,
+  onVideoClick,
 }: {
   title: string
   videoId: string
   views: string
   badge: string
+  onVideoClick?: (videoId: string, title: string) => void
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [animateIn, setAnimateIn] = useState(false)
@@ -38,9 +40,11 @@ export default function VideoCard({
 
   return (
     <>
-      <div 
-        onClick={() => setIsOpen(true)}
-        className="group relative bg-[#050505] border border-white/5 rounded-2xl overflow-hidden hover:border-red-500/50 hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] transition-all duration-300 flex flex-col cursor-pointer"
+      <button
+        type="button"
+        onClick={() => onVideoClick ? onVideoClick(videoId, title) : setIsOpen(true)}
+        aria-label={`Watch ${title}`}
+        className="group relative bg-[#050505] border border-white/5 rounded-2xl overflow-hidden hover:border-red-500/50 hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] transition-all duration-300 flex flex-col cursor-pointer w-full h-full text-left"
       >
         <div className="relative aspect-video w-full overflow-hidden flex-shrink-0">
           <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
@@ -71,7 +75,7 @@ export default function VideoCard({
             {title}
           </h3>
         </div>
-      </div>
+      </button>
 
       {/* Cinematic Video Modal */}
       {isOpen && (
@@ -109,4 +113,3 @@ export default function VideoCard({
     </>
   )
 }
-

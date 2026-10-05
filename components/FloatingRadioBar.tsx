@@ -2,30 +2,17 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import Image from 'next/image'
+import Image from '@/components/FallbackImage'
 import Link from 'next/link'
 import { useRadio } from '@/context/RadioContext'
 import { Play, Pause, Volume2, VolumeX, Radio, Maximize2 } from 'lucide-react'
 
 export default function FloatingRadioBar() {
   const pathname = usePathname()
-  const { isPlaying, currentShow, togglePlay, volume, setVolume } = useRadio()
-  const [isMuted, setIsMuted] = useState(false)
-  const [prevVolume, setPrevVolume] = useState(1)
+  const { isPlaying, currentShow, togglePlay, volume, toggleMute } = useRadio()
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   if (pathname === '/domain-payment' || pathname === '/payment-test') return null
-
-  const handleToggleMute = () => {
-    if (isMuted) {
-      setVolume(prevVolume || 1)
-      setIsMuted(false)
-    } else {
-      setPrevVolume(volume)
-      setVolume(0)
-      setIsMuted(true)
-    }
-  }
 
   return (
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end pointer-events-auto">
@@ -77,11 +64,11 @@ export default function FloatingRadioBar() {
           <div className="flex items-center gap-2 flex-shrink-0">
             {/* Mute/Volume Toggle */}
             <button
-              onClick={handleToggleMute}
+              onClick={toggleMute}
               className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 text-gray-300 hover:text-white flex items-center justify-center transition-colors"
-              title={isMuted ? 'Unmute' : 'Mute'}
+              title={volume === 0 ? 'Unmute' : 'Mute'}
             >
-              {isMuted || volume === 0 ? (
+              {volume === 0 ? (
                 <VolumeX className="w-3.5 h-3.5 text-red-400" />
               ) : (
                 <Volume2 className="w-3.5 h-3.5" />

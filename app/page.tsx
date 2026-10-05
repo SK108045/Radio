@@ -1,56 +1,17 @@
 'use client'
 
-import { useState } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { motion, type Variants } from 'framer-motion'
-import { useInView } from 'react-intersection-observer'
+import { useRef, useState } from 'react'
+import { MotionConfig } from 'framer-motion'
 import Navbar from '@/components/Navbar'
 import HeroSection from '@/components/HeroSection'
 import LivePlayer from '@/components/LivePlayer'
-import ShowCard from '@/components/ShowCard'
-import MediaCard from '@/components/MediaCard'
-import VideoCard from '@/components/VideoCard'
-import ReviewCard from '@/components/ReviewCard'
 import BuySongPromo from '@/components/BuySongPromo'
-import SectionTitle from '@/components/SectionTitle'
 import Footer from '@/components/Footer'
 import PartnersSlider from '@/components/PartnersSlider'
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
-  },
-}
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.8,
-      ease: 'easeOut',
-    },
-  },
-}
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0, y: -20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut',
-    },
-  },
-}
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
+import styles from '@/components/HomeEnhancements.module.css'
+import { trendingItems as trendingContent } from '@/lib/trending'
+import { HomeLineup, HomeTrending, HomeVideos, HomeReviews } from '@/components/HomeEditorial'
 
 const dailyShows = [
   {
@@ -58,51 +19,25 @@ const dailyShows = [
     host: 'RIENG',
     schedule: 'Weekdays | 5:00 AM - 10:00 AM',
     description: 'Journey through the greatest hits from 2000s to 2004/5 Kenyan music. Featuring e Sir, Mr. Lenny, Kleptomaniax, and Dux Vultures.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/shows/KenyanOldSchool.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvc2hvd3MvS2VueWFuT2xkU2Nob29sLmpwZyIsImlhdCI6MTc3NzUwODgwMSwiZXhwIjoxODA5MDQ0ODAxfQ.5FR3q4quQCmHSW1WyQ-x0YjE0M04o2sQt2zs4u3_Fa0',
+    image: '/shows/kenyan-old-school.webp',
   },
   {
     title: 'Gengetone / Arbantone',
     host: 'RIENG',
     schedule: 'Weekdays | 10:00 AM - 3:00 PM',
-    description: 'The hardest beats and hottest flows from the Gengetone and Arbantone scenes. Pure energy from Kenya&apos;s underground.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/shows/Gengetone.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvc2hvd3MvR2VuZ2V0b25lLmpwZyIsImlhdCI6MTc3NzUwODgzNSwiZXhwIjoxODA5MDQ0ODM1fQ.edECFW-1vDOXHHpQ7emyRfNPyDjDnbOAD5sdKAHuUcI',
+    description: 'The hardest beats and hottest flows from the Gengetone and Arbantone scenes. Pure energy from Kenya’s underground.',
+    image: '/shows/gengetone.webp',
   },
   {
     title: 'Underground Kenyan HipHop',
     host: 'RIENG',
     schedule: 'Weekdays | 7:00 PM - 11:00 PM',
     description: 'Raw Kenyan HipHop straight from the underground. Pure beats and authentic lyricism from Kenya\'s finest rappers.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3NzYxODc3OSwiZXhwIjoxODA5MTU0Nzc5fQ.6lJzUQFJSgdjCajfBQFKmJXnzMgJURDJmUXkRV4Fd8E',
+    image: '/shows/underground.webp',
   },
 ]
 
-const trendingContent = [
-  {
-    category: 'Breaking News',
-    title: '🚨 ARSENAL ARE THE NEW PREMIER LEAGUE CHAMPIONS OF ENGLAND! 🏆🔴',
-    videoId: 'fLRFOxgJp7M',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Arsenal.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvQXJzZW5hbC5qcGciLCJpYXQiOjE3NzkyMjQwNTcsImV4cCI6MTgxMDc2MDA1N30.NIT9WSkM2QVSTt1WWHeuGvHK5KamJZDLqNXzyHChSN0',
-  },
-  {
-    category: 'Music',
-    title: 'Sean MMG ft. Khaligraph - Personality',
-    link: 'https://www.youtube.com/watch?v=Z_wW2ywe04w',
-    videoId: 'Z_wW2ywe04w',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Sean_Ming.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvU2Vhbl9NaW5nLmpwZyIsImlhdCI6MTc3OTA4MDEwMCwiZXhwIjoxODEwNjE2MTAwfQ.43uPrestpCOyq7MjOppzoKL190MIO44Cs6FlzcQCf08',
-  },
-  {
-    category: 'Entertainment',
-    title: 'Singer Naomi Kihuha’s $90 [Sh13K] grocery bill: What it buys in Kenya vs. U.S.',
-    link: 'https://www.pulse.co.ke/entertainment',
-    image: '/Naomi.jpg',
-  },
-  {
-    category: 'Creators',
-    title: 'From Nairobi kitchens to NYC tables: Kenyan creators shine on TikTok’s global list',
-    link: 'https://www.the-star.co.ke/news/2026-02-26-kenyan-creators-shine-on-tiktoks-global-list',
-    image: '/Tiktok.jpg',
-  },
-]
+const trendingCategories = ['All', ...new Set(trendingContent.map(item => item.category))]
 
 const riengVideos = [
   {
@@ -145,240 +80,74 @@ const riengReviews = [
 
 
 
-function AnimatedShowsSection() {
-  const { ref, inView } = useInView({ threshold: 0.1, triggerOnce: true })
-
-  return (
-    <section ref={ref} className="bg-background py-16 md:py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          variants={headerVariants}
-          className="flex items-center justify-between mb-12"
-        >
-          <div>
-            <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tight mb-2">The <span className="text-primary italic">Line-Up</span></h2>
-            <p className="text-gray-400 font-medium md:text-lg">The most lethal daily schedule on Kenyan airwaves.</p>
-          </div>
-          <Link href="/shows" className="text-primary hover:text-accent font-semibold transition-colors">View All →</Link>
-        </motion.div>
-        <motion.div
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          variants={containerVariants}
-          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {dailyShows.map((show, index) => (
-            <motion.div key={index} variants={itemVariants}>
-              <ShowCard {...show} />
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-    </section>
-  )
-}
-
 export default function Home() {
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [activeVideoTitle, setActiveVideoTitle] = useState<string>('');
-  const [animateIn, setAnimateIn] = useState(false);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const videoTrigger = useRef<HTMLElement | null>(null);
+  const videoDialog = useRef<HTMLDivElement | null>(null);
+  const filteredContent = activeCategory === 'All' ? trendingContent : trendingContent.filter(item => item.category === activeCategory);
 
   const handleOpenModal = (videoId: string, title: string) => {
     setActiveVideoId(videoId);
     setActiveVideoTitle(title);
-    setTimeout(() => setAnimateIn(true), 10);
-    document.body.style.overflow = 'hidden';
+    videoTrigger.current = document.activeElement as HTMLElement;
   };
-
-  const handleCloseModal = () => {
-    setAnimateIn(false);
-    setTimeout(() => {
-      setActiveVideoId(null);
-      setActiveVideoTitle('');
-      document.body.style.overflow = 'unset';
-    }, 400);
-  };
-
-  const { ref: trendingRef, inView: trendingInView } = useInView({ threshold: 0.1, triggerOnce: true })
-  const { ref: videoRef, inView: videoInView } = useInView({ threshold: 0.1, triggerOnce: true })
-  const { ref: reviewRef, inView: reviewInView } = useInView({ threshold: 0.1, triggerOnce: true })
 
   return (
-    <main className="min-h-screen bg-background">
-      <Navbar />
+    <MotionConfig reducedMotion="user">
+      <main className={`${styles.home} min-h-screen bg-background`}>
+        <Navbar />
       
-      {/* Hero Section */}
-      <HeroSection />
+        {/* Hero Section */}
+        <HeroSection />
 
-      {/* Live Player Section */}
-      <LivePlayer />
+        {/* Live Player Section */}
+        <LivePlayer />
 
-      {/* Featured Shows Preview */}
-      <AnimatedShowsSection />
+        <HomeLineup shows={dailyShows} />
+        <PartnersSlider />
+        <HomeTrending
+          items={filteredContent}
+          categories={trendingCategories}
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+          onVideoClick={handleOpenModal}
+        />
+        <BuySongPromo />
+        <HomeVideos videos={riengVideos} onVideoClick={handleOpenModal} />
+        <HomeReviews reviews={riengReviews} />
 
-      {/* Partners Slider Section */}
-      <PartnersSlider />
+        <Footer />
 
-      {/* Trending Now Section */}
-      <section ref={trendingRef} className="bg-background py-16 md:py-20 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial="hidden"
-            animate={trendingInView ? 'visible' : 'hidden'}
-            variants={headerVariants}
-            className="flex items-center justify-between mb-12"
+        <Dialog open={activeVideoId !== null} onOpenChange={open => { if (!open) setActiveVideoId(null) }}>
+          <DialogContent
+            ref={videoDialog}
+            aria-describedby="home-video-description"
+            className={`${styles.home} w-[calc(100%-2rem)] sm:max-w-4xl gap-0 overflow-hidden rounded-2xl border-white/15 bg-[#0a0a0a] p-0 shadow-[0_0_80px_rgba(255,107,53,0.15)]`}
+            onOpenAutoFocus={event => {
+              event.preventDefault()
+              videoDialog.current?.querySelector<HTMLButtonElement>('[data-slot="dialog-close"]')?.focus()
+            }}
+            onCloseAutoFocus={event => {
+              event.preventDefault()
+              videoTrigger.current?.focus()
+            }}
           >
-            <div>
-              <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tight mb-2">Trending <span className="text-primary italic">Now</span></h2>
-              <p className="text-gray-400 font-medium md:text-lg">The hottest stories and tracks dominating Kenyan culture.</p>
+            <div className="px-5 py-4 pr-12 border-b border-white/10">
+              <DialogTitle className="text-sm sm:text-base leading-snug">{activeVideoTitle}</DialogTitle>
+              <DialogDescription id="home-video-description" className="sr-only">Watch this RIENG video. Press Escape to close the player.</DialogDescription>
             </div>
-            <Link href="/trending" className="text-primary hover:text-accent font-semibold transition-colors uppercase tracking-widest text-sm">View All →</Link>
-          </motion.div>
-          <motion.div
-            initial="hidden"
-            animate={trendingInView ? 'visible' : 'hidden'}
-            variants={containerVariants}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {trendingContent.map((item, index) => (
-              <motion.div key={index} variants={itemVariants}>
-                <MediaCard {...item} onVideoClick={handleOpenModal} />
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Buy Song Promo Section */}
-      <BuySongPromo />
-
-      {/* Featured Videos Preview */}
-      <section ref={videoRef} className="bg-card py-16 md:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-red-500/5"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial="hidden"
-            animate={videoInView ? 'visible' : 'hidden'}
-            variants={headerVariants}
-            className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6"
-          >
-            <div>
-              <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-1.5 rounded-full mb-6 relative">
-                 <span className="absolute inset-0 bg-red-500/20 animate-ping rounded-full opacity-50"></span>
-                 <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,1)]"></span>
-                 <span className="text-xs font-black uppercase tracking-[0.2em] relative z-10">77K+ Subscribers</span>
-              </div>
-              <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tight mb-2">RIENG <span className="text-red-500 italic">TV</span></h2>
-              <p className="text-gray-400 font-medium md:text-lg max-w-2xl">The wildest games, live sets, and moments that defined Kenyan culture.</p>
-            </div>
-            <motion.a
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              href="https://www.youtube.com/@RiengRadio"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-red-500 hover:text-white font-extrabold transition-colors uppercase tracking-widest text-sm bg-red-500/10 px-8 py-4 rounded-full border border-red-500/20 hover:bg-red-500 flex-shrink-0 flex items-center gap-2 shadow-[0_0_20px_rgba(239,68,68,0.2)]"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-              Subscribe on YouTube
-            </motion.a>
-          </motion.div>
-          <motion.div
-            initial="hidden"
-            animate={videoInView ? 'visible' : 'hidden'}
-            variants={containerVariants}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {riengVideos.map((video, index) => (
-              <motion.div key={index} variants={itemVariants}>
-                <VideoCard {...video} />
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Featured Album Reviews Preview */}
-      <section ref={reviewRef} className="bg-background py-16 md:py-20 relative overflow-hidden border-t border-white/5">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none -mt-48 -mr-48"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial="hidden"
-            animate={reviewInView ? 'visible' : 'hidden'}
-            variants={headerVariants}
-            className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6"
-          >
-            <div>
-              <p className="text-xs font-bold tracking-[0.4em] text-primary uppercase mb-2">The Breakdown</p>
-              <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tight mb-2">Album <span className="text-primary italic">Reviews</span></h2>
-              <p className="text-gray-400 font-medium md:text-lg max-w-2xl">Expert breakdowns on the most important Kenyan projects dropping right now.</p>
-            </div>
-          </motion.div>
-          <motion.div
-            initial="hidden"
-            animate={reviewInView ? 'visible' : 'hidden'}
-            variants={containerVariants}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {riengReviews.map((review, index) => (
-              <motion.div key={index} variants={itemVariants}>
-                <ReviewCard {...review} />
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      <Footer />
-
-      {/* Cinematic Video Modal */}
-      {activeVideoId && (
-        <div
-          className={`fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 lg:p-8 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${animateIn ? 'opacity-100' : 'opacity-0'}`}
-        >
-          <div
-            className="absolute inset-0 bg-[#050505]/95 backdrop-blur-xl"
-            onClick={handleCloseModal}
-          />
-          <div
-            className={`relative w-full max-w-4xl aspect-video bg-black rounded-3xl overflow-hidden shadow-[0_0_100px_rgba(255,107,53,0.3)] border border-white/10 z-10 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] transform ${animateIn ? 'scale-100 translate-y-0' : 'scale-90 translate-y-16'}`}
-          >
-            <button
-              onClick={handleCloseModal}
-              className="absolute top-4 right-4 md:top-6 md:right-6 w-12 h-12 bg-black/50 hover:bg-primary backdrop-blur-md rounded-full text-white flex items-center justify-center z-20 transition-all border border-white/10"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            {activeVideoId === 'f_Jb27a3VfM' ? (
-              <div className="relative w-full h-full">
-                <Image 
-                  src="https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Arsenal.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvQXJzZW5hbC5qcGciLCJpYXQiOjE3NzkyMjQwNTcsImV4cCI6MTgxMDc2MDA1N30.NIT9WSkM2QVSTt1WWHeuGvHK5KamJZDLqNXzyHChSN0" 
-                  alt={activeVideoTitle}
-                  fill 
-                  className="object-contain"
-                  unoptimized
-                />
-                <div className="absolute bottom-6 left-6 right-6 bg-black/70 backdrop-blur-md p-6 rounded-2xl border border-white/10">
-                  <h3 className="text-xl md:text-2xl font-black text-white mb-2">{activeVideoTitle}</h3>
-                  <p className="text-gray-400 text-xs md:text-sm font-bold uppercase tracking-wider text-red-500">🏆 CHAMPIONS OF ENGLAND 🔴</p>
-                </div>
-              </div>
-            ) : (
-              <iframe
-                src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1&rel=0&modestbranding=1`}
-                title={activeVideoTitle}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            )}
-          </div>
-        </div>
-      )}
-    </main>
+            {activeVideoId && <iframe
+              src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1&rel=0`}
+              title={activeVideoTitle}
+              className="w-full aspect-video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />}
+          </DialogContent>
+        </Dialog>
+      </main>
+    </MotionConfig>
   )
 }
