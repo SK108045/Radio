@@ -23,7 +23,7 @@ export function UploadTrackForm({ artistId, isTest = false }: { artistId?: strin
     await post('/api/sales/uploads/complete', { trackId: grant.current!.trackId, description: finalDescription })
     if (artistId) localStorage.removeItem(storageKey(artistId))
     setResumeId(''); grant.current = null; upload.current = null
-    setTitle(''); setDescription(''); setPrice(''); setFile(null); setStatus(isTest ? 'Published. Your test sales card is ready in this portal.' : 'Published. Your track is now on /dj-mix-sales.'); router.refresh()
+    setTitle(''); setDescription(''); setPrice(''); setFile(null); setStatus(isTest ? 'Published. Your track is now on /dj-mix-sales and in this portal.' : 'Published. Your track is now on /dj-mix-sales.'); router.refresh()
   }
   async function submit(e: React.FormEvent) {
     e.preventDefault(); if (!file || !artistId) { setError('Select your audio file and sign in.'); return }

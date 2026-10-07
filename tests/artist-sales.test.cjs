@@ -36,7 +36,7 @@ test.before(async()=>{
  sql=new Client({connectionString:u.toString()});await sql.connect()
  let schema=fs.readFileSync(path.join(__dirname,'sales-schema-fixture.sql'),'utf8').replace(/CREATE ROLE (anon|authenticated|service_role)( BYPASSRLS)?;/g,(_,role,option='')=>`DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='${role}') THEN CREATE ROLE ${role}${option}; END IF; END $$;`)
  await sql.query(schema)
- for(const name of ['202610070001_artist_sales.sql','202610070002_test_artist.sql','202610070003_signup_verification.sql','202610070004_metro_demo_signup.sql'])await sql.query(fs.readFileSync(path.join(root,'supabase/migrations',name),'utf8'))
+ for(const name of ['202610070001_artist_sales.sql','202610070002_test_artist.sql','202610070003_signup_verification.sql','202610070004_metro_demo_signup.sql','202610070005_test_demo_signup.sql'])await sql.query(fs.readFileSync(path.join(root,'supabase/migrations',name),'utf8'))
  const role='radio_test_auth_'+process.pid
  await control.query(`CREATE ROLE ${role} LOGIN NOINHERIT`);await control.query(`GRANT anon,authenticated,service_role TO ${role}`)
  u.username=role;u.password='';port=Number(process.env.SALES_TEST_POSTGREST_PORT||55438)
@@ -96,14 +96,14 @@ test('Metro demo bypass is restricted, one-time, hashes passwords, sends no SMS 
  await dbQuery('DELETE FROM sales_artist_sessions WHERE artist_id=$1',[id]);await dbQuery('DELETE FROM sales_artist_accounts WHERE artist_id=$1',[id]);await dbQuery('UPDATE sales_artist_registry SET claimed_at=null WHERE artist_id=$1',[id])
 })
 test('SMS rejection refunds send limits, recent code requests reuse one SMS, and signup requires a verified browser',async()=>{
- const previous=global.fetch,phone='0712345691'
+ const previous=global.fetch,phone='0712345691',otpArtist='33333333-3333-3333-3333-333333333336'
  global.fetch=async(input,options)=>String(input)==='https://sozuri.net/api/v1/messaging'?new Response(JSON.stringify({messageData:{message:'Error. Insufficient balance. Top up and try again.'}}),{status:400,headers:{'content-type':'application/json'}}):previous(input,options)
- try{for(let i=0;i<6;i++){const result=await actions.requestSignupCodeAction('test_artist',null,form({phone}));assert.match(result.error,/insufficient credits/);assert.equal(result.challengeId,undefined)}}finally{global.fetch=previous}
- const counters=(await dbQuery("SELECT hits FROM sales_rate_limits WHERE key=$1 OR key=$2",['otp-artist:'+TEST_ARTIST_ID,'otp-phone:'+security.digest(phone)])).rows;assert.ok(counters.every(r=>r.hits===0))
- const first=await actions.requestSignupCodeAction('test_artist',null,form({phone}));assert.ok(first.challengeId,first.error)
- const second=await actions.requestSignupCodeAction('test_artist',null,form({phone}));assert.equal(second.challengeId,first.challengeId);assert.ok(second.retryAfterSeconds>0)
- assert.equal((await dbQuery('SELECT count(*) FROM sales_otp_challenges WHERE artist_id=$1 AND phone=$2 AND sms_sent_at IS NOT NULL',[TEST_ARTIST_ID,phone])).rows[0].count,'1')
- const premature=await context.run(jar(),()=>actions.signupAction('test_artist',null,form({challengeId:first.challengeId,password:'strong-password-123',confirmPassword:'strong-password-123'})));assert.match(premature.error,/Verify your phone/)
+ try{for(let i=0;i<6;i++){const result=await actions.requestSignupCodeAction('kapitani',null,form({phone}));assert.match(result.error,/insufficient credits/);assert.equal(result.challengeId,undefined)}}finally{global.fetch=previous}
+ const counters=(await dbQuery("SELECT hits FROM sales_rate_limits WHERE key=$1 OR key=$2",['otp-artist:'+otpArtist,'otp-phone:'+security.digest(phone)])).rows;assert.ok(counters.every(r=>r.hits===0))
+ const first=await actions.requestSignupCodeAction('kapitani',null,form({phone}));assert.ok(first.challengeId,first.error)
+ const second=await actions.requestSignupCodeAction('kapitani',null,form({phone}));assert.equal(second.challengeId,first.challengeId);assert.ok(second.retryAfterSeconds>0)
+ assert.equal((await dbQuery('SELECT count(*) FROM sales_otp_challenges WHERE artist_id=$1 AND phone=$2 AND sms_sent_at IS NOT NULL',[otpArtist,phone])).rows[0].count,'1')
+ const premature=await context.run(jar(),()=>actions.signupAction('kapitani',null,form({challengeId:first.challengeId,password:'strong-password-123',confirmPassword:'strong-password-123'})));assert.match(premature.error,/Verify your phone/)
 })
 let swattJar=jar(),metroJar=jar(),kapitaniJar=jar(),trackId,orderId,browser= new Map([['rieng-listening-browser','A'.repeat(43)]])
 test('exactly three public one-time identities; verified signup, hashes, phone login and session forgery',async()=>{
@@ -228,11 +228,18 @@ test('scheduled recovery isolates unavailable callbacks and records delayed paym
   assert.equal((await dbQuery('SELECT processed_at FROM sales_callback_inbox WHERE provider_id=$1',[unavailable])).rows[0].processed_at,null)
  }finally{global.fetch=previous}
 })
-test('experiment artist uses verified one-time phone signup, hides uploads and receives only its own payments',async()=>{
+test('experiment artist signs up without SMS once, hashes passwords, publishes real uploads and receives only its own payments',async()=>{
  const experiment=jar(),id=TEST_ARTIST_ID
- await signup('test_artist','0712345690',experiment)
+ const beforeSms=sms.size
+ const invalid=await context.run(experiment,()=>actions.signupAction('test_artist',null,form({phone:'invalid',password:'strong-password-123',confirmPassword:'strong-password-123'})));assert.match(invalid.error,/valid Kenyan/)
+ const mismatch=await context.run(experiment,()=>actions.signupAction('test_artist',null,form({phone:'0712345690',password:'strong-password-123',confirmPassword:'different-password'})));assert.match(mismatch.error,/Passwords do not match/)
+ const signupResult=await context.run(experiment,async()=>{try{return await actions.signupAction('test_artist',null,form({phone:'0712345690',password:'strong-password-123',confirmPassword:'strong-password-123'}))}catch(e){return e}});assert.equal(signupResult.url,'/sales');assert.equal(sms.size,beforeSms)
+ assert.equal((await dbQuery('SELECT count(*) FROM sales_otp_challenges WHERE artist_id=$1',[id])).rows[0].count,'0')
+ assert.equal((await dbQuery('SELECT demo_signup_enabled FROM sales_artist_registry WHERE artist_id=$1',[id])).rows[0].demo_signup_enabled,false)
  const stored=(await dbQuery('SELECT password_hash FROM sales_artist_accounts WHERE artist_id=$1',[id])).rows[0].password_hash
  assert.ok(await security.verifyPassword('strong-password-123',stored));assert.notEqual(stored,'strong-password-123')
+ await assert.rejects(dbQuery('SELECT sales_claim_test_demo($1,$2)',['0712345691',stored]),/unavailable/)
+ const repeat=await context.run(jar(),()=>actions.signupAction('test_artist',null,form({phone:'0712345691',password:'strong-password-123',confirmPassword:'strong-password-123'})));assert.match(repeat.error,/already signed up/)
  const logged=await context.run(experiment,async()=>{try{return await actions.loginAction(null,form({phone:'0712345690',password:'strong-password-123'}))}catch(e){return e}});assert.equal(logged.url,'/sales')
  const auth=load(path.join(root,'lib/auth.ts')),session=await context.run(experiment,auth.getSession)
  assert.equal(session.stageName,'Test_Artist');assert.equal(session.isTest,true)
@@ -243,7 +250,7 @@ test('experiment artist uses verified one-time phone signup, hides uploads and r
  const grant=await grantResponse.json();assert.equal(grantResponse.status,200,JSON.stringify(grant));assert.ok(grant.path.startsWith(id+'/'))
  objects.set(grants.get(grant.token),fixture)
  assert.equal((await context.run(experiment,()=>finish.POST(request('/api/sales/uploads/complete',{trackId:grant.trackId})))).status,200)
- assert.ok(!(await catalog.publicCatalog()).some(t=>t.id===grant.trackId))
+ const listed=(await catalog.publicCatalog()).find(t=>t.id===grant.trackId);assert.ok(listed);assert.equal(listed.artist,'Test_Artist');assert.equal(listed.title,'Experiment uploaded track');assert.equal('mp3_file_path' in listed,false);assert.equal('preview_file_path' in listed,false)
  const before=(await dbQuery('SELECT artist_id,count(*)::int AS sales FROM sales_receipts WHERE artist_id<>$1 GROUP BY artist_id ORDER BY artist_id',[id])).rows
  const checkout=load(path.join(root,'app/api/music/checkout/route.ts')),buyer=new Map([['rieng-listening-browser','C'.repeat(43)]])
  const response=await checkout.POST(request('/api/music/checkout',{trackId:grant.trackId,phone:'0712345690',attemptId:randomUUID()},buyer));assert.equal(response.status,200)
@@ -254,6 +261,19 @@ test('experiment artist uses verified one-time phone signup, hides uploads and r
  assert.equal(receipt.artist_id,id);assert.equal(receipt.track_id,grant.trackId);assert.equal(Number(receipt.amount),1)
  assert.deepEqual((await dbQuery('SELECT artist_id,count(*)::int AS sales FROM sales_receipts WHERE artist_id<>$1 GROUP BY artist_id ORDER BY artist_id',[id])).rows,before)
  const playback=load(path.join(root,'app/api/music/playback/route.ts'));assert.equal((await playback.GET(request(`/api/music/playback?trackId=${grant.trackId}&mode=full`,null,buyer))).status,200)
+ // Delete removes the listing without deleting receipts or revoking paid access.
+ const unauthorized=await context.run(jar(),()=>actions.deleteTrackAction(grant.trackId));assert.match(unauthorized.error,/sign in/)
+ const otherArtist=await context.run(metroJar,()=>actions.deleteTrackAction(grant.trackId));assert.ok(otherArtist.error);assert.ok((await catalog.publicCatalog()).some(t=>t.id===grant.trackId))
+ assert.equal((await context.run(experiment,()=>actions.deleteTrackAction(grant.trackId))).success,true)
+ assert.ok(!(await catalog.publicCatalog()).some(t=>t.id===grant.trackId))
+ assert.equal((await dbQuery('SELECT sales_status FROM tracks WHERE id=$1',[grant.trackId])).rows[0].sales_status,'archived')
+ assert.equal((await dbQuery('SELECT count(*) FROM sales_receipts WHERE order_id=$1',[order.id])).rows[0].count,'1')
+ assert.equal((await playback.GET(request(`/api/music/playback?trackId=${grant.trackId}&mode=preview`,null,buyer))).status,404)
+ assert.equal((await playback.GET(request(`/api/music/playback?trackId=${grant.trackId}&mode=full`,null,buyer))).status,200)
+ assert.equal((await context.run(experiment,()=>actions.deleteTrackAction(grant.trackId))).success,true)
+ const draftResponse=await context.run(experiment,()=>upload.POST(request('/api/sales/uploads',{title:'Deleted unfinished draft',price:1,size:fixture.length,contentType:'audio/mpeg'}))),draft=await draftResponse.json();assert.equal(draftResponse.status,200)
+ assert.equal((await context.run(experiment,()=>actions.deleteTrackAction(draft.trackId))).success,true)
+ assert.equal((await dbQuery('SELECT sales_status FROM tracks WHERE id=$1',[draft.trackId])).rows[0].sales_status,'archived')
 })
 test('browser UI: signup → upload → real catalog card → preview → payment → playback → artist reporting', {timeout:300000}, async()=>{
  const http=require('node:http'),{chromium}=require('@playwright/test')
@@ -318,16 +338,19 @@ test('browser UI: signup → upload → real catalog card → preview → paymen
   await page.goto('http://localhost:3117/sales',{waitUntil:'domcontentloaded'});await page.getByText('BROWSERRECEIPT003',{exact:true}).waitFor();assert.ok(await page.getByText('KSh 2',{exact:true}).count());assert.equal((await dbQuery('SELECT COUNT(*) FROM sales_receipts WHERE artist_id=$1',[kapitani])).rows[0].count,'1')
   await page.goto('http://localhost:3117/sales/sign-up/kapitani',{waitUntil:'domcontentloaded'});await page.getByRole('heading',{name:'This signup link has been used'}).waitFor()
   // Reopen only the disposable database's test identity to exercise its real signup UI.
-  await dbQuery('DELETE FROM sales_artist_sessions WHERE artist_id=$1',[TEST_ARTIST_ID]);await dbQuery('DELETE FROM sales_artist_accounts WHERE artist_id=$1',[TEST_ARTIST_ID]);await dbQuery('DELETE FROM sales_otp_challenges WHERE artist_id=$1',[TEST_ARTIST_ID]);await dbQuery('UPDATE sales_artist_registry SET claimed_at=null WHERE artist_id=$1',[TEST_ARTIST_ID])
+  await dbQuery('DELETE FROM sales_artist_sessions WHERE artist_id=$1',[TEST_ARTIST_ID]);await dbQuery('DELETE FROM sales_artist_accounts WHERE artist_id=$1',[TEST_ARTIST_ID]);await dbQuery('DELETE FROM sales_otp_challenges WHERE artist_id=$1',[TEST_ARTIST_ID]);await dbQuery('UPDATE sales_artist_registry SET claimed_at=null,demo_signup_enabled=true WHERE artist_id=$1',[TEST_ARTIST_ID])
   await page.goto('http://localhost:3117/sales/sign-up/test_artist',{waitUntil:'domcontentloaded'})
-  await page.waitForFunction(()=>Object.keys(document.querySelector('#signup-phone')||{}).some(k=>k.startsWith('__reactProps$')))
-  await page.getByLabel('Phone number',{exact:true}).fill('0712345690');await page.getByRole('button',{name:'Verify phone',exact:true}).click()
-  await page.getByLabel('SMS code',{exact:true}).waitFor();assert.equal(await page.getByLabel('Password',{exact:true}).count(),0);await page.getByLabel('SMS code',{exact:true}).fill(sms.get('+254712345690'));await page.getByRole('button',{name:'Verify code',exact:true}).click();await page.getByLabel('Password',{exact:true}).waitFor()
+  await page.waitForFunction(()=>Object.keys(document.querySelector('#demo-phone')||{}).some(k=>k.startsWith('__reactProps$')))
+  assert.equal(await page.getByRole('button',{name:'Verify phone',exact:true}).count(),0);assert.equal(await page.getByLabel('SMS code',{exact:true}).count(),0)
+  const testSmsBefore=sms.size
+  await page.getByLabel('Phone number',{exact:true}).fill('0712345690')
   await page.getByLabel('Password',{exact:true}).fill('test-ui-password-123');await page.getByLabel('Confirm password',{exact:true}).fill('test-ui-password-123');await page.getByRole('button',{name:'Create artist account'}).click();await page.waitForURL('**/sales')
+  assert.equal(sms.size,testSmsBefore)
+  const testPassword=(await dbQuery('SELECT password_hash FROM sales_artist_accounts WHERE artist_id=$1',[TEST_ARTIST_ID])).rows[0].password_hash;assert.ok(await security.verifyPassword('test-ui-password-123',testPassword));assert.notEqual(testPassword,'test-ui-password-123')
   await page.getByText('Test artist portal',{exact:true}).waitFor();await page.getByRole('heading',{name:'Try the sales experience',exact:true}).waitFor()
   await page.getByLabel('Track title').fill('Browser experiment track');await page.getByLabel('Price (KSh)').fill('1');await page.getByLabel('Description',{exact:true}).fill('Actual upload through the test artist portal.')
   await page.getByLabel('Audio file · up to 50 MB').setInputFiles(fixtureFile);await page.getByRole('button',{name:'Upload and publish',exact:true}).click()
-  await page.getByText('Published. Your test sales card is ready in this portal.').waitFor({timeout:90000})
+  await page.getByText('Published. Your track is now on /dj-mix-sales and in this portal.').waitFor({timeout:90000})
   const testCard=page.locator('article').filter({has:page.getByRole('heading',{name:'Browser experiment track',exact:true})});await testCard.waitFor();assert.equal(await testCard.count(),1)
   await testCard.getByRole('button',{name:'Play 30-second preview',exact:true}).click();await testCard.getByRole('button',{name:'Pause',exact:true}).waitFor();await testCard.getByRole('button',{name:'Pause',exact:true}).click()
   await testCard.getByLabel('M-Pesa phone number').fill('0712345690');await testCard.getByRole('button',{name:'Pay KSh 1 with M-Pesa',exact:true}).click();await testCard.getByRole('button',{name:'Awaiting payment confirmation',exact:true}).waitFor()
@@ -337,7 +360,15 @@ test('browser UI: signup → upload → real catalog card → preview → paymen
   await page.getByText('TESTUIRECEIPT007',{exact:true}).waitFor();assert.equal(await page.getByText('BROWSERRECEIPT003',{exact:true}).count(),0)
   await page.screenshot({path:'/tmp/radio-test-artist-ui.png',fullPage:true})
   await page.goto('http://localhost:3117/sales/sign-up/test_artist',{waitUntil:'domcontentloaded'});await page.getByRole('heading',{name:'This signup link has been used'}).waitFor()
-  await page.goto('http://localhost:3117/dj-mix-sales',{waitUntil:'domcontentloaded'});assert.equal(await page.getByRole('heading',{name:'Browser experiment track',exact:true}).count(),0);assert.equal(await page.getByText('Test_Artist',{exact:true}).count(),0)
+  await page.goto('http://localhost:3117/dj-mix-sales',{waitUntil:'domcontentloaded'});const publicTestCard=page.locator('article').filter({has:page.getByRole('heading',{name:'Browser experiment track',exact:true})});assert.equal(await publicTestCard.count(),1);assert.equal(await publicTestCard.getByText('Test_Artist',{exact:true}).count(),1);await publicTestCard.getByRole('button',{name:'Play full track',exact:true}).waitFor()
+  await page.goto('http://localhost:3117/sales',{waitUntil:'domcontentloaded'})
+  const ownTracks=page.locator('section').filter({has:page.getByRole('heading',{name:'Your tracks',exact:true})})
+  await page.waitForFunction(()=>{const section=[...document.querySelectorAll('section')].find(s=>s.querySelector('h2')?.textContent==='Your tracks'),button=section?.querySelector('button');return button && Object.keys(button).some(k=>k.startsWith('__reactProps$') && typeof button[k]?.onClick==='function')})
+  const cancelled=page.waitForEvent('dialog').then(dialog=>dialog.dismiss());await ownTracks.getByRole('button',{name:'Delete track',exact:true}).click();await cancelled;assert.equal(await ownTracks.getByText('Browser experiment track',{exact:true}).count(),1)
+  const confirmed=page.waitForEvent('dialog').then(dialog=>dialog.accept());await ownTracks.getByRole('button',{name:'Delete track',exact:true}).click();await confirmed;await page.waitForFunction(()=>![...document.querySelectorAll('section')].find(s=>s.querySelector('h2')?.textContent==='Your tracks')?.innerText.includes('Browser experiment track'))
+  assert.equal(await page.getByRole('heading',{name:'Browser experiment track',exact:true}).count(),0);await page.getByText('TESTUIRECEIPT007',{exact:true}).waitFor()
+  await page.goto('http://localhost:3117/dj-mix-sales',{waitUntil:'domcontentloaded'});assert.equal(await page.getByRole('heading',{name:'Browser experiment track',exact:true}).count(),0)
+  assert.equal((await dbQuery('SELECT count(*) FROM sales_receipts WHERE order_id=$1',[testOrder.id])).rows[0].count,'1')
   assert.deepEqual(browserErrors,[])
  } catch(error) {throw new Error(error.message+'\nNext test server log tail:\n'+logs.slice(-5000))}
  finally {if(browserInstance)await browserInstance.close();child.kill();await new Promise(r=>setTimeout(r,200));bridge.closeAllConnections();await new Promise(r=>bridge.close(r))}

@@ -19,7 +19,8 @@ export default async function DashboardPage() {
   ])
   const total = sales.reduce((sum,row)=>sum+Number(row.amount),0)
   const titles = new Map(tracks.map(t=>[t.id,t.title]))
-  const testTracks = session.isTest ? tracks.filter(t=>t.sales_status==='ready') : []
+  const visibleTracks = tracks.filter(t=>t.sales_status!=='archived')
+  const testTracks = session.isTest ? visibleTracks.filter(t=>t.sales_status==='ready') : []
 
   return <div className="flex min-h-screen bg-background"><Sidebar /><div className="flex-1 md:ml-64">
     <Header session={session} />
@@ -28,7 +29,7 @@ export default async function DashboardPage() {
       <p className="text-muted-foreground mt-2 mb-8">Music and confirmed sales</p>
       {session.isTest && <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 mb-8">
         <p className="font-semibold">Test artist portal</p>
-        <p className="text-sm text-muted-foreground mt-2">Your uploads appear as sales cards here. They stay off the public DJ sales page. You can use a KSh 1 track to try preview, payment, playback, and sales reporting. M-Pesa payments are real charges.</p>
+        <p className="text-sm text-muted-foreground mt-2">Your published uploads appear on the public DJ sales page and as sales cards here. You can use a KSh 1 track to try preview, payment, playback, and sales reporting. M-Pesa payments are real charges.</p>
       </div>}
       <div className="grid sm:grid-cols-3 gap-4 mb-8">
         {[['Confirmed revenue',`KSh ${total.toLocaleString('en-KE')}`],['Confirmed sales',String(sales.length)],['Published tracks',String(tracks.filter(t=>t.sales_status==='ready').length)]].map(([label,v])=>
@@ -43,10 +44,10 @@ export default async function DashboardPage() {
       </section>}
       <section className="rounded-xl border bg-card p-6 mb-8">
         <h2 className="text-2xl font-bold mb-5">Your tracks</h2>
-        {!tracks.length && <p className="text-muted-foreground">You have not uploaded any tracks.</p>}
-        <div className="space-y-4">{tracks.map(track=><div className="flex justify-between gap-4 items-center border-b pb-4" key={track.id}>
+        {!visibleTracks.length && <p className="text-muted-foreground">No tracks to show. Upload a track to publish it.</p>}
+        <div className="space-y-4">{visibleTracks.map(track=><div className="flex justify-between gap-4 items-center border-b pb-4" key={track.id}>
           <div><p className="font-semibold">{track.title}</p><p className="text-sm text-muted-foreground">KSh {track.price_ksh} · {track.sales_status}</p></div>
-          {track.sales_status==='ready' && <ArchiveTrackButton trackId={track.id} />}
+          <ArchiveTrackButton trackId={track.id} />
         </div>)}</div>
       </section>
       <section className="rounded-xl border bg-card p-6">
