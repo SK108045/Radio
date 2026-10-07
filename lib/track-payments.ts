@@ -1,6 +1,6 @@
 import 'server-only'
 import { adminDb, requireData } from './supabase-admin'
-import { paymentEnv, requestTrackStk } from './domain-payment'
+import { requestTrackStk } from './domain-payment'
 export type TrackOrder = { id: string; browser_hash: string; artist_id: string; track_id: string; amount: number; reference: string; provider_id: string | null; status: string; note: string; confirmed_at: string | null }
 export async function initiateTrackOrder(order: TrackOrder, phone: string, title: string) {
   // Durable compare-and-swap ensures only one server sends this order's STK request.
@@ -22,14 +22,15 @@ export function parseTrackConfirmation(data: any, order: TrackOrder): ProviderCo
   if ((provider && provider !== order.provider_id) || (reference && reference !== order.reference)) return { status: 'pending' }
   const receipt = t?.mpesaReceiptNumber || t?.MpesaReceiptNumber || data?.mpesaReceiptNumber || data?.MpesaReceiptNumber
   const amount = t?.amount ?? data?.amount
-  if (status === 'success' && typeof receipt === 'string' && /^[A-Z0-9]{8,30}$/i.test(receipt) && amount !== undefined && Number(amount) === Number(order.amount)) return { status: 'paid', receipt: receipt.toUpperCase(), amount: Number(amount) }
+  const amountMatches = amount === undefined || Number(amount) === Number(order.amount)
+  if (status === 'success' && typeof receipt === 'string' && /^[A-Z0-9]{8,30}$/i.test(receipt) && amountMatches) return { status: 'paid', receipt: receipt.toUpperCase(), amount: Number(order.amount) }
   return { status: ['failed','cancelled','canceled'].includes(status) ? 'failed' : 'pending' }
 }
 export async function reconcileTrackOrder(order: TrackOrder, fetcher: typeof fetch = fetch, db = adminDb()): Promise<TrackOrder> {
   if (!order.provider_id || order.status === 'paid') return order
   let confirmed: ProviderConfirmation
   try {
-    const response = await fetcher(`https://app.swifta.co.ke/poll/${encodeURIComponent(order.provider_id)}`, { headers: { Accept: 'application/json', 'x-api-key': paymentEnv('SWIFTA_API_KEY') }, redirect: 'error', signal: AbortSignal.timeout(8000), cache: 'no-store' })
+    const response = await fetcher(`https://app.swifta.co.ke/poll/${encodeURIComponent(order.provider_id)}`, { headers: { Accept: 'application/json' }, redirect: 'error', signal: AbortSignal.timeout(8000), cache: 'no-store' })
     if (!response.ok) return order
     confirmed = parseTrackConfirmation(await response.json(), order)
   } catch { return order }
@@ -61,14 +62,15 @@ export async function processTrackCallback(providerId: string, fetcher: typeof f
   if (!order) {
     // Recover the callback-before-initiation-save race using a reference from the
     // trusted provider response, never a reference supplied in the webhook body.
-    const response = await fetcher(`https://app.swifta.co.ke/poll/${encodeURIComponent(providerId)}`, { headers: { Accept: 'application/json', 'x-api-key': paymentEnv('SWIFTA_API_KEY') }, redirect: 'error', signal: AbortSignal.timeout(8000), cache: 'no-store' })
+    const response = await fetcher(`https://app.swifta.co.ke/poll/${encodeURIComponent(providerId)}`, { headers: { Accept: 'application/json' }, redirect: 'error', signal: AbortSignal.timeout(8000), cache: 'no-store' })
     if (!response.ok) throw new Error('Provider confirmation is unavailable.')
     const data = await response.json(), transaction = data?.transaction || data?.data || data
     const reference = transaction?.accountReference || transaction?.reference
     if (typeof reference !== 'string' || !reference.startsWith('RIENG-TRACK-')) return null
     const candidate = await db.from('sales_orders').select('*').eq('reference', reference).maybeSingle()
     if (candidate.error) throw new Error('Checkout could not be read.')
-    if (!candidate.data || (candidate.data.provider_id && candidate.data.provider_id !== providerId) || Number(transaction?.amount ?? data?.amount) !== Number(candidate.data.amount)) return null
+    const providerAmount = transaction?.amount ?? data?.amount
+    if (!candidate.data || (candidate.data.provider_id && candidate.data.provider_id !== providerId) || (providerAmount !== undefined && Number(providerAmount) !== Number(candidate.data.amount))) return null
     const matched = { ...candidate.data, provider_id: providerId } as TrackOrder
     if (parseTrackConfirmation(data, matched).status !== 'paid') return null
     if (!candidate.data.provider_id) {
