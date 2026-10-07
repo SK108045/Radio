@@ -21,7 +21,7 @@ function load(file) {
  const req=name=> name==='server-only'?{}:name==='next/headers'?{cookies:async()=>context.getStore()}:name==='next/navigation'?{redirect:url=>{throw Object.assign(new Error('redirect'),{url})}}:name==='next/cache'?{revalidatePath:()=>{}}:name.startsWith('@/')?load(path.join(root,name.slice(2)+'.ts')):name.startsWith('.')?load(path.resolve(path.dirname(file),name+'.ts')):require(name)
  new Function('require','module','exports',code)(req,module,module.exports); return module.exports
 }
-function jar(){const map=new Map();return {map,get:name=>map.has(name)?{value:map.get(name)}:undefined,set:(name,value)=>map.set(name,value),delete:name=>map.delete(name)}}
+function jar(){const map=new Map();return {map,get:name=>map.has(name)?{value:map.get(name)}:undefined,set:(name,value)=>map.set(name,value),delete:name=>map.delete(typeof name==='string'?name:name.name)}}
 function form(input){const f=new FormData();for(const [k,v]of Object.entries(input))f.set(k,String(v));return f}
 const request=(url,input,cookies=new Map(),headers={})=>new NextRequest('https://rieng.test'+url,{method:input?'POST':'GET',headers:{host:'rieng.test',origin:'https://rieng.test','content-type':'application/json',cookie:[...cookies].map(([k,v])=>k+'='+v).join('; '),...headers},body:input?JSON.stringify(input):undefined})
 const jsonResponse=data=>new Response(JSON.stringify(data),{headers:{'content-type':'application/json'}})
@@ -36,7 +36,7 @@ test.before(async()=>{
  sql=new Client({connectionString:u.toString()});await sql.connect()
  let schema=fs.readFileSync(path.join(__dirname,'sales-schema-fixture.sql'),'utf8').replace(/CREATE ROLE (anon|authenticated|service_role)( BYPASSRLS)?;/g,(_,role,option='')=>`DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='${role}') THEN CREATE ROLE ${role}${option}; END IF; END $$;`)
  await sql.query(schema)
- for(const name of ['202610070001_artist_sales.sql','202610070002_test_artist.sql'])await sql.query(fs.readFileSync(path.join(root,'supabase/migrations',name),'utf8'))
+ for(const name of ['202610070001_artist_sales.sql','202610070002_test_artist.sql','202610070003_signup_verification.sql','202610070004_metro_demo_signup.sql'])await sql.query(fs.readFileSync(path.join(root,'supabase/migrations',name),'utf8'))
  const role='radio_test_auth_'+process.pid
  await control.query(`CREATE ROLE ${role} LOGIN NOINHERIT`);await control.query(`GRANT anon,authenticated,service_role TO ${role}`)
  u.username=role;u.password='';port=Number(process.env.SALES_TEST_POSTGREST_PORT||55438)
@@ -77,16 +77,41 @@ test.after(async()=>{
 })
 const signup=async(slug,phone,artistJar)=>{
  const sent=await actions.requestSignupCodeAction(slug,null,form({phone}));assert.ok(sent.challengeId, sent.error)
- const code=sms.get('+254'+phone.slice(1));const result=await context.run(artistJar,async()=>{try{return await actions.signupAction(slug,null,form({challengeId:sent.challengeId,code,password:'strong-password-123',confirmPassword:'strong-password-123'}))}catch(e){return e}})
+ const code=sms.get('+254'+phone.slice(1));const verified=await context.run(artistJar,()=>actions.verifySignupCodeAction(slug,null,form({challengeId:sent.challengeId,code})));assert.equal(verified.verified,true,verified.error);const result=await context.run(artistJar,async()=>{try{return await actions.signupAction(slug,null,form({challengeId:sent.challengeId,code,password:'strong-password-123',confirmPassword:'strong-password-123'}))}catch(e){return e}})
  assert.equal(result.url,'/sales');return sent.challengeId
 }
+test('Metro demo bypass is restricted, one-time, hashes passwords, sends no SMS and supports phone login',async()=>{
+ const id='33333333-3333-3333-3333-333333333333',demoJar=jar(),before=sms.size
+ await assert.rejects(dbQuery("UPDATE sales_artist_registry SET demo_signup_enabled=true WHERE slug='swatt'"),/check constraint/)
+ const rejected=await context.run(jar(),()=>actions.signupAction('swatt',null,form({phone:'0712345689',password:'demo-strong-password-123',confirmPassword:'demo-strong-password-123'})));assert.match(rejected.error,/Verify your phone/)
+ const invalid=await context.run(demoJar,()=>actions.signupAction('metro_stunna',null,form({phone:'bad',password:'demo-strong-password-123',confirmPassword:'demo-strong-password-123'})));assert.match(invalid.error,/valid Kenyan/)
+ const mismatch=await context.run(demoJar,()=>actions.signupAction('metro_stunna',null,form({phone:'0712345689',password:'demo-strong-password-123',confirmPassword:'different-password'})));assert.match(mismatch.error,/Passwords do not match/)
+ const result=await context.run(demoJar,async()=>{try{return await actions.signupAction('metro_stunna',null,form({phone:'0712345689',password:'demo-strong-password-123',confirmPassword:'demo-strong-password-123'}))}catch(e){return e}});assert.equal(result.url,'/sales');assert.equal(sms.size,before)
+ const account=(await dbQuery('SELECT password_hash FROM sales_artist_accounts WHERE artist_id=$1',[id])).rows[0];assert.ok(await security.verifyPassword('demo-strong-password-123',account.password_hash));assert.notEqual(account.password_hash,'demo-strong-password-123')
+ assert.equal((await dbQuery('SELECT demo_signup_enabled FROM sales_artist_registry WHERE artist_id=$1',[id])).rows[0].demo_signup_enabled,false)
+ await assert.rejects(dbQuery('SELECT sales_claim_metro_demo($1,$2)',['0712345688',account.password_hash]),/unavailable/)
+ const login=await context.run(demoJar,async()=>{try{return await actions.loginAction(null,form({phone:'0712345689',password:'demo-strong-password-123'}))}catch(e){return e}});assert.equal(login.url,'/sales')
+ assert.equal((await dbQuery('SELECT count(*) FROM sales_otp_challenges WHERE artist_id=$1',[id])).rows[0].count,'0')
+ // Restore only this disposable fixture for the existing verified-signup coverage.
+ await dbQuery('DELETE FROM sales_artist_sessions WHERE artist_id=$1',[id]);await dbQuery('DELETE FROM sales_artist_accounts WHERE artist_id=$1',[id]);await dbQuery('UPDATE sales_artist_registry SET claimed_at=null WHERE artist_id=$1',[id])
+})
+test('SMS rejection refunds send limits, recent code requests reuse one SMS, and signup requires a verified browser',async()=>{
+ const previous=global.fetch,phone='0712345691'
+ global.fetch=async(input,options)=>String(input)==='https://sozuri.net/api/v1/messaging'?new Response(JSON.stringify({messageData:{message:'Error. Insufficient balance. Top up and try again.'}}),{status:400,headers:{'content-type':'application/json'}}):previous(input,options)
+ try{for(let i=0;i<6;i++){const result=await actions.requestSignupCodeAction('test_artist',null,form({phone}));assert.match(result.error,/insufficient credits/);assert.equal(result.challengeId,undefined)}}finally{global.fetch=previous}
+ const counters=(await dbQuery("SELECT hits FROM sales_rate_limits WHERE key=$1 OR key=$2",['otp-artist:'+TEST_ARTIST_ID,'otp-phone:'+security.digest(phone)])).rows;assert.ok(counters.every(r=>r.hits===0))
+ const first=await actions.requestSignupCodeAction('test_artist',null,form({phone}));assert.ok(first.challengeId,first.error)
+ const second=await actions.requestSignupCodeAction('test_artist',null,form({phone}));assert.equal(second.challengeId,first.challengeId);assert.ok(second.retryAfterSeconds>0)
+ assert.equal((await dbQuery('SELECT count(*) FROM sales_otp_challenges WHERE artist_id=$1 AND phone=$2 AND sms_sent_at IS NOT NULL',[TEST_ARTIST_ID,phone])).rows[0].count,'1')
+ const premature=await context.run(jar(),()=>actions.signupAction('test_artist',null,form({challengeId:first.challengeId,password:'strong-password-123',confirmPassword:'strong-password-123'})));assert.match(premature.error,/Verify your phone/)
+})
 let swattJar=jar(),metroJar=jar(),kapitaniJar=jar(),trackId,orderId,browser= new Map([['rieng-listening-browser','A'.repeat(43)]])
 test('exactly three public one-time identities; verified signup, hashes, phone login and session forgery',async()=>{
  assert.deepEqual((await dbQuery('SELECT slug FROM sales_artist_registry WHERE NOT is_test ORDER BY slug')).rows.map(r=>r.slug),['kapitani','metro_stunna','swatt'])
  assert.ok((await actions.requestSignupCodeAction('mejja',null,form({phone:'0712345678'}))).error)
  const sent=await actions.requestSignupCodeAction('swatt',null,form({phone:'0712345678'}));assert.ok(sent.challengeId)
  const wrong=await context.run(swattJar,()=>actions.signupAction('swatt',null,form({challengeId:sent.challengeId,code:'000000',password:'strong-password-123',confirmPassword:'strong-password-123'})));assert.ok(wrong.error)
- const code=sms.get('+254712345678');const success=await context.run(swattJar,async()=>{try{return await actions.signupAction('swatt',null,form({challengeId:sent.challengeId,code,password:'strong-password-123',confirmPassword:'strong-password-123'}))}catch(e){return e}});assert.equal(success.url,'/sales')
+ const code=sms.get('+254712345678');const verified=await context.run(swattJar,()=>actions.verifySignupCodeAction('swatt',null,form({challengeId:sent.challengeId,code})));assert.equal(verified.verified,true);const withoutProof=await context.run(jar(),()=>actions.signupAction('swatt',null,form({challengeId:sent.challengeId,password:'strong-password-123',confirmPassword:'strong-password-123'})));assert.match(withoutProof.error,/Verify your phone/);const success=await context.run(swattJar,async()=>{try{return await actions.signupAction('swatt',null,form({challengeId:sent.challengeId,code,password:'strong-password-123',confirmPassword:'strong-password-123'}))}catch(e){return e}});assert.equal(success.url,'/sales')
  assert.ok((await actions.requestSignupCodeAction('swatt',null,form({phone:'0712345679'}))).error)
  const auth=load(path.join(root,'lib/auth.ts'));assert.equal((await context.run(swattJar,auth.getSession)).stageName,'swatt')
  const account=(await dbQuery('SELECT * FROM sales_artist_accounts')).rows[0];assert.notEqual(account.password_hash,'strong-password-123');assert.ok(await security.verifyPassword('strong-password-123',account.password_hash));assert.equal(await security.verifyPassword('bad',account.password_hash),false)
@@ -274,7 +299,7 @@ test('browser UI: signup → upload → real catalog card → preview → paymen
   await page.goto('http://localhost:3117/sales/sign-up/kapitani',{waitUntil:'domcontentloaded'})
   await page.waitForFunction(()=>Object.keys(document.querySelector('#signup-phone')||{}).some(k=>k.startsWith('__reactProps$')))
   await page.getByLabel('Phone number',{exact:true}).fill('0712345682');await page.getByRole('button',{name:'Verify phone',exact:true}).click()
-  await page.getByLabel('SMS code',{exact:true}).waitFor();await page.getByLabel('SMS code',{exact:true}).fill(sms.get('+254712345682'))
+  await page.getByLabel('SMS code',{exact:true}).waitFor();assert.equal(await page.getByLabel('Password',{exact:true}).count(),0);await page.getByLabel('SMS code',{exact:true}).fill('000000');await page.getByRole('button',{name:'Verify code',exact:true}).click();await page.getByRole('alert').waitFor();assert.equal(await page.getByLabel('Password',{exact:true}).count(),0);await page.getByLabel('SMS code',{exact:true}).fill(sms.get('+254712345682'));await page.getByRole('button',{name:'Verify code',exact:true}).click();await page.getByLabel('Password',{exact:true}).waitFor()
   await page.getByLabel('Password',{exact:true}).fill('ui-strong-password-123');await page.getByLabel('Confirm password',{exact:true}).fill('ui-strong-password-123');await page.getByRole('button',{name:'Create artist account'}).click();await page.waitForURL('**/sales')
   await page.getByLabel('Track title').fill('Browser uploaded real track');await page.getByLabel('Price (KSh)').fill('2');await page.getByLabel('Description',{exact:true}).fill('Uploaded through the artist portal during the isolated browser test.')
   const fixtureFile=path.join(tmp,'ui-song.mp3');fs.writeFileSync(fixtureFile,fixture);await page.getByLabel('Audio file · up to 50 MB').setInputFiles(fixtureFile);await page.getByRole('button',{name:'Upload and publish',exact:true}).click()
@@ -297,7 +322,7 @@ test('browser UI: signup → upload → real catalog card → preview → paymen
   await page.goto('http://localhost:3117/sales/sign-up/test_artist',{waitUntil:'domcontentloaded'})
   await page.waitForFunction(()=>Object.keys(document.querySelector('#signup-phone')||{}).some(k=>k.startsWith('__reactProps$')))
   await page.getByLabel('Phone number',{exact:true}).fill('0712345690');await page.getByRole('button',{name:'Verify phone',exact:true}).click()
-  await page.getByLabel('SMS code',{exact:true}).waitFor();await page.getByLabel('SMS code',{exact:true}).fill(sms.get('+254712345690'))
+  await page.getByLabel('SMS code',{exact:true}).waitFor();assert.equal(await page.getByLabel('Password',{exact:true}).count(),0);await page.getByLabel('SMS code',{exact:true}).fill(sms.get('+254712345690'));await page.getByRole('button',{name:'Verify code',exact:true}).click();await page.getByLabel('Password',{exact:true}).waitFor()
   await page.getByLabel('Password',{exact:true}).fill('test-ui-password-123');await page.getByLabel('Confirm password',{exact:true}).fill('test-ui-password-123');await page.getByRole('button',{name:'Create artist account'}).click();await page.waitForURL('**/sales')
   await page.getByText('Test artist portal',{exact:true}).waitFor();await page.getByRole('heading',{name:'Try the sales experience',exact:true}).waitFor()
   await page.getByLabel('Track title').fill('Browser experiment track');await page.getByLabel('Price (KSh)').fill('1');await page.getByLabel('Description',{exact:true}).fill('Actual upload through the test artist portal.')

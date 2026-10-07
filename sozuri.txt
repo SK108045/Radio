@@ -19,3 +19,11 @@ lib/sozuri.ts checks the HTTP response and each recipient status before reportin
 OTP values are generated cryptographically, stored only as keyed hashes and verified
 against a durable challenge with an expiry and a maximum of five guesses.
 Keep all API credentials in .env or the deployment secret environment.
+
+The live request uses the same payload as the working root example. Delivery acceptance
+is not a final handset delivery report; see https://sozuri.net/docs/text.
+Signup requests preserve provider message IDs and safe failure codes, reuse a recently
+accepted request for 60 seconds, and refund only definitively rejected sends.
+The phone/code fields keep their values after failed requests. Verify the SMS code
+before the password fields appear; the server checks a signed HttpOnly verification
+cookie before creating the artist account.
