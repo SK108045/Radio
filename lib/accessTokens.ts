@@ -1,6 +1,7 @@
+import 'server-only'
 import crypto from 'crypto'
 
-const SECRET_KEY = process.env.ACCESS_TOKEN_SECRET || 'rieng-radio-music-store-secret-key-2026'
+function secretKey() { const secret = process.env.ACCESS_TOKEN_SECRET || process.env.DOMAIN_PAYMENT_SECRET; if (!secret) throw new Error('Music access signing is not configured.'); return secret }
 
 export interface AccessTokenPayload {
   trackId: string
@@ -31,7 +32,7 @@ export function create15MinAccessToken(
 
   const payloadBase64 = Buffer.from(JSON.stringify(payload)).toString('base64url')
   const signature = crypto
-    .createHmac('sha256', SECRET_KEY)
+    .createHmac('sha256', secretKey())
     .update(payloadBase64)
     .digest('base64url')
 
@@ -51,13 +52,15 @@ export function verifyAccessToken(
       return { valid: false, error: 'Malformed token' }
     }
 
-    const [payloadBase64, signature] = token.split('.')
+    const [payloadBase64, signature, extra] = token.split('.')
+    if (!payloadBase64 || !signature || extra) return { valid: false, error: 'Malformed token' }
     const expectedSignature = crypto
-      .createHmac('sha256', SECRET_KEY)
+      .createHmac('sha256', secretKey())
       .update(payloadBase64)
       .digest('base64url')
 
-    if (signature !== expectedSignature) {
+    const actual = Buffer.from(signature), expected = Buffer.from(expectedSignature)
+    if (actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) {
       return { valid: false, error: 'Invalid token signature' }
     }
 
@@ -65,7 +68,7 @@ export function verifyAccessToken(
       Buffer.from(payloadBase64, 'base64url').toString('utf8')
     )
 
-    if (Date.now() > payload.expiresAt) {
+    if (!Number.isFinite(payload.expiresAt) || Date.now() > payload.expiresAt) {
       return { valid: false, payload, error: 'Access pass expired' }
     }
 

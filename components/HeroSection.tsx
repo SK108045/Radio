@@ -49,9 +49,9 @@ export default function HeroSection() {
                 {[0, 1, 2, 3].map(i => <span key={i} className={styles.miniBar} style={{ animationDelay: `${i * -180}ms` }} />)}
               </span>
             </Link>
-            <Link href="/shows" className="inline-flex items-center justify-center gap-3 bg-black/40 backdrop-blur-md border border-white/25 text-white px-8 py-4 rounded-full font-bold hover:border-primary hover:bg-primary/10 transition-all text-base hover:-translate-y-1">
-              <Play size={17} aria-hidden="true" />
-              Explore RIENGFLIX
+            <Link href="/dj-mix-sales" className="inline-flex items-center justify-center gap-3 bg-black/40 backdrop-blur-md border border-white/25 text-white px-8 py-4 rounded-full font-bold hover:border-primary hover:bg-primary/10 transition-all text-base hover:-translate-y-1">
+              <Disc3 size={17} aria-hidden="true" />
+              DJ MIX SALES
             </Link>
           </div>
           <Link href="#line-up" className={`${styles.heroEnter} inline-flex items-center gap-2 mt-7 mb-12 md:mb-16 text-xs font-medium text-gray-400 hover:text-white transition-colors`} style={{ animationDelay: '320ms' }}>

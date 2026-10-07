@@ -85,15 +85,15 @@ export function requestDomainStk(phone: string, reference: string, fetcher: type
 export function requestTestStk(phone: string, reference: string, fetcher: typeof fetch = fetch): Promise<PushResult> {
   return requestStk(phone, reference, 'test', fetcher)
 }
-async function requestStk(phone: string, reference: string, purpose: PaymentPurpose, fetcher: typeof fetch): Promise<PushResult> {
-  const amount = paymentAmount(purpose)
+async function requestStk(phone: string, reference: string, purpose: PaymentPurpose, fetcher: typeof fetch, track?: { amount: number; description: string }): Promise<PushResult> {
+  const amount = track?.amount ?? paymentAmount(purpose)
   const key = paymentEnv('SWIFTA_API_KEY')
   if (!key) throw new Error('M-Pesa payments are not configured.')
   try {
     const response = await fetcher('https://app.swifta.co.ke/stkpush', {
       method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(20000),
       headers: { 'x-api-key': key, 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ phone, amount, accountReference: reference, description: purpose === 'test' ? 'Rieng KSh 1 payment test' : `Rieng domain switch to ${DOMAIN_QUOTE.newDomain}` }),
+      body: JSON.stringify({ phone, amount, accountReference: reference, description: track?.description || (purpose === 'test' ? 'Rieng KSh 1 payment test' : `Rieng domain switch to ${DOMAIN_QUOTE.newDomain}`) }),
     })
     const raw = await response.text()
     let data: any
@@ -183,4 +183,9 @@ export async function startPayment(session: PaymentSession, attemptId: string, p
     return entry.session
   })()
   return entry.flight
+}
+
+export function requestTrackStk(phone: string, reference: string, amount: number, title: string, fetcher: typeof fetch = fetch) {
+  if (!Number.isInteger(amount) || amount < 1 || amount > 100000) throw new Error('Invalid track price.')
+  return requestStk(phone, reference, 'domain', fetcher, { amount, description: `Rieng: ${title}`.slice(0, 100) })
 }

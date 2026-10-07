@@ -21,7 +21,7 @@ const dailyShows = [
     host: 'Kartelo',
     schedule: 'Weekdays | 10:00 AM - 3:00 PM',
     description: 'The hardest beats and hottest flows from the Gengetone and Arbantone scenes. Pure energy from Kenya&apos;s underground.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Gengetone2.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0dlbmdldG9uZTIuanBnIiwiaWF0IjoxNzc5MjcxMjcxLCJleHAiOjE4MTA4MDcyNzF9.8g2lcsHxZHP3zTn1nnGaS7WDdO51ILslPaQA_t8O5IM',
+    image: '/shows/Kartelo_and_Bura.png',
     color: 'from-red-500/20 to-transparent',
     features: ['Live Gengetone', 'New Drops', 'Beat Breakdowns']
   },
@@ -159,7 +159,7 @@ const weekendShows = [
     day: 'Sunday',
     schedule: '7:00 PM - 9:00 PM',
     description: 'The fresh-evening lane for the current wave: Kenya’s most-streamed space is now heavily rap, hip-hop, Afropop, and Afrobeats-driven. Featuring Bien, Sauti Sol, Wakadinali, Nyashinski, Lil Maina, and Okello Max.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/New_Kenyan_Music.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL05ld19LZW55YW5fTXVzaWMuanBnIiwiaWF0IjoxNzc5Nzg0OTExLCJleHAiOjE4MTEzMjA5MTF9.9GRhk0jBuT8Ybb-hL8uAdZuiC6rLGhj0maEjaHFuLE8',
+    image: '/shows/new_Kenyan_Music.jpg',
     color: 'from-primary to-orange-900',
     features: ['Bien', 'Wakadinali', 'Nyashinski']
   }

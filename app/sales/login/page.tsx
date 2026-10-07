@@ -24,7 +24,7 @@ export default function LoginPage() {
         <Card className="bg-card border-border border shadow-xl shadow-black/50">
           <CardHeader>
             <CardTitle>Welcome back</CardTitle>
-            <CardDescription>Enter your username and password to continue</CardDescription>
+            <CardDescription>Enter your phone number and password to continue</CardDescription>
           </CardHeader>
           <CardContent>
             <form action={formAction} className="space-y-4">
@@ -36,10 +36,12 @@ export default function LoginPage() {
               )}
               
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Username</label>
+                <label className="text-sm font-medium text-foreground">Phone number</label>
                 <Input 
-                  name="username" 
-                  placeholder="e.g. swat" 
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel" 
+                  placeholder="0712 345 678" 
                   required
                   className="bg-input border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
                 />

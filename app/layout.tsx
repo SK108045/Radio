@@ -6,8 +6,15 @@ import { RadioProvider } from '@/context/RadioContext'
 import FloatingRadioBar from '@/components/FloatingRadioBar'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const geistSans = Geist({
+  subsets: ['latin'],
+  display: 'swap',
+})
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'RIENG - Your Premium Music & Entertainment Platform',
@@ -41,7 +48,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark bg-background" data-scroll-behavior="smooth">
-      <body className="font-sans antialiased">
+      <body className={`${geistSans.className} font-sans antialiased`}>
         <RadioProvider>
           <SmoothScroll />
           {children}

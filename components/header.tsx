@@ -55,7 +55,7 @@ export function Header({ session }: { session?: SessionPayload | null }) {
         <DropdownMenuContent align="end" className="w-56">
           <div className="px-2 py-1.5">
             <p className="text-sm font-semibold">{session?.stageName || 'Artist'}</p>
-            <p className="text-xs text-muted-foreground">{session?.email || 'email@example.com'}</p>
+            <p className="text-xs text-muted-foreground">{session?.phone || ''}</p>
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>

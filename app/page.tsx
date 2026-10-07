@@ -26,7 +26,7 @@ const dailyShows = [
     host: 'RIENG',
     schedule: 'Weekdays | 10:00 AM - 3:00 PM',
     description: 'The hardest beats and hottest flows from the Gengetone and Arbantone scenes. Pure energy from Kenya’s underground.',
-    image: '/shows/gengetone.webp',
+    image: '/shows/Kartelo_and_Bura.png',
   },
   {
     title: 'Underground Kenyan HipHop',

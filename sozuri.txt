@@ -1,0 +1,21 @@
+Sozuri SMS implementation (based on the repository's sozuri_Test.txt)
+POST https://sozuri.net/api/v1/messaging
+Content-Type: application/json
+Accept: application/json
+
+JSON fields:
+  project: SOZURI_PROJECT server environment variable
+  apiKey: SOZURI_API_KEY server environment variable
+  from: SOZURI_SENDER (defaults to Sozuri)
+  to: +254 followed by the Kenyan mobile number without its initial 0
+  message: the generated six-digit code and its five-minute expiry
+  channel: sms
+  type: SOZURI_SMS_TYPE (defaults to promotional, matching the tested implementation)
+
+Successful repository example:
+  recipients: [{ status: sent, statusCode: 11, ... }]
+
+lib/sozuri.ts checks the HTTP response and each recipient status before reporting SMS sent.
+OTP values are generated cryptographically, stored only as keyed hashes and verified
+against a durable challenge with an expiry and a maximum of five guesses.
+Keep all API credentials in .env or the deployment secret environment.

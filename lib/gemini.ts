@@ -80,24 +80,26 @@ export async function enhanceTrackDescription({
   title,
   artistName = 'Kenyan Creator',
   rawDescription = '',
-  genre = 'Kenyan Urban / Arbantone / Gengetone',
+  genre = '',
 }: EnhanceDescriptionParams): Promise<string> {
   const apiKey =
-    process.env.GEMINI_API_KEY || 'AQ.Ab8RN6LDJO6RH9quRTsyVo2TfRAX18Ijam7oNcgA8sxkG4NDLw'
+    process.env.GEMINI_API_KEY || ''
 
-  const prompt = `You are an expert music critic, sound engineer, and A&R curator for RIENG in Nairobi, Kenya.
-Write an authentic, punchy, high-energy 2 to 3 sentence music description for a new track on the RIENG Music Store.
+  if (!apiKey) return rawDescription.trim() || `${title} by ${artistName}.`
+
+  const prompt = `Polish the artist's description for a track on the RIENG Music Store.
+Write a concise, engaging description using only the details supplied by the artist.
 
 Track Details:
 - Title: "${title}"
 - Artist / Producer: "${artistName}"
-- Genre / Style: "${genre}"
-- Artist Draft Notes: "${rawDescription.trim() || 'High energy street anthem with heavy 808s and Nairobi vibe'}"
+- Genre / Style: "${genre || 'Not specified'}"
+- Artist Draft Notes: "${rawDescription.trim() || 'No description supplied'}"
 
 Guidelines:
-1. Capture the genuine Nairobi street vibe, Sheng energy, and audio production excellence (mention 808s, cadence, tempo, or club bounce).
-2. Keep it engaging, professional, and ready for music fans to read before buying.
-3. Output ONLY the 2-3 sentence description text. Do NOT include markdown headers, quotes, or conversational filler.`
+1. Do not invent musical characteristics, genre, release history, popularity, or production facts. You have not listened to the audio.
+2. Preserve the artist's meaning. If no notes are supplied, use the title and artist name only.
+3. Output ONLY the description text. Do not include markdown headers, quotes, or conversational filler.`
 
   try {
     const aiText = await postGeminiHttps(apiKey, prompt)
@@ -111,6 +113,6 @@ Guidelines:
   // Fallback if network is completely offline
   return (
     rawDescription.trim() ||
-    `${title} by ${artistName}. Exclusive high-energy drop mastered for the streets on RIENG.`
+    `${title} by ${artistName}.`
   )
 }
