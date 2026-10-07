@@ -180,7 +180,8 @@ test('unique provider receipts cannot credit a second artist; failed payments ne
  assert.equal((await dbQuery('SELECT status FROM sales_orders WHERE id=$1',[order.id])).rows[0].status,'pending');assert.equal((await dbQuery('SELECT COUNT(*) FROM sales_entitlements WHERE order_id=$1',[order.id])).rows[0].count,'0')
  const payments=load(path.join(root,'lib/track-payments.ts'));provider.set('checkout-other',{status:'failed'});await payments.reconcileTrackOrder({...order,provider_id:'checkout-other',status:'pending'});assert.equal((await dbQuery('SELECT status FROM sales_orders WHERE id=$1',[order.id])).rows[0].status,'failed')
  provider.set('checkout-other',{status:'success',amount:300,mpesaReceiptNumber:'OTHERRECEIPT002'});await payments.reconcileTrackOrder({...order,provider_id:'checkout-other',status:'failed'});assert.equal((await dbQuery('SELECT COUNT(*) FROM sales_receipts WHERE artist_id=$1',['33333333-3333-3333-3333-333333333333'])).rows[0].count,'1')
- const result=payments.parseTrackConfirmation({status:'success',mpesaReceiptNumber:'OTHERRECEIPT002'}, {...order,provider_id:'checkout-other'});assert.equal(result.status,'pending')
+ const result=payments.parseTrackConfirmation({status:'success',mpesaReceiptNumber:'OTHERRECEIPT002'}, {...order,provider_id:'checkout-other'});assert.equal(result.status,'paid')
+ const wrongAmount=payments.parseTrackConfirmation({status:'success',amount:999,mpesaReceiptNumber:'OTHERRECEIPT003'}, {...order,provider_id:'checkout-other'});assert.equal(wrongAmount.status,'pending')
 })
 test('credential changes verify phone and revoke old sessions; immutable identity and anonymous DB/storage policies',async()=>{
  const auth=load(path.join(root,'lib/auth.ts')),old=jar();old.map.set('sales_session',swattJar.map.get('sales_session'))
