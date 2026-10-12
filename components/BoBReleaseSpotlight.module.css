@@ -123,19 +123,9 @@
   transition: background 180ms ease, transform 180ms ease;
 }
 .button:hover { background: #ffa363; transform: translateY(-2px); }
-.posterLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #e8d6cb;
-  font-size: 12px;
-  font-weight: 750;
-  text-decoration: underline;
-  text-decoration-color: rgba(255, 255, 255, .25);
-  text-underline-offset: 5px;
-}
-.posterLink:hover { color: #ff9b56; }
-.button:focus-visible, .posterLink:focus-visible { outline: 2px solid #ff9b56; outline-offset: 5px; }
+.button { cursor: pointer; }
+.preorderPrice { color: #e8d6cb; font-size: 12px; font-weight: 800; letter-spacing: .05em; }
+.button:focus-visible { outline: 2px solid #ff9b56; outline-offset: 5px; }
 .broughtToYou {
   display: inline-flex;
   align-items: center;
