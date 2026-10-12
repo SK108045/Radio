@@ -80,7 +80,7 @@ export default function BoBPreorderDialog({ open, onOpenChange, testMode = false
   const paid = order?.status === 'paid'
   const awaiting = order?.status === 'pending' || order?.status === 'uncertain'
   const smsText = order?.smsStatus === 'sent'
-    ? 'Your SMS was accepted by Sozuri. Keep it as proof of your pre-order.'
+    ? (testMode ? 'Sozuri accepted your test SMS. Check the handset for the BOB-TEST code.' : 'Your SMS was accepted by Sozuri. Keep it as proof of your pre-order.')
     : order?.smsStatus === 'failed'
       ? 'Your payment is confirmed, but SMS submission is delayed. Save the code below and check back.'
       : 'Your confirmation SMS is being prepared. Save your unique code below.'
@@ -138,7 +138,7 @@ export default function BoBPreorderDialog({ open, onOpenChange, testMode = false
         </div>
         <button type="submit" disabled={!ready || submitting} className="flex w-full items-center justify-center gap-2 rounded-lg bg-orange-500 px-5 py-4 font-black text-black transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-60">
           {submitting && <LoaderCircle size={18} className="animate-spin" aria-hidden="true" />}
-          {submitting ? 'Sending M-Pesa prompt…' : 'Pay KSh {amount} via M-Pesa'}
+          {submitting ? 'Sending M-Pesa prompt…' : `Pay KSh ${amount} via M-Pesa`}
         </button>
         <p className="text-center text-xs leading-5 text-neutral-400">{testMode ? 'Real KSh 1 test. A test code and SMS are created only after payment verification. No music entitlement is granted.' : 'Your pre-order code is generated only after payment is verified.'} No M-Pesa PIN is entered on this website.</p>
       </form>}
