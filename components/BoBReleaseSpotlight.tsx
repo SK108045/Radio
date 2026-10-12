@@ -1,9 +1,13 @@
+'use client'
+
 import Image from 'next/image'
-import Link from 'next/link'
-import { ArrowUpRight, Disc3, Sparkles } from 'lucide-react'
+import { useState } from 'react'
+import { Disc3, Sparkles, Ticket } from 'lucide-react'
+import BoBPreorderDialog from './BoBPreorderDialog'
 import styles from './BoBReleaseSpotlight.module.css'
 
 export default function BoBReleaseSpotlight() {
+  const [preorderOpen, setPreorderOpen] = useState(false)
   return (
     <section id="upcoming-release" aria-labelledby="bob-release-title" className={styles.section}>
       <div className={styles.inner}>
@@ -29,21 +33,14 @@ export default function BoBReleaseSpotlight() {
 
             <p className={styles.description}>
               Two voices. One new drop. We&apos;ve got something special cooking for Kenyan music.
-              Keep your eyes on RIENG254 for the release and pre-order details.
+              Pre-order BoB now for KSh 150 and receive your unique confirmation code by SMS after payment.
             </p>
 
             <div className={styles.actions}>
-              <Link href="/albums" className={styles.button}>
-                Explore RIENG music <ArrowUpRight size={19} aria-hidden="true" />
-              </Link>
-              <a
-                href="/releases/bob-swat-unco-jing-jong.webp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.posterLink}
-              >
-                View full poster <ArrowUpRight size={16} aria-hidden="true" />
-              </a>
+              <button type="button" onClick={() => setPreorderOpen(true)} className={styles.button}>
+                <Ticket size={19} aria-hidden="true" /> Pre-Order Now
+              </button>
+              <span className={styles.preorderPrice}>KSh 150 · M-Pesa</span>
             </div>
 
             <p className={styles.broughtToYou}><Disc3 size={15} aria-hidden="true" /> Music. Culture. Kenya.</p>
@@ -73,6 +70,7 @@ export default function BoBReleaseSpotlight() {
           <span>BoB — COMING SOON</span>
         </div>
       </div>
+      <BoBPreorderDialog open={preorderOpen} onOpenChange={setPreorderOpen} />
     </section>
   )
 }
