@@ -10,13 +10,13 @@ export async function GET(req: NextRequest) {
   try {
     // Readiness check prevents attempting to charge customers before the migration is applied.
     const db = adminDb()
-    const { error: schemaError } = await db.from('bob_preorders').select('id').limit(1)
+    const { error: schemaError } = await db.from('bob_preorders').select('id,is_test').limit(1)
     if (schemaError) return json({ ready: false, error: 'BoB pre-orders are being prepared. Please check back shortly.' }, 503)
     if (!paymentEnv('SWIFTA_API_KEY')) return json({ ready: false, error: 'M-Pesa checkout is temporarily unavailable.' }, 503)
     const browser = browserHash(req)
     if (!browser) return withBrowser(json({ ready: true, order: null }), req)
     const row = await db.from('bob_preorders').select('*')
-      .eq('browser_hash', browser).order('created_at', { ascending: false }).limit(1).maybeSingle()
+       .eq('browser_hash', browser).eq('is_test', false).order('created_at', { ascending: false }).limit(1).maybeSingle()
     if (row.error) throw new Error('Pre-order lookup failed.')
     let order = row.data as BobOrder | null
     if (order) {
