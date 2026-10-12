@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { MotionConfig } from 'framer-motion'
 import Navbar from '@/components/Navbar'
 import HeroSection from '@/components/HeroSection'
+import BoBReleaseSpotlight from '@/components/BoBReleaseSpotlight'
 import LivePlayer from '@/components/LivePlayer'
 import BuySongPromo from '@/components/BuySongPromo'
 import Footer from '@/components/Footer'
@@ -101,6 +102,9 @@ export default function Home() {
       
         {/* Hero Section */}
         <HeroSection />
+
+        {/* Featured upcoming release */}
+        <BoBReleaseSpotlight />
 
         {/* Live Player Section */}
         <LivePlayer />
