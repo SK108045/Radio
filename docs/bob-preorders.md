@@ -33,3 +33,22 @@ BoB orders are intentionally separate from song streaming entitlements and do no
 - Confirm receipt, one persistent BoB code, and Sozuri SMS. Reload to verify it is the **same** code and no new STK request.
 - Try a cancelled prompt and verify it remains unpaid. The code must not exist until the transaction verifies.
 - Check the database only with an authorized server-side account; never put its service-role key into a public client.
+
+
+## Real KSh 1 end-to-end test (separate from KSh 150 pre-orders)
+
+The main BoB pre-order remains KSh 150. The private/unlinked test checkout is at
+\`/bob-payment-test\`; it performs a **real KSh 1 Swifta STK push**, verifies
+payment, creates one \`BOB-TEST-...\` code, and submits an explicitly marked
+test SMS via Sozuri. It **does not reserve a BoB copy**.
+
+First, in **Supabase SQL Editor**, paste and run
+\`supabase/migrations/202610120002_bob_one_bob_test.sql\`. This preserves
+existing orders, adds an isolated test flag and price constraint, and updates
+the confirmation function to distinguish real and test transactions.
+The KSh 1 page blocks checkout until the new column and SQL are applied.
+
+No Windows migration CLI is needed if you apply the SQL manually. Refresh
+\`https://rieng254.com/bob-payment-test\`, enter a test phone number, and
+approve the **real** KSh 1 STK push. Verify the test code and Sozuri SMS.
+Do not run a live payment automatically.
