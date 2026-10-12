@@ -5,7 +5,7 @@ import { sendCustomSms } from './sozuri'
 
 export const BOB_PRICE_KSH = 150
 export type BobOrder = {
-  id: string; browser_hash: string; attempt_id: string; phone: string;
+  id: string; browser_hash: string; attempt_id: string; phone: string; is_test: boolean;
   amount: number; reference: string; provider_id: string | null;
   receipt: string | null; status: 'created'|'pending'|'uncertain'|'failed'|'paid';
   note: string; code: string | null; sms_status: 'pending'|'sending'|'sent'|'failed';
@@ -15,7 +15,7 @@ export type BobOrder = {
 
 export function publicBobOrder(order: BobOrder) {
   return {
-    id: order.id, amount: Number(order.amount), status: order.status,
+    id: order.id, amount: Number(order.amount), isTest: order.is_test, status: order.status,
     reference: order.reference, note: order.note,
     phoneLast4: order.phone.slice(-4),
     receipt: order.status === 'paid' ? order.receipt : null,
@@ -32,7 +32,10 @@ export async function initiateBobPayment(order: BobOrder) {
     .eq('id', order.id).eq('status', 'created').select('*').maybeSingle()
   if (error) throw new Error('Your pre-order could not be saved.')
   if (!claimed) return requireData(await db.from('bob_preorders').select('*').eq('id', order.id).single()) as BobOrder
-  const result = await requestTrackStk(order.phone, order.reference, BOB_PRICE_KSH, 'BoB - SWAT x Unco Jing Jong pre-order')
+  const expectedAmount = order.is_test ? 1 : BOB_PRICE_KSH
+  if (Number(order.amount) !== expectedAmount) throw new Error('Invalid BoB order amount.')
+  const result = await requestTrackStk(order.phone, order.reference, expectedAmount,
+    order.is_test ? 'RIENG BoB KSh 1 payment test (no pre-order)' : 'BoB - SWAT x Unco Jing Jong pre-order')
   const saved = await db.from('bob_preorders')
     .update({ status: result.status, provider_id: result.providerId || null, note: result.note })
     .eq('id', order.id).eq('status', 'uncertain').is('provider_id', null).select('*').maybeSingle()
@@ -50,7 +53,7 @@ export function parseBobPayment(data: any, order: BobOrder): { status:'paid';rec
   const state = String(payment?.status || data?.status || '').toLowerCase()
   // Some Swifta poll responses omit amount; when present it MUST match our server-side quote.
   if (state === 'success' && typeof receipt === 'string' && /^[A-Z0-9]{8,30}$/i.test(receipt)
-      && (amount === undefined || Number(amount) === BOB_PRICE_KSH))
+      && (amount === undefined || Number(amount) === Number(order.amount)))
     return { status: 'paid', receipt: receipt.toUpperCase() }
   return { status: ['failed','cancelled','canceled'].includes(state) ? 'failed' : 'pending' }
 }
@@ -65,9 +68,12 @@ export async function deliverBobSms(order: BobOrder): Promise<BobOrder> {
   try {
     const result = await sendCustomSms(
       claimed.phone,
-      'RIENG254: Your BoB pre-order (SWAT x Unco Jing Jong) is confirmed! ' +
-      'Amount: KSh 150. Your unique code: ' + claimed.code +
-      '. Keep this SMS as your pre-order proof. M-Pesa: ' + claimed.receipt + '.'
+      claimed.is_test
+        ? 'RIENG254 TEST: BoB KSh 1 payment succeeded. Test code: ' + claimed.code +
+          '. NOT A VALID PRE-ORDER. M-Pesa: ' + claimed.receipt + '.'
+        : 'RIENG254: Your BoB pre-order (SWAT x Unco Jing Jong) is confirmed! ' +
+          'Amount: KSh 150. Your unique code: ' + claimed.code +
+          '. Keep this SMS as your pre-order proof. M-Pesa: ' + claimed.receipt + '.'
     )
     messageId = result.messageId
   } catch (error) {
@@ -103,7 +109,7 @@ export async function reconcileBobOrder(order: BobOrder, fetcher: typeof fetch =
   const db = adminDb()
   if (confirmed.status === 'paid') {
     const paid = requireData(await db.rpc('bob_confirm_preorder', {
-      p_order: order.id, p_provider: order.provider_id, p_receipt: confirmed.receipt, p_amount: BOB_PRICE_KSH
+      p_order: order.id, p_provider: order.provider_id, p_receipt: confirmed.receipt, p_amount: Number(order.amount)
     })) as BobOrder
     return deliverBobSms(paid)
   }
