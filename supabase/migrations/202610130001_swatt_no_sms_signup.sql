@@ -1,11 +1,11 @@
 BEGIN;
 -- Extend the same one-time, phone-and-password signup exception used by Metro_Stunna
 -- to the existing Swatt identity; Kapitani must still verify by SMS.
-ALTER TABLE public.sales_artist_registry DROP CONSTRAINT sales_artist_registry_check;
+ALTER TABLE public.sales_artist_registry DROP CONSTRAINT IF EXISTS sales_artist_registry_check;
 ALTER TABLE public.sales_artist_registry ADD CONSTRAINT sales_artist_registry_check
  CHECK(NOT demo_signup_enabled OR slug IN ('metro_stunna','swatt') OR (slug='test_artist' AND is_test));
 
-CREATE FUNCTION public.sales_claim_swatt_no_sms(p_phone text,p_password_hash text) RETURNS uuid
+CREATE OR REPLACE FUNCTION public.sales_claim_swatt_no_sms(p_phone text,p_password_hash text) RETURNS uuid
 LANGUAGE plpgsql SET search_path=public AS $$
 DECLARE a sales_artist_registry;
 BEGIN
