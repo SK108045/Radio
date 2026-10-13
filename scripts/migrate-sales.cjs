@@ -2,7 +2,7 @@
 require('@next/env').loadEnvConfig(process.cwd())
 const fs=require('node:fs'),path=require('node:path'),{createHash}=require('node:crypto')
 const {connectSalesDatabase}=require('./sales-database.cjs')
-const filenames=['202610070001_artist_sales.sql','202610070002_test_artist.sql','202610070003_signup_verification.sql','202610070004_metro_demo_signup.sql','202610070005_test_demo_signup.sql','202610120001_bob_preorders.sql','202610120002_bob_one_bob_test.sql']
+const filenames=['202610070001_artist_sales.sql','202610070002_test_artist.sql','202610070003_signup_verification.sql','202610070004_metro_demo_signup.sql','202610070005_test_demo_signup.sql','202610120001_bob_preorders.sql','202610120002_bob_one_bob_test.sql','202610130001_swatt_no_sms_signup.sql']
 async function main(){
  const db=await connectSalesDatabase()
  try{

@@ -63,7 +63,7 @@ export async function signupAction(slug: string, _state: ActionState, form: Form
   let artistId: string
   try {
     const a = await registry(slug), password = value(form, 'password')
-    const demo = (a.slug === 'metro_stunna' || (a.slug === 'test_artist' && a.is_test)) && a.demo_signup_enabled
+    const demo = (a.slug === 'metro_stunna' || a.slug === 'swatt' || (a.slug === 'test_artist' && a.is_test)) && a.demo_signup_enabled
     const challenge = value(form,'challengeId')
     if (!demo) {
       const proof = (await cookies()).get(VERIFIED_COOKIE)?.value || '', expected = signupProof(challenge)
@@ -76,7 +76,7 @@ export async function signupAction(slug: string, _state: ActionState, form: Form
     if (demo) await rateLimit(`demo-signup:${a.artist_id}`,8,900)
     const passwordHash = await hashPassword(password)
     const result = demo
-      ? await adminDb().rpc(a.slug === 'test_artist' ? 'sales_claim_test_demo' : 'sales_claim_metro_demo',{p_phone:phone,p_password_hash:passwordHash})
+      ? await adminDb().rpc(a.slug === 'test_artist' ? 'sales_claim_test_demo' : a.slug === 'swatt' ? 'sales_claim_swatt_no_sms' : 'sales_claim_metro_demo',{p_phone:phone,p_password_hash:passwordHash})
       : await adminDb().rpc('sales_claim_artist', { p_slug: a.slug, p_challenge: challenge, p_password_hash: passwordHash })
     if (result.error) throw new Error(result.error.code === '23505' ? 'This phone is already registered.' : 'Signup link is unavailable or verification expired.')
     artistId = result.data as string

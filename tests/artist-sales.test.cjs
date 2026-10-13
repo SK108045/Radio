@@ -36,7 +36,7 @@ test.before(async()=>{
  sql=new Client({connectionString:u.toString()});await sql.connect()
  let schema=fs.readFileSync(path.join(__dirname,'sales-schema-fixture.sql'),'utf8').replace(/CREATE ROLE (anon|authenticated|service_role)( BYPASSRLS)?;/g,(_,role,option='')=>`DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='${role}') THEN CREATE ROLE ${role}${option}; END IF; END $$;`)
  await sql.query(schema)
- for(const name of ['202610070001_artist_sales.sql','202610070002_test_artist.sql','202610070003_signup_verification.sql','202610070004_metro_demo_signup.sql','202610070005_test_demo_signup.sql'])await sql.query(fs.readFileSync(path.join(root,'supabase/migrations',name),'utf8'))
+ for(const name of ['202610070001_artist_sales.sql','202610070002_test_artist.sql','202610070003_signup_verification.sql','202610070004_metro_demo_signup.sql','202610070005_test_demo_signup.sql','202610130001_swatt_no_sms_signup.sql'])await sql.query(fs.readFileSync(path.join(root,'supabase/migrations',name),'utf8'))
  const role='radio_test_auth_'+process.pid
  await control.query(`CREATE ROLE ${role} LOGIN NOINHERIT`);await control.query(`GRANT anon,authenticated,service_role TO ${role}`)
  u.username=role;u.password='';port=Number(process.env.SALES_TEST_POSTGREST_PORT||55438)
@@ -82,8 +82,8 @@ const signup=async(slug,phone,artistJar)=>{
 }
 test('Metro demo bypass is restricted, one-time, hashes passwords, sends no SMS and supports phone login',async()=>{
  const id='33333333-3333-3333-3333-333333333333',demoJar=jar(),before=sms.size
- await assert.rejects(dbQuery("UPDATE sales_artist_registry SET demo_signup_enabled=true WHERE slug='swatt'"),/check constraint/)
- const rejected=await context.run(jar(),()=>actions.signupAction('swatt',null,form({phone:'0712345689',password:'demo-strong-password-123',confirmPassword:'demo-strong-password-123'})));assert.match(rejected.error,/Verify your phone/)
+ await assert.rejects(dbQuery("UPDATE sales_artist_registry SET demo_signup_enabled=true WHERE slug='kapitani'"),/check constraint/)
+ const rejected=await context.run(jar(),()=>actions.signupAction('kapitani',null,form({phone:'0712345689',password:'demo-strong-password-123',confirmPassword:'demo-strong-password-123'})));assert.match(rejected.error,/Verify your phone/)
  const invalid=await context.run(demoJar,()=>actions.signupAction('metro_stunna',null,form({phone:'bad',password:'demo-strong-password-123',confirmPassword:'demo-strong-password-123'})));assert.match(invalid.error,/valid Kenyan/)
  const mismatch=await context.run(demoJar,()=>actions.signupAction('metro_stunna',null,form({phone:'0712345689',password:'demo-strong-password-123',confirmPassword:'different-password'})));assert.match(mismatch.error,/Passwords do not match/)
  const result=await context.run(demoJar,async()=>{try{return await actions.signupAction('metro_stunna',null,form({phone:'0712345689',password:'demo-strong-password-123',confirmPassword:'demo-strong-password-123'}))}catch(e){return e}});assert.equal(result.url,'/sales');assert.equal(sms.size,before)
@@ -109,9 +109,15 @@ let swattJar=jar(),metroJar=jar(),kapitaniJar=jar(),trackId,orderId,browser= new
 test('exactly three public one-time identities; verified signup, hashes, phone login and session forgery',async()=>{
  assert.deepEqual((await dbQuery('SELECT slug FROM sales_artist_registry WHERE NOT is_test ORDER BY slug')).rows.map(r=>r.slug),['kapitani','metro_stunna','swatt'])
  assert.ok((await actions.requestSignupCodeAction('mejja',null,form({phone:'0712345678'}))).error)
- const sent=await actions.requestSignupCodeAction('swatt',null,form({phone:'0712345678'}));assert.ok(sent.challengeId)
- const wrong=await context.run(swattJar,()=>actions.signupAction('swatt',null,form({challengeId:sent.challengeId,code:'000000',password:'strong-password-123',confirmPassword:'strong-password-123'})));assert.ok(wrong.error)
- const code=sms.get('+254712345678');const verified=await context.run(swattJar,()=>actions.verifySignupCodeAction('swatt',null,form({challengeId:sent.challengeId,code})));assert.equal(verified.verified,true);const withoutProof=await context.run(jar(),()=>actions.signupAction('swatt',null,form({challengeId:sent.challengeId,password:'strong-password-123',confirmPassword:'strong-password-123'})));assert.match(withoutProof.error,/Verify your phone/);const success=await context.run(swattJar,async()=>{try{return await actions.signupAction('swatt',null,form({challengeId:sent.challengeId,code,password:'strong-password-123',confirmPassword:'strong-password-123'}))}catch(e){return e}});assert.equal(success.url,'/sales')
+ const smsBeforeSwatt=sms.size
+ const invalidSwatt=await context.run(swattJar,()=>actions.signupAction('swatt',null,form({phone:'invalid',password:'strong-password-123',confirmPassword:'strong-password-123'})));assert.match(invalidSwatt.error,/valid Kenyan/)
+ const mismatchSwatt=await context.run(swattJar,()=>actions.signupAction('swatt',null,form({phone:'0712345678',password:'strong-password-123',confirmPassword:'wrong-password'})));assert.match(mismatchSwatt.error,/Passwords do not match/)
+ const success=await context.run(swattJar,async()=>{try{return await actions.signupAction('swatt',null,form({phone:'0712345678',password:'strong-password-123',confirmPassword:'strong-password-123'}))}catch(e){return e}});assert.equal(success.url,'/sales')
+ assert.equal(sms.size,smsBeforeSwatt,'Swatt signup must not send SMS')
+ const swattId='33333333-3333-3333-3333-333333333332'
+ assert.equal((await dbQuery('SELECT demo_signup_enabled FROM sales_artist_registry WHERE artist_id=$1',[swattId])).rows[0].demo_signup_enabled,false)
+ assert.equal((await dbQuery('SELECT count(*) FROM sales_otp_challenges WHERE artist_id=$1',[swattId])).rows[0].count,'0')
+ const repeatedSwatt=await context.run(jar(),()=>actions.signupAction('swatt',null,form({phone:'0712345676',password:'strong-password-123',confirmPassword:'strong-password-123'})));assert.match(repeatedSwatt.error,/already signed up/)
  assert.ok((await actions.requestSignupCodeAction('swatt',null,form({phone:'0712345679'}))).error)
  const auth=load(path.join(root,'lib/auth.ts'));assert.equal((await context.run(swattJar,auth.getSession)).stageName,'swatt')
  const account=(await dbQuery('SELECT * FROM sales_artist_accounts')).rows[0];assert.notEqual(account.password_hash,'strong-password-123');assert.ok(await security.verifyPassword('strong-password-123',account.password_hash));assert.equal(await security.verifyPassword('bad',account.password_hash),false)
