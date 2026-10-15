@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react'
+import { usePathname } from 'next/navigation'
 import { getCurrentShow, ShowDetails } from '@/lib/getCurrentShow'
 
 const STREAM_URL = 'https://mixes.casacam.net/listen/rieng_radio/radio.mp3'
@@ -23,6 +24,7 @@ const RadioContext = createContext<RadioContextValue | null>(null)
 let globalAudio: HTMLAudioElement | null = null
 
 export function RadioProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
   const [isPlaying, setIsPlaying] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   const [volume, setVolumeState] = useState(1)
@@ -44,26 +46,43 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval)
   }, [])
 
-  // Initialize persistent global audio instance with pre-buffering
+  // The BoB page has its own artist mix; do not mount a competing live-radio stream there.
   useEffect(() => {
     if (typeof window === 'undefined') return
 
+    if (pathname === '/bob') {
+      if (globalAudio) {
+        globalAudio.pause()
+        globalAudio.removeAttribute('src')
+        globalAudio.load()
+      }
+      setIsPlaying(false)
+      return
+    }
+
     if (!globalAudio) {
       globalAudio = new Audio()
-      globalAudio.src = STREAM_URL
-      globalAudio.preload = 'auto'
-      globalAudio.crossOrigin = 'anonymous'
+      globalAudio.preload = 'none'
+      globalAudio.crossOrigin = null
     }
 
     const audio = globalAudio
+    // The stream host doesn't return CORS headers. Native media playback doesn't need
+    // anonymous CORS mode, so leave crossOrigin unset to let the browser play the stream.
+    audio.crossOrigin = null
+    audio.src = STREAM_URL
+    audio.preload = 'auto'
+    audio.load()
 
     const handlePlay = () => setIsPlaying(true)
     const handlePause = () => setIsPlaying(false)
     const handleError = () => {
       if (isPlaying) {
-        setTimeout(() => {
+        window.setTimeout(() => {
           if (globalAudio) {
+            globalAudio.crossOrigin = null
             globalAudio.src = STREAM_URL
+            globalAudio.load()
             globalAudio.play().catch(() => {})
           }
         }, 2000)
@@ -74,49 +93,50 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     audio.addEventListener('pause', handlePause)
     audio.addEventListener('error', handleError)
 
-    // Sync initial state
     setIsPlaying(!audio.paused)
 
-    // Attempt instant autoplay silently on mount
     const tryAutoplay = async () => {
       try {
         await audio.play()
         setIsPlaying(true)
         setHasInteracted(true)
       } catch {
-        // Browser requires first user gesture (pointerdown/click/touchstart/keydown)
+        // Browser requires a user gesture before starting audible playback.
         setIsPlaying(false)
       }
     }
 
-    tryAutoplay()
+    void tryAutoplay()
 
     return () => {
       audio.removeEventListener('play', handlePlay)
       audio.removeEventListener('pause', handlePause)
       audio.removeEventListener('error', handleError)
     }
-  }, [])
+  }, [pathname])
 
-  // Trusted gesture unlocker — starts playing on the absolute first tap/click/keypress anywhere on page
+  // Don't let the global stream's first-tap unlocker compete with the BoB mix.
   useEffect(() => {
+    if (pathname === '/bob') {
+      if (globalAudio && !globalAudio.paused) globalAudio.pause()
+      return
+    }
     if (hasInteracted && isPlaying) return
 
     const unlockAndPlay = async () => {
       if (!globalAudio) return
 
       try {
-        if (globalAudio.paused) {
+        if (globalAudio.paused && globalAudio.src) {
           await globalAudio.play()
           setIsPlaying(true)
         }
         setHasInteracted(true)
       } catch {
-        // Silent catch
+        // Playback is unavailable until the stream can be loaded or a gesture is allowed.
       }
     }
 
-    // Only trusted browser user gestures that satisfy Chromium & WebKit Autoplay Policy
     const trustedEvents = ['pointerdown', 'click', 'touchstart', 'keydown']
     trustedEvents.forEach((evt) => {
       window.addEventListener(evt, unlockAndPlay, { capture: true, once: true })
@@ -127,16 +147,21 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
         window.removeEventListener(evt, unlockAndPlay, { capture: true })
       })
     }
-  }, [hasInteracted, isPlaying])
+  }, [hasInteracted, isPlaying, pathname])
 
   const play = useCallback(async () => {
     if (!globalAudio) return
     try {
+      if (!globalAudio.src) {
+        globalAudio.crossOrigin = null
+        globalAudio.src = STREAM_URL
+        globalAudio.load()
+      }
       await globalAudio.play()
       setIsPlaying(true)
       setHasInteracted(true)
     } catch {
-      // Audio playback failed
+      setIsPlaying(false)
     }
   }, [])
 
