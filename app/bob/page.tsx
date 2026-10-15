@@ -1,13 +1,92 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
-import { Check, Copy, Headphones, Share2, Ticket } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Check, Copy, Headphones, Share2, Ticket, LoaderCircle, Music2, Pause, Play } from 'lucide-react'
 import BoBPreorderDialog from '@/components/BoBPreorderDialog'
+
+type BackgroundTrack = { title: string; url: string }
 
 export default function BobPreorderPage() {
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [tracks, setTracks] = useState<BackgroundTrack[]>([])
+  const [trackIndex, setTrackIndex] = useState(0)
+  const [musicPlaying, setMusicPlaying] = useState(false)
+  const [musicLoading, setMusicLoading] = useState(true)
+  const [musicError, setMusicError] = useState('')
+  const audioRef = useRef<HTMLAudioElement>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadTracks() {
+      try {
+        const response = await fetch('/api/releases/bob/music', { cache: 'no-store' })
+        if (!response.ok) throw new Error('Audio unavailable')
+        const payload = await response.json() as { tracks?: BackgroundTrack[] }
+        if (!Array.isArray(payload.tracks) || payload.tracks.length === 0) {
+          throw new Error('Audio unavailable')
+        }
+        if (!cancelled) setTracks(payload.tracks)
+      } catch {
+        if (!cancelled) setMusicError('Background music is currently unavailable.')
+      } finally {
+        if (!cancelled) setMusicLoading(false)
+      }
+    }
+
+    void loadTracks()
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    const audio = audioRef.current
+    const track = tracks[trackIndex]
+    if (!audio || !track) return
+
+    if (audio.src !== track.url) {
+      audio.src = track.url
+      audio.load()
+    }
+
+    if (musicPlaying) {
+      void audio.play().catch(() => {
+        setMusicPlaying(false)
+        setMusicError('Tap Play mix to start the music.')
+      })
+    } else {
+      audio.pause()
+    }
+  }, [tracks, trackIndex, musicPlaying])
+
+  async function toggleBackgroundMusic() {
+    const audio = audioRef.current
+    if (!audio || musicLoading) return
+
+    if (musicPlaying) {
+      audio.pause()
+      setMusicPlaying(false)
+      return
+    }
+
+    if (!tracks.length) {
+      setMusicError('Background music is currently unavailable.')
+      return
+    }
+
+    setMusicError('')
+    try {
+      await audio.play()
+      setMusicPlaying(true)
+    } catch {
+      setMusicError('Your browser blocked playback. Tap Play mix to try again.')
+    }
+  }
+
+  function playNextTrack() {
+    if (tracks.length > 1) setTrackIndex((current) => (current + 1) % tracks.length)
+  }
 
   async function sharePage() {
     const url = window.location.href
@@ -105,6 +184,39 @@ export default function BobPreorderPage() {
           <span>© RIENG254</span>
           <a href="/" className="transition hover:text-orange-300">Visit RIENG254.com</a>
         </footer>
+      </div>
+
+      <audio ref={audioRef} preload="none" onEnded={playNextTrack} onError={() => {
+        if (musicPlaying) {
+          setMusicPlaying(false)
+          setMusicError('Could not load the next track. Tap Play mix to try again.')
+        }
+      }} aria-label="Swat and Metro Stunna background music mix" />
+
+      <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 md:bottom-5 md:left-auto md:right-5 md:translate-x-0">
+        <div className="flex items-center gap-3 rounded-xl border border-orange-500/30 bg-[#120d0a]/95 p-3 shadow-[0_12px_48px_rgba(0,0,0,.5)] backdrop-blur-xl">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-500/15 text-orange-300">
+            <Music2 size={18} aria-hidden="true" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[9px] font-black uppercase tracking-[.16em] text-orange-300">SWAT × Metro Stunna</p>
+            <p className="truncate text-xs font-semibold text-white">
+              {musicLoading ? 'Preparing background mix…' : tracks[trackIndex]?.title ?? 'Background mix'}
+              {!musicLoading && tracks.length > 1 && <span className="font-normal text-neutral-400"> · loops</span>}
+            </p>
+            {musicError && <p role="status" className="mt-1 text-[10px] leading-4 text-orange-200">{musicError}</p>}
+          </div>
+          <button
+            type="button"
+            onClick={() => { void toggleBackgroundMusic() }}
+            disabled={musicLoading || tracks.length === 0}
+            aria-label={musicPlaying ? 'Pause background mix' : 'Play background mix'}
+            className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-orange-500 px-3 text-xs font-black text-[#190b03] transition hover:bg-orange-300 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-300"
+          >
+            {musicLoading ? <LoaderCircle size={15} className="animate-spin" aria-hidden="true" /> : musicPlaying ? <Pause size={15} aria-hidden="true" /> : <Play size={15} aria-hidden="true" />}
+            <span>{musicLoading ? 'Loading' : musicPlaying ? 'Pause' : 'Play mix'}</span>
+          </button>
+        </div>
       </div>
 
       <BoBPreorderDialog open={checkoutOpen} onOpenChange={setCheckoutOpen} />
