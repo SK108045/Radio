@@ -70,9 +70,12 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     // The stream host doesn't return CORS headers. Native media playback doesn't need
     // anonymous CORS mode, so leave crossOrigin unset to let the browser play the stream.
     audio.crossOrigin = null
-    audio.src = STREAM_URL
-    audio.preload = 'auto'
-    audio.load()
+    // Keep live radio playing across ordinary route changes; only reload if /bob removed it.
+    if (!audio.src) {
+      audio.src = STREAM_URL
+      audio.preload = 'auto'
+      audio.load()
+    }
 
     const handlePlay = () => setIsPlaying(true)
     const handlePause = () => setIsPlaying(false)
