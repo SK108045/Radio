@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { Menu, X, Flame, Tv, Play, Disc, TrendingUp, ShoppingBag } from 'lucide-react'
+import CatfishAd from '@/components/CatfishAd'
+import { hasCatfishAd } from '@/lib/catfish'
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -190,6 +192,7 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
+    {pathname !== '/' && hasCatfishAd(pathname) && <CatfishAd />}
     </>
   )
 }
