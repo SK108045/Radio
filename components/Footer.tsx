@@ -3,7 +3,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import AdSlot from '@/components/AdSlot'
 
 export default function Footer() {
   const [email, setEmail] = useState('')
@@ -36,8 +35,6 @@ export default function Footer() {
   }
 
   return (
-    <>
-    <AdSlot placement="footer" />
     <footer className="relative bg-[#050505] border-t border-white/10 overflow-hidden">
       {/* Background Banner Image with Dark Gradient Overlay */}
       <div className="absolute inset-0 z-0">
@@ -151,6 +148,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-    </>
   )
 }

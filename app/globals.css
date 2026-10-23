@@ -129,7 +129,6 @@ html {
   }
   body {
     @apply bg-background text-foreground;
-    padding-bottom: var(--catfish-height, 0px);
   }
 }
 

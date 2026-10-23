@@ -5,8 +5,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { Menu, X, Flame, Tv, Play, Disc, TrendingUp, ShoppingBag } from 'lucide-react'
-import AdSlot from '@/components/AdSlot'
-import { hasCatfishAd } from '@/lib/catfish'
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -192,7 +190,6 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
-    {pathname !== '/' && hasCatfishAd(pathname) && <AdSlot placement="player" />}
     </>
   )
 }

@@ -2,60 +2,46 @@
 
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
-import { AD_DOMAIN, CATFISH_ZONE_ID, loadAdNetwork, releaseAdZone } from '@/lib/ad-network'
 import { hasCatfishAd } from '@/lib/catfish'
 
-const containerId = `zone_${CATFISH_ZONE_ID}`
+const containerId = 'zone_1892228828'
 
-function CatfishZone() {
+// The advertiser's supplied tag, unchanged.
+const advertiserTag = `(function(w,d,o,g,r,a,m){
+    var cid='zone_1892228828';
+    w[r]=w[r]||function(){(w[r+'l']=w[r+'l']||[]).push(arguments)};
+    function e(b,w,r){if((w[r+'h']=b.pop())&&!w.ABN){
+        var a=d.createElement(o),p=d.getElementsByTagName(o)[0];a.async=1;
+        a.src='https://cdn.'+w[r+'h']+'/libs/e.js';a.onerror=function(){e(g,w,r)};
+        p.parentNode.insertBefore(a,p)}}e(g,w,r);
+    w[r](cid,{id:1892228828,domain:w[r+'h']});
+})(window,document,'script',['ftd.agency'],'ABNS');`
+
+function CatfishTag() {
   const container = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     const node = container.current
     if (!node) return
-    let cancelled = false
-    let frame = 0
-    const observed = new Set<Element>()
-    const resize = new ResizeObserver(() => scheduleMeasure())
-    const measure = () => {
-      frame = 0
-      let height = 0
-      for (const element of [node, ...Array.from(node.querySelectorAll('*'))]) {
-        const style = getComputedStyle(element)
-        if (style.position !== 'fixed' || style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') continue
-        if (!observed.has(element)) { resize.observe(element); observed.add(element) }
-        const rect = element.getBoundingClientRect()
-        if (rect.width > 0 && rect.height > 0 && rect.top >= 0 && rect.bottom >= window.innerHeight - 4) {
-          height = Math.max(height, Math.ceil(window.innerHeight - rect.top))
-        }
-      }
-      document.documentElement.style.setProperty('--catfish-height', `${height}px`)
-    }
-    const scheduleMeasure = () => { if (!frame) frame = requestAnimationFrame(measure) }
-    const mutation = new MutationObserver(scheduleMeasure)
-    mutation.observe(node, { childList: true, subtree: true, attributes: true })
-    resize.observe(node)
-    window.addEventListener('resize', scheduleMeasure)
-    node.addEventListener('load', scheduleMeasure, true)
-    scheduleMeasure()
-    void loadAdNetwork().then(Network => {
-      if (!cancelled) new Network(containerId, { id: CATFISH_ZONE_ID, domain: AD_DOMAIN })
-    }).catch(() => { /* An unavailable ad must never interrupt the radio. */ })
+    const script = document.createElement('script')
+    script.dataset.catfishZone = '1892228828'
+    script.textContent = advertiserTag
+    node.appendChild(script)
+
     return () => {
-      cancelled = true
-      cancelAnimationFrame(frame)
-      mutation.disconnect()
-      resize.disconnect()
-      window.removeEventListener('resize', scheduleMeasure)
-      node.removeEventListener('load', scheduleMeasure, true)
-      releaseAdZone(containerId, node)
-      document.documentElement.style.removeProperty('--catfish-height')
+      script.remove()
+      // Release the removed container so the same supplied tag works on re-entry.
+      const zones = (window as Window & {
+        ABN?: { zones?: Record<string, { div: HTMLElement }> }
+      }).ABN?.zones
+      if (zones?.[containerId]?.div === node) delete zones[containerId]
     }
   }, [])
-  return <div id={containerId} ref={container} aria-label="Advertisement" />
+
+  return <div id={containerId} ref={container} />
 }
 
 export default function CatfishAd() {
   const pathname = usePathname()
-  // Root-layout ownership keeps a single anchor across public-page navigation.
-  return hasCatfishAd(pathname) ? <CatfishZone /> : null
+  return hasCatfishAd(pathname) ? <CatfishTag /> : null
 }
