@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar'
 import HeroSection from '@/components/HeroSection'
 import BoBReleaseSpotlight from '@/components/BoBReleaseSpotlight'
 import LivePlayer from '@/components/LivePlayer'
+import CatfishAd from '@/components/CatfishAd'
 import BuySongPromo from '@/components/BuySongPromo'
 import Footer from '@/components/Footer'
 import PartnersSlider from '@/components/PartnersSlider'
@@ -108,6 +109,7 @@ export default function Home() {
 
         {/* Live Player Section */}
         <LivePlayer />
+        <CatfishAd />
 
         <HomeLineup shows={dailyShows} />
         <PartnersSlider />
