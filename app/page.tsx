@@ -6,7 +6,7 @@ import Navbar from '@/components/Navbar'
 import HeroSection from '@/components/HeroSection'
 import BoBReleaseSpotlight from '@/components/BoBReleaseSpotlight'
 import LivePlayer from '@/components/LivePlayer'
-import CatfishAd from '@/components/CatfishAd'
+import AdSlot from '@/components/AdSlot'
 import BuySongPromo from '@/components/BuySongPromo'
 import Footer from '@/components/Footer'
 import PartnersSlider from '@/components/PartnersSlider'
@@ -109,7 +109,7 @@ export default function Home() {
 
         {/* Live Player Section */}
         <LivePlayer />
-        <CatfishAd />
+        <AdSlot placement="player" />
 
         <HomeLineup shows={dailyShows} />
         <PartnersSlider />
@@ -121,6 +121,7 @@ export default function Home() {
           onVideoClick={handleOpenModal}
         />
         <BuySongPromo />
+        <AdSlot placement="feed" />
         <HomeVideos videos={riengVideos} onVideoClick={handleOpenModal} />
         <HomeReviews reviews={riengReviews} />
 

@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import SmoothScroll from '@/components/SmoothScroll'
 import { RadioProvider } from '@/context/RadioContext'
 import FloatingRadioBar from '@/components/FloatingRadioBar'
+import CatfishAd from '@/components/CatfishAd'
 import './globals.css'
 
 const geistSans = Geist({
@@ -52,6 +53,7 @@ export default function RootLayout({
         <RadioProvider>
           <SmoothScroll />
           {children}
+          <CatfishAd />
           <FloatingRadioBar />
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </RadioProvider>
