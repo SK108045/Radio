@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import Image from '@/components/FallbackImage'
 import { useRadio } from '@/context/RadioContext'
 import { Play, Pause, Volume2, VolumeX, Radio } from 'lucide-react'
+import { hasCatfishAd } from '@/lib/catfish'
 
 export default function FloatingRadioBar() {
   const pathname = usePathname()
@@ -15,7 +16,7 @@ export default function FloatingRadioBar() {
   if (pathname === '/bob' || pathname === '/domain-payment' || pathname === '/payment-test') return null
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end pointer-events-auto">
+    <div className={`fixed right-5 z-50 flex flex-col items-end pointer-events-auto ${hasCatfishAd(pathname) ? 'bottom-28 sm:bottom-32' : 'bottom-5'}`}>
       {isCollapsed ? (
         <button
           onClick={() => setIsCollapsed(false)}
