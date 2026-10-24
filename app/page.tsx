@@ -13,30 +13,9 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import styles from '@/components/HomeEnhancements.module.css'
 import { trendingItems as trendingContent } from '@/lib/trending'
 import { HomeLineup, HomeTrending, HomeVideos, HomeReviews } from '@/components/HomeEditorial'
+import { SHOW_SCHEDULE } from '@/lib/showSchedule'
 
-const dailyShows = [
-  {
-    title: 'Kenyan Old School',
-    host: 'RIENG',
-    schedule: 'Weekdays | 5:00 AM - 10:00 AM',
-    description: 'Journey through the greatest hits from 2000s to 2004/5 Kenyan music. Featuring e Sir, Mr. Lenny, Kleptomaniax, and Dux Vultures.',
-    image: '/shows/kenyan-old-school.webp',
-  },
-  {
-    title: 'Gengetone / Arbantone',
-    host: 'RIENG',
-    schedule: 'Weekdays | 10:00 AM - 3:00 PM',
-    description: 'The hardest beats and hottest flows from the Gengetone and Arbantone scenes. Pure energy from Kenya’s underground.',
-    image: '/shows/Kartelo_and_Bura.png',
-  },
-  {
-    title: 'Underground Kenyan HipHop',
-    host: 'RIENG',
-    schedule: 'Weekdays | 7:00 PM - 11:00 PM',
-    description: 'Raw Kenyan HipHop straight from the underground. Pure beats and authentic lyricism from Kenya\'s finest rappers.',
-    image: '/shows/underground.webp',
-  },
-]
+const dailyShows = SHOW_SCHEDULE
 
 const trendingCategories = ['All', ...new Set(trendingContent.map(item => item.category))]
 
