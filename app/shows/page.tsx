@@ -5,165 +5,17 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
 import { getCurrentShow } from '@/lib/getCurrentShow'
+import { SHOW_SCHEDULE } from '@/lib/showSchedule'
 
-const dailyShows = [
-  {
-    title: 'Kenyan Old School',
-    host: 'Muthoni Kenya',
-    schedule: 'Weekdays | 5:00 AM - 10:00 AM',
-    description: 'Journey through the greatest hits from 2000s to 2004/5 Kenyan music. Featuring e Sir, Mr. Lenny, Kleptomaniax, and Dux Vultures.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/KenyanOldSchool.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0tlbnlhbk9sZFNjaG9vbC5qcGciLCJpYXQiOjE3Nzg5MjkyNzksImV4cCI6MTgxMDQ2NTI3OX0.v6fsoH7FpaX9-sDUtk1Kwk_5hiRTzvK_c9HIBHHU-LI',
-    color: 'from-orange-500/20 to-transparent',
-    features: ['e Sir', 'Mr. Lenny', 'Kleptomaniax', 'Dux Vultures']
-  },
-  {
-    title: 'Gengetone / Arbantone',
-    host: 'Kartelo',
-    schedule: 'Weekdays | 10:00 AM - 3:00 PM',
-    description: 'The hardest beats and hottest flows from the Gengetone and Arbantone scenes. Pure energy from Kenya&apos;s underground.',
-    image: '/shows/Kartelo_and_Bura.png',
-    color: 'from-red-500/20 to-transparent',
-    features: ['Live Gengetone', 'New Drops', 'Beat Breakdowns']
-  },
-  {
-    title: 'Reggae / Dancehall',
-    host: 'inkmatic',
-    schedule: 'Weekdays | 3:00 PM - 7:00 PM',
-    description: 'Unwind with smooth reggae vibes and infectious dancehall rhythms. Island sounds dominate the airwaves.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/InkMatik.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvSW5rTWF0aWsuanBnIiwiaWF0IjoxNzc4ODYyNTY3LCJleHAiOjE4MTAzOTg1Njd9.PGiJ15a-fGAhA8e0v2HZwnkVIP2jBx4KSrWiPuwX-fA',
-    color: 'from-purple-500/20 to-transparent',
-    features: ['Reggae Classics', 'Dancehall Hits', 'Dubplates']
-  },
-  {
-    title: 'Underground Kenyan HipHop',
-    host: 'Joy Ohon',
-    schedule: 'Weekdays | 7:00 PM - 11:00 PM',
-    description: 'Featuring Ukoo Flani, Walanguzi, Katapila, Moroko Kalahari, Virusi Mbaya, Shrap, and Wakadinali Drill.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Underground.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1VuZGVyZ3JvdW5kLmpwZyIsImlhdCI6MTc3ODkyOTUxNiwiZXhwIjoxODEwNDY1NTE2fQ.pKGmaixaUTCozsgsdKO5vn2DMu8HpNniojn6Zc8bRR8',
-    color: 'from-green-500/20 to-transparent',
-    features: ['Ukoo Flani', 'Walanguzi', 'Wakadinali Drill', 'Shrap']
-  },
-  {
-    title: 'Kenyan RnB',
-    host: 'Modesto',
-    schedule: 'Weekdays | 11:00 PM - 3:00 AM',
-    description: 'Smooth Kenyan RnB featuring Bensoul, Nviiri, Otile Brown, Kodong Clan, Sauti Sol, and more.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/RnB.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1JuQi5qcGciLCJpYXQiOjE3NzkyNjcwMzYsImV4cCI6MTgxMDgwMzAzNn0.1n19oWoG6A-EDrXaILLNof75PFG_mg7iLSLI7_aAl9I',
-    color: 'from-blue-500/20 to-transparent',
-    features: ['Bensoul', 'Nviiri', 'Otile Brown', 'Sauti Sol']
-  },
-  {
-    title: 'Gospel Kenya',
-    host: 'RIENG',
-    schedule: 'Sundays | All Day + Daily | 3:00 AM - 5:00 AM',
-    description: 'Spiritual awakening with Kenya&apos;s finest gospel music. Start your day with uplifting messages and powerful melodies.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Gospel.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL0dvc3BlbC5qcGciLCJpYXQiOjE3Nzc2MTg2OTAsImV4cCI6MTgwOTE1NDY5MH0.FiCgYciSVoTbmjsZ039KJG8_hlbPa18hY7rl10hUzrw',
-    color: 'from-yellow-500/20 to-transparent',
-    features: ['Gospel Hits', 'Spiritual Messages', 'Uplifting Vibes']
-  },
-  {
-    title: 'SPORTS SHOW',
-    host: 'Bura & Swat',
-    schedule: 'Saturday | 8:00 AM - 12:00 PM',
-    description: 'The ultimate sports breakdown. Hot takes, live analysis, and all the weekend action from local and international sports.',
-    image: '/Bura.jpg',
-    color: 'from-green-500/20 to-transparent',
-    features: ['Live Sports Analysis', 'Athlete Interviews', 'Fantasy Football Talk']
-  },
-  {
-    title: 'SUNRISE WORSHIP - LIVE',
-    host: 'HEALING & RENEWED LIVES CENTRE × RIENG',
-    schedule: 'Sunday | 11:00 AM - 2:00 PM',
-    description: 'A faith-filled live show experience featuring healing conversations, inspiring testimonies, worship, counseling insights, and practical guidance for stronger families, relationships, and communities.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Guidance.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvR3VpZGFuY2UuanBnIiwiaWF0IjoxNzgwNTE1NzUzLCJleHAiOjE4MTIwNTE3NTN9.QETbkxT8Fmm0ZCythheoAl08c1zP-fdqU3JoAFmBqcw',
-    color: 'from-emerald-500/20 to-transparent',
-    features: ['Faith-Based Guidance','Healing Conversations','Inspiring Testimonies']
-  },
-  {
-    title: 'POLITICS SHOW - STARTING SOON',
-    host: 'HON MICHAEL THIONGO KAZIDUU',
-    schedule: 'Saturday | 9:00 AM - 1:00 PM',
-    description: 'In-depth political interviews with leading politicians and presidential aspirants. No questions off-limits.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Politics.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1BvbGl0aWNzLmpwZyIsImlhdCI6MTc3OTQ1NjgwOSwiZXhwIjoxODEwOTkyODA5fQ.cL7be6KjlWm1cMDWqElTql568ju6o8GznaYZvAAim8o',
-    color: 'from-blue-500/20 to-transparent',
-    features: ['Political Interviews', 'Policy Discussions', 'Election Coverage']
-  },
-]
+const dailyShows = SHOW_SCHEDULE
 
-const weekendShows = [
-  {
-    title: 'Bongo',
-    day: 'Saturday',
-    schedule: '1:00 PM - 3:00 PM',
-    description: 'A Swahili-heavy East African heat check: catchy hooks, street poetry, and that Tanzanian pop/hip-hop bounce that makes Bongo Flava so sticky. Featuring Diamond Platnumz, Nandy, Harmonize, Alikiba, and Rayvanny.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/Bongo.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL0JvbmdvLmpwZyIsImlhdCI6MTc3OTc4NDg1MSwiZXhwIjoxODExMzIwODUxfQ.hVJe2v5lmbwmb3BwiaCHyD5L0y4eVNlv2YmHEo5to7g',
-    color: 'from-orange-500 to-orange-900',
-    features: ['Diamond Platnumz', 'Nandy', 'Harmonize']
-  },
-  {
-    title: 'Naija',
-    day: 'Saturday',
-    schedule: '3:00 PM - 5:00 PM',
-    description: 'Pure Afrobeats energy for the weekend takeover: danceable drums, sing-along choruses, and glossy crossover records. Burna Boy, Wizkid, Davido, and Fireboy DML are all solid anchors here.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/Naija.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL05haWphLmpwZyIsImlhdCI6MTc3OTc4NTQyNiwiZXhwIjoxODExMzIxNDI2fQ.a3GJb0qDEkC5w6IGHY5ItCGB03PTaAKwzIZ-NUzb9Ec',
-    color: 'from-green-500 to-green-900',
-    features: ['Afrobeats', 'Burna Boy', 'Wizkid', 'Davido']
-  },
-  {
-    title: 'Amapiano',
-    day: 'Saturday',
-    schedule: '5:00 PM - 7:00 PM',
-    description: 'Amapiano is the South African township sound built on jazz/house roots, warm keys, and deep log-drum grooves. Kabza De Small, DJ Maphorisa, Kamo Mphela, Tyla, and Boohle fit this lane nicely.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/Ampiano.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL0FtcGlhbm8uanBnIiwiaWF0IjoxNzc5Nzg0ODYzLCJleHAiOjE4MTEzMjA4NjN9.Gv_a67BXe_-vKhi0-Gu1EDhvy7ec2xMb8YbG-KC_eHw',
-    color: 'from-yellow-500 to-yellow-900',
-    features: ['Amapiano', 'Kabza De Small', 'DJ Maphorisa']
-  },
-  {
-    title: 'Lingala',
-    day: 'Saturday',
-    schedule: '7:00 PM - 9:00 PM',
-    description: 'The Congolese rumba/soukous power slot: bright guitars, big dance energy, and that rich Lingala feel that always sounds like a celebration. Fally Ipupa, Koffi Olomidé, Werrason, and Awilo Longomba.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/Lingala.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL0xpbmdhbGEuanBnIiwiaWF0IjoxNzc5Nzg1NDkzLCJleHAiOjE4MTEzMjE0OTN9.R0QtH6HYpjOtGFJwV9ND8ve4xOYD3J6-6DDXyYtmDjs',
-    color: 'from-red-500 to-red-900',
-    features: ['Rumba', 'Fally Ipupa', 'Koffi Olomidé']
-  },
-  {
-    title: 'Gospel / Worship',
-    day: 'Sunday',
-    schedule: '5:00 AM - 7:00 AM',
-    description: 'A proper sunrise worship block, separate from the weekday run. Think big-voice praise, choir moments, and testimony-driven worship with Kirk Franklin, CeCe Winans, Mercy Chinwo, and Benjamin Dube.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/Gospel.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL0dvc3BlbC5qcGciLCJpYXQiOjE3Nzk3ODYxNDYsImV4cCI6MTgxMTMyMjE0Nn0.6EtVIW4mzntmzejfQxDySoddqdQjQ4gR7I_-7jxluqg',
-    color: 'from-purple-500 to-purple-900',
-    features: ['Sunrise Worship', 'Kirk Franklin', 'CeCe Winans']
-  },
-  {
-    title: 'US R&B',
-    day: 'Sunday',
-    schedule: '1:00 PM - 3:00 PM',
-    description: 'Smooth, emotional, glossy R&B with a little soul and hip-hop drizzle on top. SZA, H.E.R., Chris Brown, and The Weeknd are strong names for this block.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/US_RnB.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL1VTX1JuQi5qcGciLCJpYXQiOjE3Nzk3ODU5NTMsImV4cCI6MTgxMTMyMTk1M30.Q-eNIt5VPJquyzv9qufEUlnOhtywWVF-YiyAD4eqElQ',
-    color: 'from-blue-500 to-blue-900',
-    features: ['SZA', 'H.E.R.', 'Chris Brown']
-  },
-  {
-    title: 'US Hip-Hop',
-    day: 'Sunday',
-    schedule: '3:00 PM - 7:00 PM',
-    description: 'The bars-and-attitude slot: lyric-heavy, culture-heavy, and built for replay value. Kendrick Lamar and Drake are the cleanest headliners here.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/US_HipHop.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL1VTX0hpcEhvcC5qcGciLCJpYXQiOjE3Nzk3ODYyMzQsImV4cCI6MTgxMTMyMjIzNH0.7MVsXgaAO9xv5rtNh023kqxgCwmbbUBuZmPok4LxuTQ',
-    color: 'from-gray-500 to-gray-900',
-    features: ['Kendrick Lamar', 'Drake', 'J. Cole']
-  },
-  {
-    title: 'New Kenyan Music',
-    day: 'Sunday',
-    schedule: '7:00 PM - 9:00 PM',
-    description: 'The fresh-evening lane for the current wave: Kenya’s most-streamed space is now heavily rap, hip-hop, Afropop, and Afrobeats-driven. Featuring Bien, Sauti Sol, Wakadinali, Nyashinski, Lil Maina, and Okello Max.',
-    image: '/shows/new_Kenyan_Music.jpg',
-    color: 'from-primary to-orange-900',
-    features: ['Bien', 'Wakadinali', 'Nyashinski']
-  }
-]
+const weekendShows = ['Saturday', 'Sunday'].flatMap((day) =>
+  SHOW_SCHEDULE.map((show) => ({
+    ...show,
+    day,
+    schedule: show.schedule.replace('Every day | ', ''),
+  })),
+)
 
 function PremiumWeekendAccordion() {
   const satShows = weekendShows.filter(s => s.day === 'Saturday')
@@ -174,6 +26,7 @@ function PremiumWeekendAccordion() {
 
   const [mounted, setMounted] = useState(false)
   const [currentHour, setCurrentHour] = useState(new Date().getHours())
+  const [currentMinute, setCurrentMinute] = useState(new Date().getMinutes())
   const [currentDay, setCurrentDay] = useState(new Date().getDay())
 
   useEffect(() => {
@@ -181,6 +34,7 @@ function PremiumWeekendAccordion() {
     const interval = setInterval(() => {
       const now = new Date()
       setCurrentHour(now.getHours())
+      setCurrentMinute(now.getMinutes())
       setCurrentDay(now.getDay())
     }, 60000)
     return () => clearInterval(interval)
@@ -198,7 +52,7 @@ function PremiumWeekendAccordion() {
           <div>
             <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-white px-4 py-1.5 rounded-full mb-6 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
               <span className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]"></span>
-              <span className="text-xs font-bold uppercase tracking-[0.2em]">Curated Selection</span>
+              <span className="text-xs font-bold uppercase tracking-[0.2em]">Same 24/7 Rotation</span>
             </div>
             <h2 className="text-5xl md:text-8xl lg:text-[9rem] font-black uppercase tracking-tighter leading-none text-white">
               Weekend
@@ -207,7 +61,7 @@ function PremiumWeekendAccordion() {
             </h2>
           </div>
           <p className="max-w-md text-gray-400 font-medium text-lg leading-relaxed border-l-[3px] border-primary/50 pl-6 lg:mb-8">
-            Step into the sonic underground. Carefully curated, deeply rooted, and broadcasted live. Explore our premium weekend roster.
+            Saturday and Sunday now run on the same RIENG station clock as the rest of the week — the full rotation, all weekend.
           </p>
         </div>
 
@@ -223,7 +77,7 @@ function PremiumWeekendAccordion() {
           
           <div className="flex flex-col lg:flex-row gap-3 h-[800px] lg:h-[650px]">
             {satShows.map((show, i) => {
-              const isLive = mounted && getCurrentShow(currentDay, currentHour).title === show.title;
+              const isLive = mounted && getCurrentShow(currentDay, currentHour, currentMinute).title === show.title;
               return (
               <div 
                 key={i}
@@ -318,7 +172,7 @@ function PremiumWeekendAccordion() {
           
           <div className="flex flex-col lg:flex-row gap-3 h-[800px] lg:h-[650px]">
             {sunShows.map((show, i) => {
-              const isLive = mounted && getCurrentShow(currentDay, currentHour).title === show.title;
+              const isLive = mounted && getCurrentShow(currentDay, currentHour, currentMinute).title === show.title;
               return (
               <div 
                 key={i}
@@ -409,6 +263,7 @@ function PremiumWeekendAccordion() {
 
 export default function ShowsPage() {
   const [currentHour, setCurrentHour] = useState(12)
+  const [currentMinute, setCurrentMinute] = useState(0)
   const [currentDay, setCurrentDay] = useState(0)
   const [mounted, setMounted] = useState(false)
 
@@ -416,6 +271,7 @@ export default function ShowsPage() {
   useEffect(() => {
     const now = new Date()
     setCurrentHour(now.getHours())
+    setCurrentMinute(now.getMinutes())
     setCurrentDay(now.getDay())
     setMounted(true)
   }, [])
@@ -454,7 +310,7 @@ export default function ShowsPage() {
           
           let isLive = false;
           if (mounted) {
-            isLive = getCurrentShow(currentDay, currentHour).title === show.title;
+            isLive = getCurrentShow(currentDay, currentHour, currentMinute).title === show.title;
           }
 
           return (
@@ -517,7 +373,7 @@ export default function ShowsPage() {
         })}
       </section>
 
-      {/* Weekend Specials — Premium Accordion */}
+      {/* Weekend schedule — same rotation Saturday & Sunday */}
       <PremiumWeekendAccordion />
 
       {/* Guest Mixes Banner Section */}
