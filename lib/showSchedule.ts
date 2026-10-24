@@ -60,7 +60,7 @@ export const SHOW_SCHEDULE: ShowScheduleItem[] = [
     host: 'RIENG',
     schedule: 'Every day | 6:00 PM - 7:30 PM',
     description: 'Politics, headlines, public affairs and the stories shaping Kenya — unpacked with the RIENG edge.',
-    image: '/shows/politics-show-2027.avif',
+    image: '/shows/politics-show-2027.jpg',
     color: 'from-sky-500/20 to-transparent',
     features: ['Politics', 'News', 'Current Affairs', 'Interviews'],
     startMinute: 1080,
