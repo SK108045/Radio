@@ -25,7 +25,7 @@ export function HomeLineup({ shows }: { shows: ShowPreview[] }) {
             <h2 className={styles.lineupHeading}>The <span className={styles.orange}>line-up.</span></h2>
           </div>
           <div className={styles.lineupAside}>
-            <p>Old school mornings. Loud afternoons.<br />Underground nights.</p>
+            <p>Old school mornings. Loud afternoons.<br />Underground nights. Every day.</p>
             <Link href="/shows" className={styles.textLink}>Full schedule <ArrowUpRight size={16} aria-hidden="true" /></Link>
           </div>
         </div>
@@ -40,7 +40,7 @@ export function HomeLineup({ shows }: { shows: ShowPreview[] }) {
                   {live && <span className={styles.posterLive}><i /> Live now</span>}
                 </div>
                 <div className={styles.posterCaption}>
-                  <p className={styles.showTime}>Weekdays / {show.schedule.replace('Weekdays | ', '')}</p>
+                  <p className={styles.showTime}>{show.schedule}</p>
                   <h3>{show.title}<ArrowUpRight size={22} aria-hidden="true" /></h3>
                   <p className={styles.showDescription}>{show.description}</p>
                 </div>
