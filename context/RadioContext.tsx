@@ -39,7 +39,7 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const updateShow = () => {
       const now = new Date()
-      setCurrentShow(getCurrentShow(now.getDay(), now.getHours()))
+      setCurrentShow(getCurrentShow(now.getDay(), now.getHours(), now.getMinutes()))
     }
     updateShow()
     const interval = setInterval(updateShow, 60000)
