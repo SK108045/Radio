@@ -60,7 +60,7 @@ export const SHOW_SCHEDULE: ShowScheduleItem[] = [
     host: 'RIENG',
     schedule: 'Every day | 6:00 PM - 7:30 PM',
     description: 'Politics, headlines, public affairs and the stories shaping Kenya — unpacked with the RIENG edge.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/Politics.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1BvbGl0aWNzLmpwZyIsImlhdCI6MTc3OTQ1NjgwOSwiZXhwIjoxODEwOTkyODA5fQ.cL7be6KjlWm1cMDWqElTql568ju6o8GznaYZvAAim8o',
+    image: '/shows/politics-show-2027.jpg',
     color: 'from-sky-500/20 to-transparent',
     features: ['Politics', 'News', 'Current Affairs', 'Interviews'],
     startMinute: 1080,
