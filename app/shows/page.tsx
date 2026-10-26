@@ -7,7 +7,17 @@ import Image from 'next/image'
 import { getCurrentShow } from '@/lib/getCurrentShow'
 import { SHOW_SCHEDULE } from '@/lib/showSchedule'
 
-const dailyShows = SHOW_SCHEDULE
+const upcomingSportsShow = {
+  title: 'Sports Show',
+  host: 'Cheche & Swat',
+  schedule: 'Coming this weekend',
+  description: 'Big-match talk, hot takes, predictions and live analysis with Cheche — Harambee Stars & Kenya Police player — alongside Swat.',
+  image: '/Bura.jpg',
+  color: 'from-green-500/20 to-transparent',
+  features: ['Cheche', 'Swat', 'Football', 'Live Analysis'],
+}
+
+const dailyShows = [...SHOW_SCHEDULE, upcomingSportsShow]
 
 const weekendShows = ['Saturday', 'Sunday'].flatMap((day) =>
   SHOW_SCHEDULE.map((show) => ({
