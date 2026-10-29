@@ -1,6 +1,6 @@
 # Rieng domain payment
 
-Open `/domain-payment` for the KSh 5,000 request to switch **rieng254.com** to **rieng.ke**. The page uses TrueHost's original logo and public registrar contact details. Rieng collects the payment using the same Swifta merchant API key as the furniture project; this is not a checkout hosted by TrueHost. Registration and DNS changes are arranged separately after payment.
+Open `/domain-payment` for the KSh 5,000 request to switch **rieng254.com** to **Rieng.ke**. The page uses TrueHost's original logo and public registrar contact details. Rieng collects the payment using the same Swifta merchant API key as the furniture project; this is not a checkout hosted by TrueHost. Registration and DNS changes are arranged separately after payment.
 
 ## One-bob test
 
