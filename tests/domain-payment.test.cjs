@@ -36,11 +36,11 @@ test('signed checkout cookies reject tampering and expiration', () => {
   assert.equal(payments.validCsrf(session, 'wrong'), false)
   assert.equal(payments.validCsrf(session, payments.csrfToken(session)), true)
 })
-test('Swifta receives exactly KSh 2,800 and nested acceptance stays pending', async () => {
+test('Swifta receives exactly KSh 5,000 and nested acceptance stays pending', async () => {
   const result = await payments.requestDomainStk('0712345678', 'RIENG-DOM-TEST', async (url, options) => {
     assert.equal(url, 'https://app.swifta.co.ke/stkpush')
     assert.equal(options.headers['x-api-key'], 'test-key-no-live-requests')
-    assert.deepEqual(JSON.parse(options.body), { phone: '0712345678', amount: 2800, accountReference: 'RIENG-DOM-TEST', description: 'Rieng domain switch to rieng.com' })
+    assert.deepEqual(JSON.parse(options.body), { phone: '0712345678', amount: 5000, accountReference: 'RIENG-DOM-TEST', description: 'Rieng domain switch to rieng.ke' })
     return response({ success: true, data: { mpesaResponse: { ResponseCode: '0', CheckoutRequestID: 'nested-checkout' } } })
   })
   assert.equal(result.status, 'pending')
@@ -63,11 +63,11 @@ test('blocked gateway requests fail and ambiguous replies stay locked', async ()
 })
 test('provider success requires a receipt and rejects a mismatched amount', async () => {
   const session = pending()
-  const missingReceipt = await payments.pollDomainPayment(session, async () => response({ status: 'success', amount: 2800 }))
+  const missingReceipt = await payments.pollDomainPayment(session, async () => response({ status: 'success', amount: 5000 }))
   assert.equal(missingReceipt.status, 'pending')
   const wrongAmount = await payments.pollDomainPayment(session, async () => response({ status: 'success', amount: 1, mpesaReceiptNumber: 'TEST123456' }))
   assert.equal(wrongAmount.status, 'pending')
-  const paid = await payments.pollDomainPayment(session, async () => response({ transaction: { status: 'success', amount: '2800', mpesaReceiptNumber: 'test123456' } }))
+  const paid = await payments.pollDomainPayment(session, async () => response({ transaction: { status: 'success', amount: '5000', mpesaReceiptNumber: 'test123456' } }))
   assert.equal(paid.status, 'paid')
   assert.equal(paid.receipt, 'TEST123456')
 })
@@ -131,7 +131,7 @@ test('signed test payment state cannot be used as domain payment state', () => {
   assert.deepEqual(payments.readSession(token, 'test'), paidTest)
   assert.equal(payments.readSession(payments.signSession(payments.newSession()), 'test'), null)
   assert.equal(payments.summary(paidTest).amount, 1)
-  assert.equal(payments.summary(payments.newSession()).amount, 2800)
+  assert.equal(payments.summary(payments.newSession()).amount, 5000)
 })
 test('a one-bob receipt confirms only a test payment', async () => {
   const fetcher = async () => response({ status: 'success', amount: 1, mpesaReceiptNumber: 'TEST123456' })
