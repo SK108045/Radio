@@ -3,7 +3,7 @@ import DomainPayment from './payment'
 
 export const metadata: Metadata = {
   title: 'Domain payment · Rieng',
-  description: 'KSh 2,800 payment request to switch Rieng from rieeng.co.ke to rieng.com, with TrueHost as the domain registrar.',
+  description: 'KSh 5,000 payment request to switch Rieng from rieng254.com to rieng.ke, with TrueHost as the domain registrar.',
   robots: { index: false, follow: false },
 }
 
