@@ -111,7 +111,7 @@ export default function DomainPayment({ testMode = false }: { testMode?: boolean
         <div className={`${styles.intro} ${testMode ? styles.testIntro : ''}`}>
           <p className={styles.eyebrow}>{testMode ? 'KSH 1 PAYMENT TEST' : 'A NEW ADDRESS. SAME RIENG.'}</p>
           <h1>{testMode ? 'Test M-Pesa.' : 'Let’s make the switch.'}</h1>
-          <p>{testMode ? 'Send one bob to check the Swifta payment flow.' : 'One simple payment to move Rieng to its new .com domain.'}</p>
+          <p>{testMode ? 'Send one bob to check the Swifta payment flow.' : 'One simple payment to move Rieng to its new .ke domain.'}</p>
         </div>
 
         <section className={`${styles.card} ${testMode ? styles.testCard : ''}`} aria-label={testMode ? 'KSh 1 M-Pesa test payment' : 'Rieng domain payment request'}>
@@ -120,7 +120,7 @@ export default function DomainPayment({ testMode = false }: { testMode?: boolean
             <div className={styles.domains}>
               <div className={styles.oldDomain}><span>CURRENT DOMAIN</span><strong>{DOMAIN_QUOTE.currentDomain}</strong></div>
               <div className={styles.domainArrow}><ArrowRight size={20} aria-hidden="true" /></div>
-              <div className={styles.newDomain}><div><span>NEW DOMAIN</span><span className={styles.comTag}>.COM</span></div><strong>{DOMAIN_QUOTE.newDomain}</strong><p>A shorter address for what comes next.</p></div>
+              <div className={styles.newDomain}><div><span>NEW DOMAIN</span><span className={styles.comTag}>.KE</span></div><strong>{DOMAIN_QUOTE.newDomain}</strong><p>A shorter address for what comes next.</p></div>
             </div>
 
             <div className={styles.quote}>
@@ -144,7 +144,7 @@ export default function DomainPayment({ testMode = false }: { testMode?: boolean
                 <h2>{testMode ? 'Test payment received.' : 'Payment received.'}</h2>
                 <p>{testMode ? <>Your KSh {money} M-Pesa test payment is confirmed.</> : <>Your KSh {money} payment for the switch to <strong>{DOMAIN_QUOTE.newDomain}</strong> is confirmed.</>}</p>
                 <dl className={styles.receipt}><div><dt>M-Pesa receipt</dt><dd>{payment.receipt}</dd></div><div><dt>Request reference</dt><dd>{payment.reference}</dd></div><div><dt>Amount paid</dt><dd>KSh {money}</dd></div></dl>
-                <p className={styles.smallNote}>{testMode ? 'The payment flow worked. The domain request remains KSh 2,800.' : 'The Rieng team can now arrange the domain registration and switch with TrueHost.'}</p>
+                <p className={styles.smallNote}>{testMode ? 'The payment flow worked. The domain request remains KSh 5,000.' : 'The Rieng team can now arrange the domain registration and switch with TrueHost.'}</p>
               </div>
             ) : waiting ? (
               <div className={styles.result} role="status" aria-live="polite">
