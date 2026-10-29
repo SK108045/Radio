@@ -1,7 +1,7 @@
 export const DOMAIN_QUOTE = {
-  currentDomain: 'rieeng.co.ke',
-  newDomain: 'rieng.com',
-  amount: 2800,
+  currentDomain: 'rieng254.com',
+  newDomain: 'rieng.ke',
+  amount: 5000,
   currency: 'KES',
   registrar: 'TrueHost',
 } as const
