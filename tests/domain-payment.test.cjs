@@ -40,7 +40,7 @@ test('Swifta receives exactly KSh 5,000 and nested acceptance stays pending', as
   const result = await payments.requestDomainStk('0712345678', 'RIENG-DOM-TEST', async (url, options) => {
     assert.equal(url, 'https://app.swifta.co.ke/stkpush')
     assert.equal(options.headers['x-api-key'], 'test-key-no-live-requests')
-    assert.deepEqual(JSON.parse(options.body), { phone: '0712345678', amount: 5000, accountReference: 'RIENG-DOM-TEST', description: 'Rieng domain switch to rieng.ke' })
+    assert.deepEqual(JSON.parse(options.body), { phone: '0712345678', amount: 5000, accountReference: 'RIENG-DOM-TEST', description: 'Rieng domain switch to Rieng.ke' })
     return response({ success: true, data: { mpesaResponse: { ResponseCode: '0', CheckoutRequestID: 'nested-checkout' } } })
   })
   assert.equal(result.status, 'pending')
