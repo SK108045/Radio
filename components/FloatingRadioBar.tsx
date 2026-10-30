@@ -36,6 +36,7 @@ export default function FloatingRadioBar() {
               src={currentShow.image || '/KarteloandMiracleBaby.jpg'}
               alt={currentShow.title}
               fill
+              sizes="44px"
               className="object-cover"
             />
             {isPlaying && <div className="absolute inset-0 bg-primary/20 animate-pulse" />}
