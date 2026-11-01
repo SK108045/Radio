@@ -10,7 +10,7 @@ export type ShowScheduleItem = {
   endMinute: number
 }
 
-export const SHOW_SCHEDULE: ShowScheduleItem[] = [
+// Keep frequently rendered show artwork local so the global player does not consume Supabase Storage egress.\nexport const SHOW_SCHEDULE: ShowScheduleItem[] = [
   {
     title: 'Kenyan Old-School',
     host: 'Muthoni Kenya',
@@ -27,7 +27,7 @@ export const SHOW_SCHEDULE: ShowScheduleItem[] = [
     host: 'Modesto',
     schedule: 'Every day | 9:00 AM - 12:00 PM',
     description: 'Three hours of Kenyan R&B, soul and smooth crossover records from the country’s strongest vocalists and hitmakers.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/UpdatedShows/RnB.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvVXBkYXRlZFNob3dzL1JuQi5qcGciLCJpYXQiOjE3NzkyNjcwMzYsImV4cCI6MTgxMDgwMzAzNn0.1n19oWoG6A-EDrXaILLNof75PFG_mg7iLSLI7_aAl9I',
+    image: '/shows/new-kenyan-music.webp',
     color: 'from-blue-500/20 to-transparent',
     features: ['Bensoul', 'Nviiri', 'Otile Brown', 'Sauti Sol'],
     startMinute: 540,
@@ -49,7 +49,7 @@ export const SHOW_SCHEDULE: ShowScheduleItem[] = [
     host: 'inkmatic',
     schedule: 'Every day | 3:00 PM - 6:00 PM',
     description: 'High-energy dancehall for the afternoon: riddims, club records, throwbacks and fresh Caribbean heat.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/InkMatik.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvSW5rTWF0aWsuanBnIiwiaWF0IjoxNzc4ODYyNTY3LCJleHAiOjE4MTAzOTg1Njd9.PGiJ15a-fGAhA8e0v2HZwnkVIP2jBx4KSrWiPuwX-fA',
+    image: '/shows/gengetone.webp',
     color: 'from-purple-500/20 to-transparent',
     features: ['Dancehall', 'Riddims', 'Club Anthems', 'Dubplates'],
     startMinute: 900,
@@ -60,7 +60,7 @@ export const SHOW_SCHEDULE: ShowScheduleItem[] = [
     host: 'RIENG',
     schedule: 'Every day | 6:00 PM - 7:30 PM',
     description: 'Politics, headlines, public affairs and the stories shaping Kenya — unpacked with the RIENG edge.',
-    image: '/shows/politics-show-2027.png',
+    image: '/shows/politics-show-2027.avif',
     color: 'from-sky-500/20 to-transparent',
     features: ['Politics', 'News', 'Current Affairs', 'Interviews'],
     startMinute: 1080,
@@ -93,7 +93,7 @@ export const SHOW_SCHEDULE: ShowScheduleItem[] = [
     host: 'RIENG',
     schedule: 'Every day | 12:00 AM - 2:00 AM',
     description: 'Late-night Nigerian Afrobeats and Afropop — big hooks, club records and nonstop West African energy.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/Naija.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL05haWphLmpwZyIsImlhdCI6MTc3OTc4NTQyNiwiZXhwIjoxODExMzIxNDI2fQ.a3GJb0qDEkC5w6IGHY5ItCGB03PTaAKwzIZ-NUzb9Ec',
+    image: '/Rieng_Radio.jpg',
     color: 'from-green-500/20 to-transparent',
     features: ['Afrobeats', 'Burna Boy', 'Wizkid', 'Davido'],
     startMinute: 0,
@@ -104,7 +104,7 @@ export const SHOW_SCHEDULE: ShowScheduleItem[] = [
     host: 'RIENG',
     schedule: 'Every day | 2:00 AM - 4:00 AM',
     description: 'Two hours of Bongo Flava and Tanzanian hits — melodic street records, pop crossovers and East African staples.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/Bongo.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL0JvbmdvLmpwZyIsImlhdCI6MTc3OTc4NDg1MSwiZXhwIjoxODExMzIwODUxfQ.hVJe2v5lmbwmb3BwiaCHyD5L0y4eVNlv2YmHEo5to7g',
+    image: '/Rieng_Radio.jpg',
     color: 'from-orange-500/20 to-transparent',
     features: ['Bongo Flava', 'Diamond Platnumz', 'Nandy', 'Harmonize'],
     startMinute: 120,
@@ -115,7 +115,7 @@ export const SHOW_SCHEDULE: ShowScheduleItem[] = [
     host: 'RIENG',
     schedule: 'Every day | 4:00 AM - 5:00 AM',
     description: 'Congolese rumba and soukous before sunrise — bright guitars, dance energy and classic Lingala records.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/WeekendShows/Lingala.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvV2Vla2VuZFNob3dzL0xpbmdhbGEuanBnIiwiaWF0IjoxNzc5Nzg1NDkzLCJleHAiOjE4MTEzMjE0OTN9.R0QtH6HYpjOtGFJwV9ND8ve4xOYD3J6-6DDXyYtmDjs',
+    image: '/Rieng_Radio.jpg',
     color: 'from-red-500/20 to-transparent',
     features: ['Rumba', 'Soukous', 'Fally Ipupa', 'Koffi Olomidé'],
     startMinute: 240,
@@ -126,7 +126,7 @@ export const SHOW_SCHEDULE: ShowScheduleItem[] = [
     host: 'RIENG',
     schedule: 'Every day | 5:00 AM - 6:00 AM',
     description: 'A reflective hour of faith, worship and conversation with God before the morning programming begins.',
-    image: 'https://dkmdvhzdixefykoojhgt.supabase.co/storage/v1/object/sign/Mp3/Guidance.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81NTUxYTk2MC04YjVhLTRkNjEtOTJkMS1jMjVkNWNlY2IxMDMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJNcDMvR3VpZGFuY2UuanBnIiwiaWF0IjoxNzgwNTE1NzUzLCJleHAiOjE4MTIwNTE3NTN9.QETbkxT8Fmm0ZCythheoAl08c1zP-fdqU3JoAFmBqcw',
+    image: '/Rieng_Radio.jpg',
     color: 'from-yellow-500/20 to-transparent',
     features: ['Faith', 'Reflection', 'Worship', 'Prayer'],
     startMinute: 300,
