@@ -10,7 +10,8 @@ export type ShowScheduleItem = {
   endMinute: number
 }
 
-// Keep frequently rendered show artwork local so the global player does not consume Supabase Storage egress.\nexport const SHOW_SCHEDULE: ShowScheduleItem[] = [
+// Keep frequently rendered show artwork local so the global player does not consume Supabase Storage egress.
+export const SHOW_SCHEDULE: ShowScheduleItem[] = [
   {
     title: 'Kenyan Old-School',
     host: 'Muthoni Kenya',
