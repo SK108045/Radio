@@ -1,0 +1,21 @@
+-- A local stand-in for the inspected legacy schema, not a production migration.
+CREATE ROLE anon;
+CREATE ROLE authenticated;
+CREATE ROLE service_role BYPASSRLS;
+CREATE SCHEMA storage;
+GRANT USAGE ON SCHEMA storage TO anon,authenticated,service_role;
+CREATE TABLE storage.buckets(id text PRIMARY KEY,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+CREATE TABLE storage.objects(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),bucket_id text REFERENCES storage.buckets(id));
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+GRANT ALL ON storage.objects,storage.buckets TO anon,authenticated,service_role;
+CREATE POLICY legacy_dev_select ON storage.objects FOR SELECT USING(true);
+CREATE POLICY legacy_dev_insert ON storage.objects FOR INSERT WITH CHECK(true);
+CREATE POLICY legacy_dev_update ON storage.objects FOR UPDATE USING(true);
+CREATE POLICY legacy_dev_delete ON storage.objects FOR DELETE USING(true);
+CREATE TABLE public.artists(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),user_id uuid,stage_name text NOT NULL,total_active_listeners integer DEFAULT 0,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now());
+CREATE TABLE public.artist_accounts(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),artist_id uuid REFERENCES artists(id),username text UNIQUE,email text UNIQUE,password text,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now());
+CREATE TABLE public.tracks(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),artist_id uuid NOT NULL REFERENCES artists(id),title text NOT NULL,description text,price_ksh numeric(12,2) NOT NULL,mp3_file_path text,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now());
+CREATE TABLE public.track_performance(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),track_id uuid REFERENCES tracks(id),metric_month date,streams integer,downloads integer,revenue_ksh numeric(12,2));
+CREATE VIEW public.vw_top_performing_tracks AS SELECT t.id track_id,t.artist_id,t.title track_title,a.stage_name FROM tracks t JOIN artists a ON a.id=t.artist_id;
+GRANT SELECT ON public.vw_top_performing_tracks TO anon,authenticated;
+INSERT INTO artists(id,stage_name) VALUES('33333333-3333-3333-3333-333333333332','Swat'),('33333333-3333-3333-3333-333333333333','Metro Stunna');

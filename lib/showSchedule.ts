@@ -1,0 +1,136 @@
+export type ShowScheduleItem = {
+  title: string
+  host: string
+  schedule: string
+  description: string
+  image: string
+  color: string
+  features: string[]
+  startMinute: number
+  endMinute: number
+}
+
+// Keep frequently rendered show artwork local so the global player does not consume Supabase Storage egress.
+export const SHOW_SCHEDULE: ShowScheduleItem[] = [
+  {
+    title: 'Kenyan Old-School',
+    host: 'Muthoni Kenya',
+    schedule: 'Every day | 6:00 AM - 9:00 AM',
+    description: 'Start the day with classic Kenyan records from the 2000s and beyond — the songs that built the sound before the new wave took over.',
+    image: '/shows/kenyan-old-school.webp',
+    color: 'from-orange-500/20 to-transparent',
+    features: ['E-Sir', 'Mr. Lenny', 'Kleptomaniax', 'Ogopa Classics'],
+    startMinute: 360,
+    endMinute: 540,
+  },
+  {
+    title: 'Kenyan RnBs',
+    host: 'Modesto',
+    schedule: 'Every day | 9:00 AM - 12:00 PM',
+    description: 'Three hours of Kenyan R&B, soul and smooth crossover records from the country’s strongest vocalists and hitmakers.',
+    image: '/shows/new-kenyan-music.webp',
+    color: 'from-blue-500/20 to-transparent',
+    features: ['Bensoul', 'Nviiri', 'Otile Brown', 'Sauti Sol'],
+    startMinute: 540,
+    endMinute: 720,
+  },
+  {
+    title: 'Gengewuoo / Gengetone / Arbantone',
+    host: 'Kartelo',
+    schedule: 'Every day | 12:00 PM - 3:00 PM',
+    description: 'A loud midday run through Gengewuoo, Gengetone and Arbantone — street anthems, new drops and the raw pulse of Nairobi.',
+    image: '/shows/gengetone.webp',
+    color: 'from-red-500/20 to-transparent',
+    features: ['Gengewuoo', 'Gengetone', 'Arbantone', 'New Drops'],
+    startMinute: 720,
+    endMinute: 900,
+  },
+  {
+    title: 'Dancehall',
+    host: 'inkmatic',
+    schedule: 'Every day | 3:00 PM - 6:00 PM',
+    description: 'High-energy dancehall for the afternoon: riddims, club records, throwbacks and fresh Caribbean heat.',
+    image: '/shows/gengetone.webp',
+    color: 'from-purple-500/20 to-transparent',
+    features: ['Dancehall', 'Riddims', 'Club Anthems', 'Dubplates'],
+    startMinute: 900,
+    endMinute: 1080,
+  },
+  {
+    title: 'Politriks & Newsment',
+    host: 'RIENG',
+    schedule: 'Every day | 6:00 PM - 7:30 PM',
+    description: 'Politics, headlines, public affairs and the stories shaping Kenya — unpacked with the RIENG edge.',
+    image: '/shows/politics-show-2027.avif',
+    color: 'from-sky-500/20 to-transparent',
+    features: ['Politics', 'News', 'Current Affairs', 'Interviews'],
+    startMinute: 1080,
+    endMinute: 1170,
+  },
+  {
+    title: 'Kenyan Underground Hip-Hop / Shrap',
+    host: 'Joy Ohon',
+    schedule: 'Every day | 7:30 PM - 10:00 PM',
+    description: 'Kenyan underground rap after dark — Shrap, raw hip-hop, drill and uncompromising lyricism from the scene.',
+    image: '/shows/underground.webp',
+    color: 'from-green-500/20 to-transparent',
+    features: ['Shrap', 'Ukoo Flani', 'Wakadinali', 'Underground Rap'],
+    startMinute: 1170,
+    endMinute: 1320,
+  },
+  {
+    title: 'Reggae',
+    host: 'RIENG',
+    schedule: 'Every day | 10:00 PM - 12:00 AM',
+    description: 'Close out the night with roots, lovers rock, conscious reggae and heavyweight selections from RIENG’s reggae rotation.',
+    image: 'https://img.youtube.com/vi/-DMoaDCixNo/hqdefault.jpg',
+    color: 'from-emerald-500/20 to-transparent',
+    features: ['Roots Reggae', 'Lovers Rock', 'Conscious', 'Dub'],
+    startMinute: 1320,
+    endMinute: 1440,
+  },
+  {
+    title: 'Naija',
+    host: 'RIENG',
+    schedule: 'Every day | 12:00 AM - 2:00 AM',
+    description: 'Late-night Nigerian Afrobeats and Afropop — big hooks, club records and nonstop West African energy.',
+    image: '/Rieng_Radio.jpg',
+    color: 'from-green-500/20 to-transparent',
+    features: ['Afrobeats', 'Burna Boy', 'Wizkid', 'Davido'],
+    startMinute: 0,
+    endMinute: 120,
+  },
+  {
+    title: 'Bongo',
+    host: 'RIENG',
+    schedule: 'Every day | 2:00 AM - 4:00 AM',
+    description: 'Two hours of Bongo Flava and Tanzanian hits — melodic street records, pop crossovers and East African staples.',
+    image: '/Rieng_Radio.jpg',
+    color: 'from-orange-500/20 to-transparent',
+    features: ['Bongo Flava', 'Diamond Platnumz', 'Nandy', 'Harmonize'],
+    startMinute: 120,
+    endMinute: 240,
+  },
+  {
+    title: 'Lingala',
+    host: 'RIENG',
+    schedule: 'Every day | 4:00 AM - 5:00 AM',
+    description: 'Congolese rumba and soukous before sunrise — bright guitars, dance energy and classic Lingala records.',
+    image: '/Rieng_Radio.jpg',
+    color: 'from-red-500/20 to-transparent',
+    features: ['Rumba', 'Soukous', 'Fally Ipupa', 'Koffi Olomidé'],
+    startMinute: 240,
+    endMinute: 300,
+  },
+  {
+    title: 'Mujadala na Mungu',
+    host: 'RIENG',
+    schedule: 'Every day | 5:00 AM - 6:00 AM',
+    description: 'A reflective hour of faith, worship and conversation with God before the morning programming begins.',
+    image: '/Rieng_Radio.jpg',
+    color: 'from-yellow-500/20 to-transparent',
+    features: ['Faith', 'Reflection', 'Worship', 'Prayer'],
+    startMinute: 300,
+    endMinute: 360,
+  },
+]

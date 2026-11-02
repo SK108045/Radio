@@ -1,0 +1,3 @@
+-- Superseded by migrations/202610070001_artist_sales.sql.
+-- Apply that migration for private storage and signed TUS upload grants.
+-- Do not recreate the old anonymous upload/read/delete policies.
