@@ -10,5 +10,5 @@ export default function SalesLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <>{children}</>
+  return <div data-sales-portal className="min-h-screen">{children}</div>
 }
