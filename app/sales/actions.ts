@@ -101,6 +101,21 @@ export async function loginAction(_state: ActionState, form: FormData) {
   redirect('/sales')
 }
 export async function logoutAction() { await clearSession(); redirect('/sales/login') }
+export async function requestPayoutAction(_state: ActionState, _form: FormData) {
+  try {
+    const session = await getSession()
+    if (!session) throw new Error('Please sign in again.')
+    await rateLimit(`payout:${session.artistId}`, 4, 3600)
+    const result = await adminDb().rpc('sales_request_artist_payout', { p_artist: session.artistId })
+    if (result.error) {
+      if (result.error.message.includes('already pending')) throw new Error('A payment request is already being processed.')
+      if (result.error.message.includes('No available earnings')) throw new Error('You do not have available earnings to request yet.')
+      throw new Error('Payment request could not be processed.')
+    }
+    revalidatePath('/sales/payments')
+    return { success: 'Request processed. Wait for payment in the next one hour.' }
+  } catch (e) { return failure(e) }
+}
 async function currentAccount(form: FormData) {
   const session = await getSession()
   if (!session) throw new Error('Please sign in again.')

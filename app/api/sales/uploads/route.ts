@@ -3,6 +3,7 @@ import { getSession } from '@/lib/auth'
 import { adminDb, requireData, rateLimit } from '@/lib/supabase-admin'
 import { inputJson, json, uuid } from '@/lib/sales-http'
 import { randomUUID } from 'node:crypto'
+import { TRACK_PRICE_KSH } from '@/lib/sales-pricing'
 export const runtime = 'nodejs'
 export async function POST(req: NextRequest) {
   try {
@@ -14,6 +15,7 @@ export async function POST(req: NextRequest) {
     if (input.resumeId) {
       if (!uuid(input.resumeId)) return json({ error: 'Invalid upload.' }, 400)
       track = requireData(await db.from('tracks').select('*').eq('id', input.resumeId).eq('artist_id', session.artistId).eq('sales_status', 'draft').single())
+      if (Number(track.price_ksh) !== TRACK_PRICE_KSH) track = requireData(await db.from('tracks').update({ price_ksh: TRACK_PRICE_KSH }).eq('id', track.id).eq('artist_id', session.artistId).eq('sales_status','draft').select('*').single())
       if (Number(track.audio_size) !== input.size || track.audio_content_type !== input.contentType) return json({ error: 'Select the original file to resume.' }, 400)
       // Publishing can fail after TUS has finished. Preserve the completed
       // private original and retry preview creation without uploading again.
@@ -22,11 +24,11 @@ export async function POST(req: NextRequest) {
     } else {
       const title = typeof input.title === 'string' ? input.title.trim() : ''
       const description = typeof input.description === 'string' ? input.description.trim().slice(0, 3000) : ''
-      const price = Number(input.price), size = Number(input.size)
+      const size = Number(input.size)
       const allowed = ['audio/mpeg','audio/mp3','audio/wav','audio/x-wav','audio/mp4','audio/aac','audio/ogg','application/octet-stream']
-      if (!title || title.length > 160 || !Number.isInteger(price) || price < 1 || price > 100000 || !Number.isInteger(size) || size < 1 || size > 50 * 1024 * 1024 || !allowed.includes(input.contentType)) return json({ error: 'Enter a title, a whole KSh price, and audio up to 50 MB.' }, 400)
+      if (!title || title.length > 160 || !Number.isInteger(size) || size < 1 || size > 50 * 1024 * 1024 || !allowed.includes(input.contentType)) return json({ error: 'Enter a title and audio up to 50 MB.' }, 400)
       const id = randomUUID(), path = `${session.artistId}/${id}/original`
-      track = requireData(await db.from('tracks').insert({ id, artist_id: session.artistId, title, description, price_ksh: price, mp3_file_path: path, audio_content_type: input.contentType, audio_size: size, sales_status: 'draft' }).select('*').single())
+      track = requireData(await db.from('tracks').insert({ id, artist_id: session.artistId, title, description, price_ksh: TRACK_PRICE_KSH, mp3_file_path: path, audio_content_type: input.contentType, audio_size: size, sales_status: 'draft' }).select('*').single())
     }
     const grant = uploaded ? { token: '' } : requireData(await db.storage.from('artist-tracks').createSignedUploadUrl(track.mp3_file_path))
     const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!)

@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BarChart3, Settings, Radio, ChevronLeft, ChevronRight } from 'lucide-react'
+import { BarChart3, Settings, Radio, ChevronLeft, ChevronRight, WalletCards } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
 const navItems = [
   { href: '/sales', label: 'Overview', icon: BarChart3 },
+  { href: '/sales/payments', label: 'Payments', icon: WalletCards },
   { href: '/sales/settings', label: 'Settings', icon: Settings },
 ]
 
