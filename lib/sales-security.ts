@@ -2,7 +2,7 @@ import 'server-only'
 import { randomBytes, scrypt as scryptCallback, timingSafeEqual, createHash, createHmac } from 'node:crypto'
 import { promisify } from 'node:util'
 const scrypt = promisify(scryptCallback)
-export const ARTISTS = { metro_stunna: 'Metro_Stunna', swatt: 'swatt', kapitani: 'Kapitani', test_artist: 'Test_Artist' } as const
+export const ARTISTS = { metro_stunna: 'Metro_Stunna', swatt: 'swatt', kapitani: 'Kapitani', ethics_entertainment: 'Ethics Entertainment', test_artist: 'Test_Artist' } as const
 export function artistSlug(value: string) { const slug = value.toLowerCase(); return Object.hasOwn(ARTISTS, slug) ? slug as keyof typeof ARTISTS : null }
 export function opaqueToken() { return randomBytes(32).toString('base64url') }
 export function digest(value: string) { return createHash('sha256').update(value).digest('hex') }
