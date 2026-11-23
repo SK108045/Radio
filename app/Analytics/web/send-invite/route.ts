@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-const inviteUrl = 'https://rieng-analytics-invite.johnwakaba146.workers.dev/invite'
+const inviteUrl = 'https://g-analytics-invite.johnwakaba146.workers.dev/invite'
 const accessPath = '/Analytics/web/access.html'
 const allowedAccessHosts = new Set(['riengradio.co.ke', 'www.riengradio.co.ke'])
 
@@ -25,35 +25,49 @@ export async function POST(request: Request) {
   try {
     const upstream = await fetch(inviteUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: authorization },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: authorization,
+        'x-analytics-site': 'rieng',
+      },
       body: JSON.stringify({ email, role, send: body.send }),
       redirect: 'error',
       signal: AbortSignal.timeout(12000),
       cache: 'no-store',
     })
 
-    if (upstream.status === 401) return json({ error: 'The admin invite key was rejected.' }, 401)
+    const result = await upstream.json().catch(() => ({}))
 
-    if (upstream.ok) {
-      const result = await upstream.json()
-      const link = new URL(result.accessUrl)
-      const validAccessUrl =
-        result.ok === true &&
-        typeof result.sent === 'boolean' &&
-        link.protocol === 'https:' &&
-        allowedAccessHosts.has(link.hostname.toLowerCase()) &&
-        link.port === '' &&
-        link.username === '' &&
-        link.password === '' &&
-        link.pathname === accessPath &&
-        link.searchParams.get('email') === email &&
-        link.searchParams.has('token')
-
-      if (validAccessUrl) {
-        return json({ sent: result.sent, accessUrl: link.href }, 200)
-      }
+    if (upstream.status === 401) {
+      return json({ error: 'The admin invite key was rejected.' }, 401)
     }
-  } catch {}
 
-  return json({ error: 'The invitation service could not complete this request. Try again shortly.' }, 502)
+    if (!upstream.ok) {
+      return json(
+        { error: typeof result?.error === 'string' ? result.error : 'The invitation service could not complete this request.' },
+        upstream.status >= 400 && upstream.status <= 599 ? upstream.status : 502,
+      )
+    }
+
+    const link = new URL(result.accessUrl)
+    const validAccessUrl =
+      result.ok === true &&
+      typeof result.sent === 'boolean' &&
+      link.protocol === 'https:' &&
+      allowedAccessHosts.has(link.hostname.toLowerCase()) &&
+      link.port === '' &&
+      link.username === '' &&
+      link.password === '' &&
+      link.pathname === accessPath &&
+      link.searchParams.get('email') === email &&
+      link.searchParams.has('token')
+
+    if (validAccessUrl) {
+      return json({ sent: result.sent, accessUrl: link.href }, 200)
+    }
+
+    return json({ error: 'The invitation service returned an invalid Rieng access link.' }, 502)
+  } catch {
+    return json({ error: 'The invitation service could not complete this request. Try again shortly.' }, 502)
+  }
 }
