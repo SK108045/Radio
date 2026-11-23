@@ -206,8 +206,47 @@ linear-gradient(#3c4043,#3c4043) center/1.8px 11px no-repeat}
 /* GA-like content-height page ending */
 html,body{background:#f8fafd!important}
 #w{background:#f8fafd;padding-bottom:28px;box-sizing:border-box}
-</style></head>
+
+/* Keep the pre-rendered chart base hidden until LegacyReport has hydrated it. */
+html.snapshot-loading #s{visibility:hidden!important}
+</style><script>
+  document.documentElement.classList.add('snapshot-loading');
+  window.__snapshotRevealTimer = setTimeout(() => {
+    document.documentElement.classList.remove('snapshot-loading');
+  }, 4000);
+</script>
+</head>
 <body><div id="w"><div id="s">
+
+<div class="c" style="left:273px;top:228px;width:782px;height:344px"></div>
+<div class="c" style="left:1068px;top:228px;width:517px;height:344px"></div>
+<div class="c" style="left:273px;top:588px;width:452px;height:298px"></div>
+<div class="c" style="left:740px;top:588px;width:428px;height:298px"></div>
+<div class="c" style="left:1183px;top:588px;width:402px;height:298px"></div>
+
+<svg class="b" style="left:0;top:0" width="1600" height="900" viewBox="0 0 1600 900">
+<path d="M297 360H1000M297 406H1000M297 457H1000M297 492H1000" stroke="#e8eaed" stroke-width="1"/>
+<path data-chart-series="1" d="M298.0 478.5L308.0 478.0L318.0 475.0L328.0 473.5L338.0 472.0L348.0 470.5L358.0 469.0L368.0 467.5L378.0 466.0L388.0 464.5L398.0 464.5L408.0 460.5L418.0 460.0L428.0 458.5L438.0 456.5L448.0 456.5L458.0 455.8L468.0 455.1L478.0 454.4L488.0 453.7L498.0 453.0L508.0 453.0L518.0 451.5L528.0 450.0L538.0 448.5L548.0 447.8L558.0 447.2L568.0 446.5L578.0 446.0L588.0 444.8L598.0 443.7L608.0 442.5L618.0 442.5L628.0 442.0L638.0 441.5L648.0 440.8L658.0 440.0L668.0 439.2L678.0 438.5L688.0 438.5L698.0 437.0L708.0 438.5L718.0 438.0L728.0 440.5L738.0 440.5L748.0 446.0L758.0 446.0L768.0 446.0L778.0 448.3L788.0 450.7L798.0 453.0L808.0 451.5L818.0 450.0L828.0 451.0L838.0 452.0L848.0 451.5L858.0 452.5L868.0 452.8L878.0 453.2L888.0 453.5L898.0 453.8L908.0 454.2L918.0 454.5L928.0 456.0L938.0 458.0L948.0 457.8L958.0 457.5L968.0 457.2L978.0 457.0L988.0 457.0" fill="none" stroke="#8ab4f8" stroke-width="1.5" stroke-dasharray="4 4"/>
+<path data-chart-series="1" d="M298.0 465.0L308.0 462.0L318.0 459.0L328.0 456.0L338.0 458.0L348.0 451.5L358.0 451.0L368.0 447.5L378.0 443.5L388.0 443.5L398.0 445.5L408.0 441.5L418.0 443.0L428.0 438.5L438.0 437.0L448.0 439.0L458.0 437.0L468.0 433.5L478.0 430.5L488.0 428.5L498.0 427.0L508.0 428.0L518.0 429.0L528.0 425.0L538.0 426.0L548.0 427.5L558.0 421.5L568.0 415.5L578.0 414.5L588.0 414.0L598.0 408.0L608.0 407.0L618.0 406.0L628.0 401.0L638.0 399.0L648.0 396.5L658.0 397.0L668.0 396.5L678.0 389.7L688.0 394.0L698.0 399.0L708.0 403.5L718.0 401.0L728.0 400.0L738.0 406.0L748.0 406.5L758.0 411.0L768.0 407.5L778.0 413.0L788.0 418.5L798.0 418.5L808.0 418.5L818.0 421.5L828.0 422.0L838.0 420.5L848.0 423.0L858.0 423.5L868.0 424.5L878.0 426.0L888.0 420.5L898.0 424.0L908.0 428.0L918.0 432.5L928.0 429.5L938.0 431.5L948.0 432.0L958.0 426.5L968.0 431.5L978.0 435.5L988.0 433.0" fill="none" stroke="#1a73e8" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="302" cy="544" r="4.5" fill="#1a73e8"/>
+<path d="M402 544H422" stroke="#8ab4f8" stroke-width="1.5" stroke-dasharray="3 3"/>
+<!-- map -->
+<g>
+<path d="M1082 345L1100 330 1130 322 1165 320 1168 340 1150 360 1140 385 1120 395 1105 385 1090 370Z" fill="#1a73e8"/>
+<path d="M1098 360L1125 352 1145 362 1140 385 1120 395 1105 385Z" fill="#0b57d0"/>
+<path d="M1170 325L1190 322 1188 345 1172 348Z" fill="#dadce0"/>
+<path d="M1128 420L1150 415 1165 430 1155 460 1145 478 1135 455Z" fill="#8ab4f8"/>
+<path d="M1195 345L1230 335 1245 350 1225 365 1200 365Z" fill="#dadce0"/>
+<path d="M1195 375L1245 372 1262 395 1255 425 1235 450 1215 440 1205 410Z" fill="#8ab4f8"/>
+<path d="M1195 380L1215 376 1222 395 1208 402Z" fill="#dadce0"/>
+<path d="M1245 335L1290 330 1335 345 1330 380 1300 395 1270 400 1255 380Z" fill="#aecbfa"/>
+<path d="M1250 360L1285 358 1275 400 1258 385Z" fill="#dadce0"/>
+<path d="M1258 380L1278 378 1268 402Z" fill="#1a73e8"/>
+<path d="M1290 435L1325 430 1335 455 1310 468 1292 455Z" fill="#1a73e8"/>
+</g>
+</svg>
+
+
 <script src="report-data.js"></script>
 <script src="legacy-report-data.js"></script>
 <script>
@@ -735,6 +774,8 @@ UI.restoreComparison(350,210);
 
 PortalLayout.remap(273,273,145,1600);
 LegacyReport.mount('snapshot',S,UI,PortalLayout,T,B);
+document.documentElement.classList.remove('snapshot-loading');
+clearTimeout(window.__snapshotRevealTimer);
 setTimeout(()=>UI.animate(),120);
 
 </script>
