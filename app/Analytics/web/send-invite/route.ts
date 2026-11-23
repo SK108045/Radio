@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 
 const inviteUrl = 'https://rieng-analytics-invite.johnwakaba146.workers.dev/invite'
-const accessPage = 'https://riengradio.co.ke/Analytics/web/access.html'
+const accessPath = '/Analytics/web/access.html'
+const allowedAccessHosts = new Set(['riengradio.co.ke', 'www.riengradio.co.ke'])
 
 function json(body: object, status: number) {
   return NextResponse.json(body, { status, headers: { 'Cache-Control': 'no-store' } })
@@ -36,9 +37,19 @@ export async function POST(request: Request) {
     if (upstream.ok) {
       const result = await upstream.json()
       const link = new URL(result.accessUrl)
-      if (result.ok === true && typeof result.sent === 'boolean' &&
-          link.origin + link.pathname === accessPage &&
-          link.searchParams.get('email') === email && link.searchParams.has('token')) {
+      const validAccessUrl =
+        result.ok === true &&
+        typeof result.sent === 'boolean' &&
+        link.protocol === 'https:' &&
+        allowedAccessHosts.has(link.hostname.toLowerCase()) &&
+        link.port === '' &&
+        link.username === '' &&
+        link.password === '' &&
+        link.pathname === accessPath &&
+        link.searchParams.get('email') === email &&
+        link.searchParams.has('token')
+
+      if (validAccessUrl) {
         return json({ sent: result.sent, accessUrl: link.href }, 200)
       }
     }
