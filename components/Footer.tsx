@@ -100,6 +100,7 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-black uppercase tracking-widest text-sm mb-6">Explore</h3>
             <ul className="space-y-4">
+              <li><Link href="/blog" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-transform font-medium text-sm w-max">RIENG Blog</Link></li>
               <li><Link href="#" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-transform font-medium text-sm w-max">Live Sets</Link></li>
               <li><Link href="#" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-transform font-medium text-sm w-max">RIENG TV</Link></li>
               <li><Link href="#" className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-transform font-medium text-sm w-max">Trending Now</Link></li>
