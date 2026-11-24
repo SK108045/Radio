@@ -33,18 +33,49 @@
           if(el.dataset.sessionEmail)delete el.dataset.sessionEmail;
         }
       });
+    },
+    async validate(){
+      let path=location.pathname;
+      try{path=decodeURIComponent(path)}catch{}
+      if(path.endsWith('/access.html')||path.endsWith('/Access management.html'))return true;
+
+      try{
+        const response=await fetch('session-status',{
+          method:'GET',
+          credentials:'same-origin',
+          cache:'no-store',
+          headers:{'Accept':'application/json'}
+        });
+
+        if(response.ok)return true;
+        if(response.status===503)return true;
+
+        this.clear();
+        const reason=response.status===403?'revoked':'session-required';
+        location.replace('access.html?error='+reason);
+        return false;
+      }catch{
+        return true;
+      }
     }
   };
 
   window.PortalSession=api;
 
-  const run=()=>api.apply();
+  const run=()=>{
+    api.apply();
+    api.validate();
+  };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});
   else run();
 
-  // Only react when an avatar element is newly inserted. The old observer
-  // watched the entire DOM and apply() mutated the avatar again, creating
-  // a self-triggering MutationObserver loop that could freeze the page.
+  // Re-check access while a report tab remains open, and immediately when
+  // the user returns to the tab. A revoked session is cleared on the next check.
+  setInterval(()=>api.validate(),60000);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible')api.validate();
+  });
+
   const observer=new MutationObserver(records=>{
     for(const record of records){
       for(const node of record.addedNodes){
