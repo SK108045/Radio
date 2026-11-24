@@ -42,7 +42,7 @@ export const blogPosts: BlogPost[] = [
       {
         paragraphs: [
           'Bien’s new 17-track album Alusa Continua arrived on 20 November with the kind of guest list that instantly gets screenshots moving: 2 Chainz, Joshua Baraka, Oxlade, Coster Ojwang, Ywaya Tajiri and more.',
-          'But the features are not the most interesting part. Kenyan artists have been collaborating across borders for years. What makes this project worth sitting with is how little it seems interested in sanding off its Kenyan edges just to look “global”.',
+          'But the features are not the most interesting part. Kenyan artists have been collaborating across borders for years. What makes this project worth sitting with is how little it seems interested in sanding off its Kenyan edges just to look “global”. On release day, Spotify put the album on its New Music Friday billboard in Times Square — a very global stage for a record that keeps home firmly in the frame.',
         ],
       },
       {
@@ -69,6 +69,10 @@ export const blogPosts: BlogPost[] = [
       {
         label: 'KenyanVibe — Bien announces 17-track album and collaborators',
         url: 'https://www.kenyanvibe.com/bien-new-17-track-album-features-2chainz-alikiba-and-femi-one/',
+      },
+      {
+        label: 'KenyanVibe — Bien Takes Kenyan Music to Times Square With Alusa Continua',
+        url: 'https://www.kenyanvibe.com/bien-takes-kenyan-music-to-times-square-with-alusa-continua/',
       },
     ],
   },
