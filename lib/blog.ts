@@ -161,6 +161,10 @@ export const blogPosts: BlogPost[] = [
         label: 'KenyanVibe — Crispy Fresh! New Kenyan Music This Week (13 Nov 2026)',
         url: 'https://www.kenyanvibe.com/crispy-fresh-new-kenyan-music-this-week-19/',
       },
+      {
+        label: 'KenyanVibe — Crispy Fresh! New Kenyan Music This Week (7 Nov 2026)',
+        url: 'https://www.kenyanvibe.com/crispy-fresh-new-kenyan-music-this-week-18/',
+      },
     ],
   },
   {
