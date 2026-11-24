@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Menu, X, Flame, Tv, Play, Disc, TrendingUp, ShoppingBag } from 'lucide-react'
+import { Menu, X, Flame, Tv, Play, Disc, TrendingUp, ShoppingBag, Newspaper } from 'lucide-react'
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -26,6 +26,7 @@ export default function Navbar() {
     { href: '/', label: 'Home', icon: Flame },
     { href: '/shows', label: 'Shows', icon: Tv },
     { href: '/trending', label: 'Trending', icon: TrendingUp },
+    { href: '/blog', label: 'Blog', icon: Newspaper },
     { href: '/videos', label: 'Videos', icon: Play },
     { href: '/albums', label: 'Albums', icon: Disc },
     { href: '/merch', label: 'Merch', icon: ShoppingBag },
@@ -121,7 +122,7 @@ export default function Navbar() {
           {/* Desktop Button & Mobile Menu Toggle */}
           <div className="flex items-center gap-5">
             {/* Listen Live Premium Button */}
-            <Link href="#live-player" className="hidden sm:flex items-center gap-2 group relative">
+            <Link href="/#live-player" className="hidden sm:flex items-center gap-2 group relative">
                <div className="absolute -inset-0.5 bg-gradient-to-r from-red-600 to-orange-500 rounded-full blur opacity-40 group-hover:opacity-70 transition duration-500"></div>
                <div className="relative px-6 py-2 bg-black border border-white/10 rounded-full flex items-center gap-2 text-xs md:text-sm font-black uppercase tracking-widest text-white transform group-hover:-translate-y-0.5 transition-all duration-300">
                   <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
@@ -178,7 +179,7 @@ export default function Navbar() {
             })}
             
             <div className="pt-6 mt-4 border-t border-white/5" style={{ transitionDelay: `${navLinks.length * 50}ms`, opacity: isOpen ? 1 : 0, transform: isOpen ? 'translateY(0)' : 'translateY(-10px)', transitionProperty: 'opacity, transform', transitionDuration: '500ms' }}>
-              <Link href="#live-player" onClick={() => setIsOpen(false)} className="w-full relative flex items-center justify-center group py-1">
+              <Link href="/#live-player" onClick={() => setIsOpen(false)} className="w-full relative flex items-center justify-center group py-1">
                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-orange-500 rounded-2xl blur-md opacity-40 group-hover:opacity-70 transition duration-500"></div>
                  <div className="relative w-full bg-black border border-white/10 rounded-2xl px-4 py-4 flex items-center justify-center gap-3 text-sm font-black uppercase tracking-widest text-white transform group-hover:-translate-y-0.5 transition-all duration-300">
                     <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,1)]" />
