@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.riengradio.co.ke'),
   title: 'RIENG - Your Premium Music & Entertainment Platform',
   description: 'RIENG - The ultimate destination for curated music, live shows, and entertainment. Stream your favorite music and discover new artists.',
   generator: 'v0.app',
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
     title: 'RIENG - Your Premium Music & Entertainment Platform',
     description: 'Stream premium music, live shows, and entertainment on RIENG',
     type: 'website',
-    url: 'https://rieng-radio.com',
+    url: 'https://www.riengradio.co.ke',
   },
 }
 
