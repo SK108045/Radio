@@ -7,6 +7,7 @@ import HeroSection from '@/components/HeroSection'
 import BoBReleaseSpotlight from '@/components/BoBReleaseSpotlight'
 import LivePlayer from '@/components/LivePlayer'
 import BuySongPromo from '@/components/BuySongPromo'
+import BlogSpotlight from '@/components/BlogSpotlight'
 import Footer from '@/components/Footer'
 import PartnersSlider from '@/components/PartnersSlider'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
@@ -97,6 +98,7 @@ export default function Home() {
           onCategoryChange={setActiveCategory}
           onVideoClick={handleOpenModal}
         />
+        <BlogSpotlight />
         <BuySongPromo />
         <HomeVideos videos={riengVideos} onVideoClick={handleOpenModal} />
         <HomeReviews reviews={riengReviews} />
