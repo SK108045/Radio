@@ -158,7 +158,7 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
           </div>
         </header>
 
-        <div className="mx-auto grid max-w-6xl gap-12 px-4 py-12 sm:px-6 md:grid-cols-[minmax(0,1fr)_260px] md:py-18">
+        <div className="mx-auto grid max-w-6xl gap-12 px-4 py-12 sm:px-6 md:grid-cols-[minmax(0,1fr)_260px] md:py-20">
           <div className="min-w-0">
             <div className="relative mb-10 aspect-[16/9] overflow-hidden rounded-[24px] border border-white/10">
               <Image
