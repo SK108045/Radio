@@ -87,16 +87,16 @@ export default function Navbar() {
           </Link>
           
           {/* Desktop Navigation - Premium Pill Design */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden xl:flex items-center gap-0.5">
             {navLinks.map((link) => {
               const active = isActive(link.href)
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="relative px-5 py-2 group"
+                  className="relative px-3.5 2xl:px-4 py-2 group"
                 >
-                  <span className={`relative z-10 text-[13px] font-black uppercase tracking-widest transition-all duration-300 ${
+                  <span className={`relative z-10 text-[12px] 2xl:text-[13px] font-black uppercase tracking-wider 2xl:tracking-widest transition-all duration-300 ${
                     active ? 'text-white' : 'text-white/40 group-hover:text-white/90'
                   }`}>
                     {link.label}
@@ -133,7 +133,7 @@ export default function Navbar() {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden relative w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300"
+              className="xl:hidden relative w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300"
               aria-label="Toggle menu"
             >
               <div className="absolute inset-0 rounded-full bg-red-500/10 blur-md opacity-0 hover:opacity-100 transition-opacity" />
@@ -145,7 +145,7 @@ export default function Navbar() {
         </div>
 
         {/* Cinematic Mobile Navigation Overlay */}
-        <div className={`lg:hidden absolute top-[65px] left-0 w-full overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-top ${
+        <div className={`xl:hidden absolute top-[65px] left-0 w-full overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-top ${
           isOpen ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0'
         }`}>
           <div className="px-6 py-6 pb-8 space-y-2 bg-[#050505]/95 backdrop-blur-2xl border-b border-white/[0.05] shadow-[0_20px_40px_rgba(0,0,0,0.8)]">
