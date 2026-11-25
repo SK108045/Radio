@@ -2,12 +2,13 @@
 import { randomInt, randomUUID, timingSafeEqual } from 'node:crypto'
 import { cookies } from 'next/headers'
 import { adminDb, requireData, rateLimit } from '@/lib/supabase-admin'
-import { setSession, clearSession, getSession } from '@/lib/auth'
+import { setSession, setCloudflareSession, clearSession, getSession } from '@/lib/auth'
 import { artistSlug, hashPassword, verifyPassword, otpDigest, validPassword, digest } from '@/lib/sales-security'
 import { normalizePhone } from '@/lib/domain-payment'
 import { sendVerificationSms, SozuriSmsError } from '@/lib/sozuri'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { cloudflareLogin, cloudflareSignup } from '@/lib/cloudflare-artist-auth'
 type ActionResult = { error?: string; success?: string; challengeId?: string; verified?: boolean; retryAfterSeconds?: number }
 type ActionState = ActionResult | null
 const VERIFIED_COOKIE = 'sales_signup_verified'
@@ -60,43 +61,62 @@ export async function verifySignupCodeAction(slug: string, _state: ActionState, 
   } catch(e) { return failure(e) }
 }
 export async function signupAction(slug: string, _state: ActionState, form: FormData) {
-  let artistId: string
   try {
-    const a = await registry(slug), password = value(form, 'password')
-    const demo = (a.slug === 'metro_stunna' || a.slug === 'swatt' || a.slug === 'kapitani' || a.slug === 'ethics_entertainment' || (a.slug === 'test_artist' && a.is_test)) && a.demo_signup_enabled
-    const challenge = value(form,'challengeId')
-    if (!demo) {
-      const proof = (await cookies()).get(VERIFIED_COOKIE)?.value || '', expected = signupProof(challenge)
-      if (!/^[0-9a-f-]{36}$/i.test(challenge) || proof.length!==expected.length || !timingSafeEqual(Buffer.from(proof),Buffer.from(expected))) throw new Error('Verify your phone with the SMS code before setting a password.')
-    }
+    const password = value(form, 'password')
     if (!validPassword(password)) throw new Error('Use a password with 10–128 characters.')
     if (password !== value(form, 'confirmPassword')) throw new Error('Passwords do not match.')
-    const phone = demo ? normalizePhone(value(form,'phone')) : null
-    if (demo && !phone) throw new Error('Enter a valid Kenyan phone number.')
-    if (demo) await rateLimit(`demo-signup:${a.artist_id}`,8,900)
-    const passwordHash = await hashPassword(password)
-    const result = demo
-      ? await adminDb().rpc(a.slug === 'test_artist' ? 'sales_claim_test_demo' : a.slug === 'swatt' ? 'sales_claim_swatt_no_sms' : a.slug === 'kapitani' ? 'sales_claim_kapitani_no_sms' : a.slug === 'ethics_entertainment' ? 'sales_claim_ethics_entertainment_no_sms' : 'sales_claim_metro_demo',{p_phone:phone,p_password_hash:passwordHash})
-      : await adminDb().rpc('sales_claim_artist', { p_slug: a.slug, p_challenge: challenge, p_password_hash: passwordHash })
-    if (result.error) throw new Error(result.error.code === '23505' ? 'This phone is already registered.' : 'Signup link is unavailable or verification expired.')
-    artistId = result.data as string
-    ;(await cookies()).delete({name:VERIFIED_COOKIE,path:'/sales/sign-up'})
-    await setSession(artistId)
+
+    if (slug === 'djkidkev') {
+      const phone = normalizePhone(value(form, 'phone'))
+      if (!phone) throw new Error('Enter a valid Kenyan phone number.')
+      const result = await cloudflareSignup({
+        slug,
+        phone,
+        password,
+        inviteToken: value(form, 'inviteToken'),
+      })
+      await setCloudflareSession(result.session.token)
+    } else {
+      const a = await registry(slug)
+      const demo = (a.slug === 'metro_stunna' || a.slug === 'swatt' || a.slug === 'kapitani' || a.slug === 'ethics_entertainment' || (a.slug === 'test_artist' && a.is_test)) && a.demo_signup_enabled
+      const challenge = value(form,'challengeId')
+      if (!demo) {
+        const proof = (await cookies()).get(VERIFIED_COOKIE)?.value || '', expected = signupProof(challenge)
+        if (!/^[0-9a-f-]{36}$/i.test(challenge) || proof.length!==expected.length || !timingSafeEqual(Buffer.from(proof),Buffer.from(expected))) throw new Error('Verify your phone with the SMS code before setting a password.')
+      }
+      const phone = demo ? normalizePhone(value(form,'phone')) : null
+      if (demo && !phone) throw new Error('Enter a valid Kenyan phone number.')
+      if (demo) await rateLimit(`demo-signup:${a.artist_id}`,8,900)
+      const passwordHash = await hashPassword(password)
+      const result = demo
+        ? await adminDb().rpc(a.slug === 'test_artist' ? 'sales_claim_test_demo' : a.slug === 'swatt' ? 'sales_claim_swatt_no_sms' : a.slug === 'kapitani' ? 'sales_claim_kapitani_no_sms' : a.slug === 'ethics_entertainment' ? 'sales_claim_ethics_entertainment_no_sms' : 'sales_claim_metro_demo',{p_phone:phone,p_password_hash:passwordHash})
+        : await adminDb().rpc('sales_claim_artist', { p_slug: a.slug, p_challenge: challenge, p_password_hash: passwordHash })
+      if (result.error) throw new Error(result.error.code === '23505' ? 'This phone is already registered.' : 'Signup link is unavailable or verification expired.')
+      ;(await cookies()).delete({name:VERIFIED_COOKIE,path:'/sales/sign-up'})
+      await setSession(result.data as string)
+    }
   } catch (e) { return failure(e) }
   redirect('/sales')
 }
+
 export async function loginAction(_state: ActionState, form: FormData) {
   try {
     const phone = normalizePhone(value(form, 'phone')), password = value(form, 'password')
     if (!phone || !password) throw new Error('Phone number and password are required.')
-    await rateLimit(`login:${digest(phone)}`, 8, 900)
-    const { data, error } = await adminDb().from('sales_artist_accounts').select('artist_id,password_hash').eq('phone', phone).maybeSingle()
-    if (error) throw new Error('Sign-in is temporarily unavailable.')
-    // Perform scrypt for nonexistent accounts too, avoiding a fast identity oracle.
-    const dummy = `scrypt$${'0'.repeat(32)}$${'0'.repeat(128)}`
-    const matches = await verifyPassword(password, data?.password_hash || dummy)
-    if (!data || !matches) throw new Error('Invalid phone number or password.')
-    await setSession(data.artist_id)
+
+    const cloudflare = await cloudflareLogin(phone, password).catch(() => null)
+    if (cloudflare) {
+      await setCloudflareSession(cloudflare.session.token)
+    } else {
+      await rateLimit(`login:${digest(phone)}`, 8, 900)
+      const { data, error } = await adminDb().from('sales_artist_accounts').select('artist_id,password_hash').eq('phone', phone).maybeSingle()
+      if (error) throw new Error('Sign-in is temporarily unavailable.')
+      // Perform scrypt for nonexistent accounts too, avoiding a fast identity oracle.
+      const dummy = `scrypt$${'0'.repeat(32)}$${'0'.repeat(128)}`
+      const matches = await verifyPassword(password, data?.password_hash || dummy)
+      if (!data || !matches) throw new Error('Invalid phone number or password.')
+      await setSession(data.artist_id)
+    }
   } catch (e) { return failure(e) }
   redirect('/sales')
 }
