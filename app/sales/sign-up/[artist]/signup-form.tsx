@@ -3,16 +3,17 @@ import { useActionState, useEffect, useState } from 'react'
 import { requestSignupCodeAction, verifySignupCodeAction, signupAction } from '../../actions'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-export function SignupForm({ slug, stageName, demoSignup = false }: { slug: string; stageName: string; demoSignup?: boolean }) {
-  return demoSignup ? <DemoSignupForm slug={slug} stageName={stageName} /> : <VerifiedSignupForm slug={slug} stageName={stageName} />
+export function SignupForm({ slug, stageName, demoSignup = false, inviteToken = '' }: { slug: string; stageName: string; demoSignup?: boolean; inviteToken?: string }) {
+  return demoSignup ? <DemoSignupForm slug={slug} stageName={stageName} inviteToken={inviteToken} /> : <VerifiedSignupForm slug={slug} stageName={stageName} />
 }
-function DemoSignupForm({slug,stageName}: {slug:string;stageName:string}) {
+function DemoSignupForm({slug,stageName,inviteToken}: {slug:string;stageName:string;inviteToken:string}) {
   const [state,signup,pending] = useActionState(signupAction.bind(null,slug),null)
   const [phone,setPhone] = useState(''),[password,setPassword] = useState(''),[confirmation,setConfirmation] = useState('')
   return <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 space-y-6">
     <h1 className="text-3xl font-bold">{stageName}</h1>
     <p className="text-muted-foreground">Create your artist account with your phone number and password.</p>
     <form action={signup} className="space-y-3">
+      {inviteToken && <input type="hidden" name="inviteToken" value={inviteToken} />}
       <label htmlFor="demo-phone">Phone number</label><Input id="demo-phone" name="phone" type="tel" autoComplete="tel" placeholder="0712 345 678" value={phone} onChange={e=>setPhone(e.target.value)} required />
       <label htmlFor="demo-password">Password</label><Input id="demo-password" name="password" type="password" autoComplete="new-password" minLength={10} maxLength={128} value={password} onChange={e=>setPassword(e.target.value)} required />
       <p className="text-sm text-muted-foreground">Use at least 10 characters.</p>
