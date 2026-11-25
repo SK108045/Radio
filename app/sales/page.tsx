@@ -7,11 +7,40 @@ import { getSession } from '@/lib/auth'
 import { adminDb, requireData } from '@/lib/supabase-admin'
 import { ArchiveTrackButton } from '@/components/archive-track-button'
 import { TrackSalesCard } from '@/components/track-sales-card'
+import { logoutAction } from './actions'
+import { Button } from '@/components/ui/button'
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
   const session = await getSession()
   if (!session) redirect('/sales/login')
+
+  if (session.authSource === 'cloudflare') {
+    return <main className="min-h-screen bg-background p-6 md:p-10">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
+          <div>
+            <p className="text-sm font-semibold text-primary">RIENG ARTIST PORTAL</p>
+            <h1 className="text-4xl font-bold mt-2">{session.stageName}</h1>
+            <p className="text-muted-foreground mt-2">Your private artist account is active.</p>
+          </div>
+          <form action={logoutAction}><Button type="submit" variant="outline">Sign out</Button></form>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-4 mb-8">
+          <div className="rounded-xl border bg-card p-6"><p className="text-sm text-muted-foreground">Account status</p><p className="text-2xl font-bold mt-3">Active</p></div>
+          <div className="rounded-xl border bg-card p-6"><p className="text-sm text-muted-foreground">Sign-in</p><p className="text-2xl font-bold mt-3">Phone + password</p></div>
+          <div className="rounded-xl border bg-card p-6"><p className="text-sm text-muted-foreground">Phone</p><p className="text-xl font-bold mt-3">{session.phone}</p></div>
+        </div>
+
+        <section className="rounded-xl border bg-card p-6">
+          <h2 className="text-2xl font-bold">Artist workspace</h2>
+          <p className="text-muted-foreground mt-3">Authentication is ready for this Cloudflare-backed account. Music uploads and sales data are not connected to this account yet, so the paused Supabase service will not block you from signing in.</p>
+        </section>
+      </div>
+    </main>
+  }
+
   const db = adminDb()
   const [sales, tracks] = await Promise.all([
     db.from('sales_receipts').select('id,track_id,amount,transaction_id,reference,provider_id,confirmed_at').eq('artist_id',session.artistId).order('confirmed_at',{ascending:false}).then(requireData),
