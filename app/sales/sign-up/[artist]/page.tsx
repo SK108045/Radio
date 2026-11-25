@@ -3,10 +3,34 @@ import { adminDb } from '@/lib/supabase-admin'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { SignupForm } from './signup-form'
+
 export const dynamic = 'force-dynamic'
-export default async function SignupPage({ params }: { params: Promise<{ artist: string }> }) {
+
+export default async function SignupPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ artist: string }>
+  searchParams: Promise<{ invite?: string | string[] }>
+}) {
   const slug = artistSlug((await params).artist)
   if (!slug) notFound()
+
+  if (slug === 'djkidkev') {
+    const rawInvite = (await searchParams).invite
+    const inviteToken = typeof rawInvite === 'string' ? rawInvite : ''
+    if (!inviteToken) {
+      return <main className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+        <h1 className="text-2xl font-bold">This signup link is invalid</h1>
+        <p className="text-muted-foreground">Use the private DJ Kid Kev invite link you were sent.</p>
+        <Link href="/sales/login" className="text-primary">Artist sign in</Link>
+      </main>
+    }
+    return <main className="min-h-screen flex items-center justify-center p-6">
+      <SignupForm slug={slug} stageName="djkidkev" demoSignup inviteToken={inviteToken} />
+    </main>
+  }
+
   const { data, error } = await adminDb().from('sales_artist_registry').select('stage_name,claimed_at,is_test,demo_signup_enabled').eq('slug', slug).single()
   if (error) throw new Error('Artist signup is unavailable. Apply the sales migration.')
   if (!data || data.claimed_at) return <main className="min-h-screen flex flex-col items-center justify-center gap-4"><h1 className="text-2xl font-bold">This signup link has been used</h1><Link href="/sales/login" className="text-primary">Sign in with your phone number</Link></main>
