@@ -164,6 +164,8 @@ export function mountMobileReport(kind, controls) {
   }
 
   function snapshot() {
+    const countries = group('country', 'users').slice(0, 7);
+    window.RiengCountryMap?.update(countries);
     const kpis = ['users', 'newUsers', 'engaged', 'avgEngagement'].map(field => {
       const value = metricValue(current, field);
       const delta = comparison && change(value, metricValue(comparison, field));
@@ -175,8 +177,8 @@ export function mountMobileReport(kind, controls) {
       ...(comparison ? [change(row.sessions, comparison.groups.channel.find(entry => entry.label === row.label)?.sessions)] : [])]);
     return [
       card('Activity over time', `<div class="mobile-report-kpis">${kpis.join('')}</div><div data-mobile-trend>${trend(metric)}</div>`),
-      card('Active users by Country', '<img class="mobile-report-map" src="ga-world-map.webp" alt="Map highlighting African countries">' +
-        bars(group('country', 'users').slice(0, 7), 'users'), 'Demographic details_ Country.html', 'View countries'),
+      card('Active users by Country', '<iframe class="mobile-report-map" data-rieng-country-map src="interactive-country-map.html" title="Interactive users by country map" loading="eager"></iframe>' +
+        bars(countries, 'users'), 'Demographic details_ Country.html', 'View countries'),
       card('New users by first channel', bars(group('firstChannel', 'newUsers'), 'newUsers'),
         'Traffic acquisition.html', 'View acquisition'),
       card('Sessions by channel', table('Channel', ['Sessions', ...(comparison ? ['Change'] : [])], channels),
