@@ -32,6 +32,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font:1
   const svg=document.getElementById('map');
   const paths=[...svg.querySelectorAll('.c')];
   const fmt=n=>Number(n||0).toLocaleString('en-US');
+  const aliases={'South Sudan':'S. Sudan'};
+  const mapName=name=>aliases[name]||name;
 
   function rebuild(data){
     DATA={};
@@ -39,12 +41,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font:1
       data.forEach(row=>{
         const name=String(row?.label??row?.country??'').trim();
         const users=Number(row?.users??row?.value??0);
-        if(name&&Number.isFinite(users)&&users>0)DATA[name]=users;
+        if(name&&Number.isFinite(users)&&users>0)DATA[mapName(name)]=users;
       });
     }else if(data&&typeof data==='object'){
       Object.entries(data).forEach(([name,value])=>{
         const users=Number(value);
-        if(name&&Number.isFinite(users)&&users>0)DATA[name]=users;
+        if(name&&Number.isFinite(users)&&users>0)DATA[mapName(name)]=users;
       });
     }
     total=Object.values(DATA).reduce((sum,n)=>sum+n,0);
