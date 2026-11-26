@@ -164,8 +164,9 @@ export function mountMobileReport(kind, controls) {
   }
 
   function snapshot() {
-    const countries = group('country', 'users').slice(0, 7);
-    window.RiengCountryMap?.update(countries);
+    const allCountries = group('country', 'users');
+    const countries = allCountries.slice(0, 7);
+    window.RiengCountryMap?.update(allCountries);
     const kpis = ['users', 'newUsers', 'engaged', 'avgEngagement'].map(field => {
       const value = metricValue(current, field);
       const delta = comparison && change(value, metricValue(comparison, field));
