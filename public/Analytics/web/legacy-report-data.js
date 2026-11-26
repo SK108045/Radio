@@ -109,6 +109,7 @@
       return [labels[i],value,change];
     });
     const countries = ranked('country','users').slice(0,7);
+    window.RiengCountryMap?.update(countries);
     countries.forEach((row,i)=>{
       const y=320+i*27.9;
       write(1355,y,row.label,'country-name');
