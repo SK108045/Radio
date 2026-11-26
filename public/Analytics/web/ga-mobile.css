@@ -325,8 +325,10 @@
   .mobile-report-map {
     display: block;
     width: min(100%, 280px);
-    height: auto;
+    height: 155px;
     margin: 0 auto 8px;
+    border: 0;
+    background: #fff;
   }
 
   .mobile-report-bars {
