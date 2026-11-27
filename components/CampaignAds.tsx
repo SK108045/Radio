@@ -28,7 +28,6 @@ type AdWindow = Window & {
 export default function CampaignAds() {
   const pathname = usePathname()
   const publicPage = Boolean(pathname && isPublicPage(pathname))
-  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     // An external script cannot be unloaded reliably after a client-side navigation.
@@ -74,6 +73,20 @@ export default function CampaignAds() {
 
   if (!publicPage) return null
 
+  return (
+    <>
+      <div id="zone_1718416788" />
+      <div id="zone_1892228828" />
+    </>
+  )
+}
+
+export function CampaignPromoBanner() {
+  const pathname = usePathname()
+  const [copied, setCopied] = useState(false)
+
+  if (!pathname || !isPublicPage(pathname)) return null
+
   async function copyCode() {
     try {
       await navigator.clipboard.writeText(PROMO_CODE)
@@ -84,16 +97,19 @@ export default function CampaignAds() {
   }
 
   return (
-    <>
-      <div id="zone_1718416788" />
-      <div id="zone_1892228828" />
-      <aside aria-label="Sponsored promotion" className="border-t border-white/10 bg-[#080808] px-4 py-4 text-center text-white">
-        <span className="mr-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Sponsored promo code</span>
-        <button type="button" onClick={copyCode} className="inline-flex items-center gap-3 rounded-lg border border-primary/40 px-3 py-2 text-sm font-bold tracking-wider text-primary">
+    <aside aria-label="AfroPari sponsored promotion" className="relative w-full border-b border-orange-400/50 bg-[#171008] px-3 py-3 text-white">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center">
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+          <span className="rounded bg-orange-500 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-black">Sponsored</span>
+          <span className="text-sm font-black text-white sm:text-base">AfroPari Promo Code</span>
+          <span className="text-xs text-gray-300 sm:text-sm">Use on AfroPari</span>
+        </div>
+        <button type="button" onClick={copyCode} aria-label="Copy AfroPari promo code RGRAP300" className="inline-flex items-center gap-3 rounded-md border border-orange-400 bg-black px-4 py-2 text-sm font-black tracking-widest text-orange-300 transition-colors hover:bg-orange-500/15 sm:text-base">
           {PROMO_CODE}
-          <span className="text-xs font-medium tracking-normal text-white" aria-live="polite">{copied ? 'Copied!' : 'Copy'}</span>
+          <span className="border-l border-orange-400/40 pl-3 text-xs font-semibold tracking-normal text-white" aria-live="polite">{copied ? 'Copied!' : 'Copy code'}</span>
         </button>
-      </aside>
-    </>
+        <span className="text-[11px] font-medium text-gray-300">18+ · Terms apply</span>
+      </div>
+    </aside>
   )
 }

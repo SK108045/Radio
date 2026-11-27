@@ -4,7 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import SmoothScroll from '@/components/SmoothScroll'
 import { RadioProvider } from '@/context/RadioContext'
 import FloatingRadioBar from '@/components/FloatingRadioBar'
-import CampaignAds from '@/components/CampaignAds'
+import CampaignAds, { CampaignPromoBanner } from '@/components/CampaignAds'
 import './globals.css'
 
 const geistSans = Geist({
@@ -53,6 +53,7 @@ export default function RootLayout({
       <body className={`${geistSans.className} font-sans antialiased`}>
         <RadioProvider>
           <SmoothScroll />
+          <CampaignPromoBanner />
           {children}
           <CampaignAds />
           <FloatingRadioBar />
